@@ -1,0 +1,50 @@
+{
+  "name": "classical-dark-theme",
+  "displayName": "Classical Dark Theme",
+  "description": "A simple dark theme for Visual Studio Code inspired by the classic color scheme.",
+  "version": "1.0.15",
+  "publisher": "minkul",
+  "license": "MIT",
+  "preview": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/minkul/classical-dark-theme"
+  },
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.120.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "keywords": [
+    "theme",
+    "dark",
+    "dark theme",
+    "color theme",
+    "classical"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Classical Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/classical-dark.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsx src/build-theme.ts",
+    "package": "npm run build && npx vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@vscode/vsce": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

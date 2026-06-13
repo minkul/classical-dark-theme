@@ -1,0 +1,10 @@
+.git/**
+.gitignore
+node_modules/**
+src/**
+tsconfig.json
+yarn.lock
+*.vsix
+icon_large.png
+.idea/
+sample.png
