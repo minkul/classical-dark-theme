@@ -4,224 +4,336 @@
 // Single source of truth for the theme: `npm run build` (src/build-theme.ts)
 // writes it to themes/classical-dark.json.
 //
-// The palette below is fixed. New workbench color keys (e.g. ones added by
-// newer VS Code releases) are mapped onto these existing constants rather than
-// introducing new hex values.
+// Layout model: the workbench is a set of dark panels — editor, side bar,
+// panel, terminal, all `gray10` — resting on a lighter frame (`gray30`): title
+// bar, activity bar, status bar and the shell that shows between floating
+// panels in the modern layout. Panels draw no border of their own; in the
+// classic layout a 1px frame-colored separator stands in for the gap.
 
-// Gray scale — UI structure
-const gray1 = "#1E1F22"; // deepest background (editor bg, active tab, window border)
-const gray1b = "#27292C"; // chrome background (title bar, status bar, sidebar, activity bar, panel, tab bar, modern-UI shell/cards) — a clear gray step above the editor bg
-const gray2 = "#2B2D30"; // overlay/widget background (menus, quick input, suggest, peek view, find widget)
-const gray3 = "#393B40"; // hover backgrounds, input bg, hover widget, notifications, code blocks
-const gray4 = "#43454A"; // borders, separators, dividers; terminal ANSI black
-const gray4b = "#34363C"; // subtle structural borders (panel, editor group, tab bar, modern-UI cards) — tracks the gray1b chrome lift
-const gray5 = "#4E5157"; // control borders (inputs, dropdowns, checkboxes, secondary buttons), whitespace
-const gray6 = "#80858C"; // disabled text / very muted foreground
-const gray7 = "#A8ACB3"; // muted/secondary foreground (descriptions, placeholders, inlay hints, code lens)
-const gray9 = "#9DA0A8"; // status bar widget text, breadcrumbs
-const gray10 = "#B4B8BF"; // secondary foreground (sidebar text, inactive tab text, icons)
-const gray11 = "#CED0D6"; // cursor (editor + terminal), command center text, active breadcrumb
-const gray12 = "#DFE1E5"; // primary UI foreground (menus, labels)
-const gray13 = "#F0F1F2"; // brightest foreground (settings header hover)
-const gray14 = "#FFFFFF"; // pure white (button text on colored bg)
-
-// Editor text
-const editorForeground = "#BCBEC4"; // default editor text
-const editorBackground = gray1; // #1E1F22
-
-// Blues — accent / interactive
-const blue2 = "#4570B8"; // selection bg (list, tree, menu, suggest)
-const blue3 = "#4570B8"; // same hex as blue2 — native text selection, active input option (e.g. match-case toggle)
-const blue4 = "#375FAD"; // button/extension hover, info border, modified-item indicator
-const blue5 = "#366ACE"; // badges, primary button, extension button
-const blue6 = "#3574F0"; // focus ring, active border/underline, checkbox select
-const blue7 = "#467FF2"; // progress bar
-const blue8 = "#548AF7"; // info foreground, ctrl-click link, action icons
-const blue9 = "#6B9BFA"; // link foreground, modified-tab marker, list/suggest match highlight
-const blue10 = "#83ACFC"; // hover-widget highlight (active signature param), quick-pick focus-row match highlight; terminal bright blue
-
-// Greens — success / added
-const green3 = "#375239"; // passed-test retired icon
-const green6 = "#57965C"; // remote status badge bg, test coverage
-const green7 = "#5FAD65"; // success icons (debug, test, notebook), editor hint, active find match
-const green8 = "#73BD79"; // snippet symbol icon; terminal bright green
-
-// Yellows — warnings / metadata
-const yellow1 = "#3D3223"; // warning bg (deepest)
-const yellow3 = "#826A41"; // warning border
-const yellow4 = "#9E814A"; // warning marker bg, unhandled conflict border
-const yellow5 = "#BA9752"; // warning status/activity badge, skipped-test icon
-const yellow6 = "#D6AE58"; // warning foreground / icons; terminal bright yellow
-const yellow7 = "#F2C55C"; // light bulb, current-frame breakpoint, stars, find-match / sibling-match washes
-
-// Reds — errors / deleted
-const red3 = "#5E3838"; // error bg medium (validation, exception widget, debugging status bar)
-const red5 = "#9C4E4E"; // error background (status/activity badge, marker)
-const red6 = "#BD5757"; // error border / hover background
-const red7 = "#E47474"; // error foreground / icons (squiggles, console, problems); terminal red
-
-// Oranges
-const orange6 = "#E08855"; // pre-release extension icon, chart orange, active moved-code border
-const orange8 = "#F0AC81"; // debugger value foreground, array symbol icon
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Semantic syntax colors
-// ─────────────────────────────────────────────────────────────────────────────
-
-const syntaxKeyword = "#CF8E6D"; // keyword (orange-tan)
-const syntaxString = "#6AAB73"; // string (green)
-const syntaxNumber = "#2AACB8"; // number (teal-cyan)
-// Lifted from #7A7E86 (4.05:1, fails AA) to clear 4.5:1 on the editor bg.
-const syntaxComment = "#878C94"; // line / block / doc comment
-const syntaxDocComment = syntaxComment;
-const syntaxDocTag = syntaxComment;
-const syntaxFunction = "#56A8F5"; // function declaration (blue)
-// Green-teal, pushed away from number cyan #2AACB8 in both hue (165° vs 185°)
-// and lightness so `x: number = 42` stays differentiable, incl. for CVD readers.
-const syntaxType = "#3FC0A0"; // type / type parameter (green-teal)
-// Member color: used for "key-like" tokens — object literal keys, dict keys,
-// property names (obj.prop), enum members, instance fields. Not for variables.
-const syntaxMember = "#C77DBB"; // (purple-pink) keys/properties/enum members
-const syntaxField = syntaxMember; // instance field (same)
-const syntaxMetadata = "#B3AE60"; // metadata / decorators (yellow-green)
-const syntaxHtmlTag = "#D5B778"; // HTML / XML tag name (gold)
-const syntaxRegexp = "#42C3D4"; // regexp
-const syntaxInvalid = "#FA6F7C"; // bad character / errors
-const syntaxLabel = "#32B8AF"; // label (teal)
-const syntaxJsxComponent = "#9C9CFF"; // JSX component
-const syntaxTypeParam = syntaxType;
-
-// Line / gutter colors
-const lineNumberColor = "#74787F"; // line numbers
-const lineNumberActiveColor = syntaxMember; // line number on caret row
-const caretRowBackground = "#26282E"; // caret row
-const indentGuideColor = "#313438"; // indent guide, rulers
-const indentGuideActive = "#666870"; // selected indent guide
-// Highlight palette — each category owns a distinct hue so they are never confused:
-//   steel blue (#2A4D7B) → selection (desaturated so syntax colors stay legible
-//                          on top; cobalt #1857C2 wash marks other occurrences)
-//   green      (#5FAD65) → active find match (solid block + ring)
-//   yellow     (#F2C55C) → other find matches and sibling matches (low-alpha wash)
-//   teal       (#0DC4B0) → word occurrence — read access (cool, observational)
-//   rose       (#E05585) → word occurrence — write access (warm, signals mutation)
-//   violet     (#9B6DF5) → symbol highlight (go-to-definition target)
-//   soft blue  (#5480F0) → range / navigation highlight
-// Active find: a solid green7 block, ringed in the same hue, pops against the
-// yellow-washed siblings. White glyphs on it are only ~2.7:1, so the block and
-// ring — not text contrast — are what mark the current match.
-const findMatchBackground = green7; // #5FAD65 — solid block (white glyphs ~2.7:1)
-const findMatchForeground = "#FFFFFF"; // white — forced over syntax token colors
-const findMatchBorder = green7; // #5FAD65 — solid ring for the active match
-// Sibling-match fill (search editor, peek view, list filter) — yellow wash, non-dominant
-// so none of the siblings claim focus.
-const siblingMatchBackground = yellow7 + "33"; // #F2C55C @ 20% — visible but non-dominant
-const siblingMatchBorder = yellow6 + "66"; // #D6AE58 @ 40% — clear edge marker
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Transparency overlays (frequently reused alpha-composited values)
-// ─────────────────────────────────────────────────────────────────────────────
-
+// Neutral ramp — surfaces, borders and text
+const gray10 = "#191A1C"; // panel surface: editor, side bar, panel, terminal, inputs
+const gray20 = "#212326"; // inline surface: find widget, peek editor, alternating rows
+const gray30 = "#26282C"; // frame: title/activity/status bars, modern shell; popups; panel separators
+const gray40 = "#33353B"; // popup borders, inactive selection, notifications, tree guides
+const gray50 = "#40434A"; // control borders (inputs, dropdowns, secondary buttons), progress track
+const gray60 = "#4C4F56"; // disabled text
+const gray70 = "#5F6269"; // disabled icons, raised control borders
+const gray80 = "#73767C"; // tertiary text: placeholders, group labels; neutral counter badges
+const gray100 = "#9FA2A8"; // muted text: status bar, descriptions, inactive titles
+const gray120 = "#C3C5CB"; // icons
+const gray130 = "#D1D3D9"; // primary UI text
+const gray150 = "#E9EAEE"; // emphasized text
+const white = "#FFFFFF";
+const black = "#000000";
 const transparent = "#00000000";
-const dropOverlay = "#35538F40"; // drag-and-drop tint (steel blue #35538F @ 25% alpha)
-// Non-active find matches: yellow7 wash — same hue family as active match.
-// At 27% alpha the highlight reads clearly without competing with the active match.
-const findMatchHighlight = yellow7 + "44"; // #F2C55C @ 27%
-const errorBackgroundOverlay = "#DB5C5C18"; // error line background
-const warningBackgroundOverlay = "#D6AE5818"; // warning line background
-const infoBackgroundOverlay = "#548AF718"; // info line background
-const stackFrameOverlay = "#2A509180"; // debug current frame
-const focusedStackFrameOverlay = "#1A3B2D80"; // debug focused frame
-// Diff line backgrounds — success green / danger red, so the diff body matches
-// the change bars in the gutter beside it. Held at ~12% alpha: a calm wash that
-// still reads as green/red at a glance without glowing. Default text holds
-// ~7.6:1 and syntax-colored tokens ≥4.2:1 on top (at ~16% the tint felt flashy;
-// at ~33% colored tokens fell to ~3.7:1).
-const insertedLineOverlay = "#2ea0431F"; // diff inserted line — success green @ ~12%
-const removedLineOverlay = "#f851491F"; // diff removed line  — danger red @ ~12%
-// ─────────────────────────────────────────────────────────────────────────────
-// Git colors — modeled on GitHub Dark Default (github-vscode-theme). Two
-// surfaces, two tiers:
-//
-//   • Change BARS (gutter strokes, minimap ticks, overview-ruler marks) render on
-//     the dark editor bg (gray1 #1E1F22). These use the *emphasis* hues at full
-//     opacity (6.5–7.8:1) so changed lines are obvious at a glance.
-//   • Decoration FOREGROUNDS (SCM list, Explorer file labels) render on the
-//     chrome bg (gray1b #27292C), where every state except the intentionally dim
-//     ignored/submodule clears 5.7:1. Added / modified / deleted / conflict use
-//     GitHub's base hues verbatim (per design call) and dip to ~3.9:1 on the
-//     selected-blue SCM row (~#2E436E) — below AA there, but still clearly
-//     legible on that rare row. Untracked and renamed use GitHub's lighter steps
-//     and stay ≥5:1 even on the selected row.
-//
-// The same constants also color chat edited-file / +/- line counts and the
-// agents mobile diff, so every "changed file" signal speaks one language.
-//
-// Change bars — emphasis hues (added green, modified gold, deleted red).
-const gitAddedBar = "#3fb950"; // added line bar    — success green (6.49:1 on editor)
-const gitModifiedBar = "#dbab36"; // modified line bar — attention gold (7.76:1 on editor)
-const gitDeletedBar = "#ff7b72"; // deleted line bar  — danger red    (6.54:1 on editor)
-// Decoration foregrounds — contrast shown as sidebar / selected-blue row.
-const gitAdded = "#3fb950"; // added                       — success green (5.74 / 3.86)
-const gitUntracked = "#7ee787"; // untracked (new files) — lighter step so new ≠ tracked (9.49 / 6.37)
-const gitModified = "#d29922"; // modified / staged-modified  — attention gold (5.78 / 3.88)
-const gitDeleted = "#ff7b72"; // deleted / staged-deleted    — danger red (5.78 / 3.88)
-const gitRenamed = "#79c0ff"; // renamed                     — accent blue, lighter step (7.50 / 5.04)
-const gitConflict = "#f0883e"; // conflicting                 — orange (5.76 / 3.87)
-const gitIgnored = "#6e7681"; // ignored                     — subtle, intentionally dim (3.17 / 2.13)
-const gitSubmodule = "#8b949e"; // submodule                   — muted gray (4.74 / 3.18)
-// SCM history-graph swimlanes — accent ramp (blue / green / purple / orange /
-// pink), bright steps chosen for legible strokes on the editor bg.
-const gitGraph1 = "#79c0ff"; // accent blue
-const gitGraph2 = "#56d364"; // success green
-const gitGraph3 = "#d2a8ff"; // purple
-const gitGraph4 = "#f0883e"; // orange
-const gitGraph5 = "#ff9bce"; // pink
 
-// Neutral alpha washes and shadows (names are approximate; actual alpha noted).
-const blackAlpha20 = "#00000033"; // 20% — subtle darkening hover (notebook cell)
-const whiteAlpha05 = "#FFFFFF08"; // ~3% — very subtle wash (minimap slider at rest)
-const whiteAlpha08 = "#FFFFFF14"; // ~8% — hover wash (toolbar, status bar, chat bubble, activity-bar pill)
-const whiteAlpha15 = "#FFFFFF26"; // 15% — active/pressed wash, scrollbar slider at rest
-const whiteAlpha30 = "#FFFFFF4D"; // 30% — scrollbar slider hover/active
-const blackAlpha40 = "#00000060"; // ~38% — widget / sticky-scroll shadows
-const blueRowFocus = "#3574F010"; // focused settings row
-const blueRowHover = "#3574F008"; // hovered settings row
+// Blue ramp — accent, selection, focus
+const blue30 = "#1B283F"; // muted info surface (multi-selected tabs)
+const blue40 = "#233558"; // selected tab, info banners/validation, muted selection
+const blue50 = "#2A4371"; // list / menu / completion selection
+const blue60 = "#2E4D89"; // selected tab border, toggled options, secondary accent borders
+const blue70 = "#2F5EB9"; // accent hover
+const blue80 = "#3871E1"; // accent: primary buttons, focus ring, progress, selected activity item
+const blue90 = "#538AF9"; // completion match text, blue badge
+const blue100 = "#71A1FE"; // links, modified-setting marker
+const blue110 = "#92B7FF"; // completion match text on the selected row
+const blueVivid = "#3574F0"; // checked boxes, chart lines, selected terminal block
+
+// Green / red / yellow / purple ramps — feedback surfaces and accents
+const green40 = "#203B2A";
+const green60 = "#29583C";
+const green80 = "#338555"; // success / running accent
+const green100 = "#6DB083"; // success text
+const red40 = "#56272B"; // error surface
+const red60 = "#80383E"; // error surface border
+const red70 = "#A4414A";
+const red80 = "#C54E58"; // error accent / error border
+const red100 = "#F57E84"; // error text
+const yellow40 = "#44321D"; // warning surface
+const yellow60 = "#694820"; // warning surface border
+const yellow70 = "#875817";
+const yellow80 = "#A56906"; // warning accent / warning border
+const yellow100 = "#D59637"; // warning text
+const yellow110 = "#E4AD5F"; // match text on the selected row
+const purple20 = "#261E3C"; // AI surface
+const purple50 = "#4A387B"; // AI surface border
+const purple70 = "#6C4EBB";
+const purple100 = "#A894F6";
+const purple140 = "#E2DBFC";
+const orange100 = "#E18C71";
+const teal100 = "#6AAEA6";
+const matchGold = "#BA9752"; // matched characters in lists and type-to-find
+const shellTint = "#3F448D"; // gradient tint of the agents shell
+
+// Translucent washes, shadow and scrollbar thumbs
+const wash05 = "#FFFFFF0A"; // hovered terminal block
+const wash10 = "#FFFFFF10"; // list / tree / editor hover
+const wash20 = "#FFFFFF17"; // toolbar / tab / status item hover
+const wash30 = "#FFFFFF21"; // separators on the frame
+const wash40 = "#FFFFFF29"; // pressed state, neutral badge
+const wash50 = "#FFFFFF3B"; // keybinding outline, sash grips
+const shadow = "#00000020";
+const dropTarget = "#366ACF4D"; // drag-and-drop target area
+const whiteMuted = "#FFFFFFCC"; // text on neutral translucent badges
+const scrollbarThumb = "#80808059";
+const scrollbarThumbHover = "#8080808C";
+const minimapThumb = "#80808033";
+const windowBorder = "#5A5D63";
+
+// Icon colors (status glyphs, symbol kinds, run / debug controls)
+const iconRed = "#DB5C5C"; // error, breakpoint, stop, methods / functions
+const iconYellow = "#F2C55C"; // warning, failed test, light bulb, execution point
+const iconBlue = "#548AF7"; // info, classes / types, running
+const iconGreen = "#57965C"; // success, run / debug / resume, interfaces
+const iconOrange = "#C77D55"; // fields / variables / constants
+const iconPurple = "#A571E6"; // enums
+const iconLavender = "#B589EC"; // properties, AI
+const iconAmber = "#D6AE58"; // exceptions
+const aiPurple = "#955AE0"; // AI working accent
+
+// Checkbox / radio glyphs
+const checkFill = "#2B2D30";
+const checkBorder = "#5A5D63";
+const checkSelected = blueVivid;
+const checkDisabledFill = "#393B40";
+const checkDisabledMark = "#6F737A";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Terminal colors — the editor's syntax palette, reused
+// Editor palette
 // ─────────────────────────────────────────────────────────────────────────────
-// The integrated terminal speaks the same color language as the code editor:
-// every ANSI slot is an existing syntax/UI constant, so `git diff` greens are
-// string green, prompts' blues are function blue, comments in zsh
-// autosuggestions look like editor comments, and so on. No new hues.
-//
-// Every slot except black clears 4.5:1 on the editor bg. That matters: VS Code
-// silently re-tints any terminal color below `minimumContrastRatio` (default
-// 4.5), so a color under it renders brighter and harsher than defined (the
-// previous palette's red, bright red and bright black all did). Bright slots
-// are sibling hues from the same palette — mostly a step lighter; bright
-// yellow is a deeper gold — so bold-as-bright text stays within the editor's
-// range instead of jumping to neon.
-const termBg = editorBackground; // #1E1F22 — same room as code
-const termFg = editorForeground; // #BCBEC4 — default editor text
-// Normal ANSI row (palette 0–7)
-const termBlack = gray4; // #43454A — visible "black" block on the dark bg
-const termRed = red7; // #E47474 — editor error foreground   (5.5:1)
-const termGreen = syntaxString; // #6AAB73 — string green              (6.0:1)
-const termYellow = syntaxHtmlTag; // #D5B778 — soft gold                 (8.5:1)
-const termBlue = syntaxFunction; // #56A8F5 — function blue             (6.5:1)
-const termMagenta = syntaxMember; // #C77DBB — member purple-pink        (5.6:1)
-const termCyan = syntaxNumber; // #2AACB8 — number teal               (6.0:1)
-const termWhite = editorForeground; // #BCBEC4 — default editor text       (8.9:1)
-// Bright ANSI row (palette 8–15)
-const termBrightBlack = syntaxComment; // #878C94 — comment gray              (4.9:1)
-const termBrightRed = syntaxInvalid; // #FA6F7C — invalid-token red         (6.0:1)
-const termBrightGreen = green8; // #73BD79 — lighter green             (7.3:1)
-const termBrightYellow = yellow6; // #D6AE58 — warning gold              (7.9:1)
-const termBrightBlue = blue10; // #83ACFC — light blue                (7.3:1)
-const termBrightMagenta = syntaxJsxComponent; // #9C9CFF — lavender                  (6.8:1)
-const termBrightCyan = syntaxRegexp; // #42C3D4 — regexp cyan               (7.8:1)
-const termBrightWhite = gray12; // #DFE1E5 — primary UI foreground     (12.6:1)
+
+const editorBackground = gray10;
+const editorForeground = "#BCBEC4";
+const caret = "#CED0D6";
+const caretRow = "#1F2024";
+const lineNumber = "#4B5059";
+const lineNumberActive = "#A1A3AB";
+const indentGuide = "#323438"; // indent guides, rulers
+const indentGuideActive = "#4E5157"; // active indent guide, matched-bracket guide
+const whitespace = "#6F737A";
+const selection = "#214283";
+const selectionInactive = "#4C4F56";
+const popupEditorBackground = "#27282B"; // completion list and documentation popups
+const codeBlockBackground = "#2B2D30"; // markdown code blocks / quotes, diff separators
+const inlineCodeBackground = "#343539";
+const inlineCodeForeground = "#CED0D6";
+const foldedForeground = "#868991";
+const foldedBackground = "#393B40";
+const inlayBackground = "#393B40";
+const inlayForeground = "#868A91";
+const inlayParameterForeground = "#858A94";
+const inlayTextForeground = "#727782"; // hints without background: code lens
+const ghostText = "#808080"; // inline completions
+const matchedBracket = "#43454A";
+const breadcrumbForeground = "#9DA0A8";
+const breadcrumbActive = "#DFE1E5";
+
+// Highlights — each kind keeps its own hue:
+//   teal  → find results (box border + scrollbar mark)
+//   green → usages / navigation targets
+//   gray-green / rose → occurrences under the caret (read / write)
+const textSearch = "#114957";
+const textSearchBorder = "#165E70";
+const textSearchMark = "#72D6D6";
+const usage = "#2D543F";
+const usageMark = "#42BD77";
+const caretWord = "#373B39";
+const caretWordMark = "#5B786A";
+const caretWriteWord = "#402F33";
+const caretWriteWordMark = "#BA6387";
+const liveTemplate = "#467FF2"; // snippet placeholders, linked editing
+const liveTemplateInactive = "#9DA0A8";
+const hyperlink = "#548AF7";
+
+// Diagnostics (underline color + scrollbar mark)
+const errorUnderline = "#FA6675";
+const errorMark = "#D64D5B";
+const warningUnderline = "#F2C55C";
+const warningMark = "#C29E4A";
+const weakWarning = "#857042"; // information-level diagnostics
+const errorHint = "#402929"; // inline test-failure line
+
+// Debugging
+const executionLine = "#2A5091";
+const otherFrameLine = "#273552";
+const inlineValue = "#666D75";
+const debugValue = "#F0AC81";
+const debugType = "#6F737A";
+const debugChanged = "#548AF7";
+
+// Version control
+const gutterAdded = "#549159";
+const gutterModified = "#375FAD";
+const gutterDeleted = "#868A91";
+const diffInserted = "#294436";
+const diffInsertedMark = "#447152";
+const diffDeleted = "#484A4A";
+const diffDeletedMark = "#656E76";
+const diffModified = "#385570";
+const diffModifiedMark = "#43698D";
+const diffConflict = "#45302B";
+const diffConflictMark = "#8F5247";
+const fileAdded = "#73BD79";
+const fileModified = "#70AEFF";
+const fileDeleted = "#6F737A";
+const fileUnversioned = "#E88F89";
+const fileIgnored = "#D69A6B";
+const fileConflict = "#DE6A66";
+const modifiedTab = "#4083C9";
+const blameText = "#8D9199";
+const branchHead = "#F5D273";
+const branchLocal = "#5FAD65";
+const branchRemote = "#B589EC";
+const branchTag = "#868A91";
+const coverageFull = "#375239";
+const coveragePartial = "#5E4D33";
+const coverageNone = "#5E3838";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Syntax colors
+// ─────────────────────────────────────────────────────────────────────────────
+// Language defaults. Calls, classes, types, parameters and local variables are
+// deliberately plain text; color marks declarations, members and literals.
+
+const synKeyword = "#CF8E6D"; // keywords, primitive types, escapes, markup markers
+const synString = "#6AAB73";
+const synNumber = "#2AACB8";
+const synComment = "#7A7E85"; // line / block comments
+const synDocComment = "#5F826B"; // doc comments, docstrings (italic)
+const synDocTag = "#67A37C"; // @param, @return …
+const synDocTagValue = "#ABADB3"; // doc tag arguments
+const synFunction = "#56A8F5"; // function / method declarations
+const synMethod = "#57AAF7"; // static / instance member functions
+const synMember = "#C77DBB"; // fields, properties, object keys, constants (italic)
+const synMetadata = "#B3AE60"; // annotations, decorators, attributes
+const synTypeParameter = "#16BAAC";
+const synTag = "#D5B778"; // HTML / XML tags, CSS selectors and functions
+const synCustomTag = "#2FBAA3";
+const synAttribute = "#BABABA"; // HTML attribute names, CSS property names
+const synEntity = "#56A8F5"; // HTML entities, CSS colors
+const synInvalid = "#F75464"; // bad characters, unmatched brackets, unresolved references
+const synTodo = "#8BB33D";
+const synRegexpClass = "#B2AE60";
+const synSeparator = "#808080"; // key-value separators in properties files
+
+// Language-specific colors
+const jsLocalVariable = "#A9B7C6";
+const jsGlobalVariable = "#C77DBA";
+const jsComponent = "#9C9CFF"; // JSX / TSX components
+const jsRegexp = "#42C3D4";
+const tsTypeParameter = "#507874";
+const cssUrl = "#5C92FF";
+const yamlAnchor = "#E8BF6A";
+const kotlinLabel = "#32B8AF";
+const pySelf = "#94558D";
+const pyBuiltin = "#8888C6";
+const pyKeywordArgument = "#AA4926";
+const pyMagic = "#B200B2";
+const pyBytes = "#A5C261";
+const goBuiltin = "#CC7832";
+const goCall = "#B09D79";
+const goPackage = "#AFBF7E";
+const goType = "#6FAFBD";
+const rsType = "#86985D"; // structs, enums, unions, type aliases
+const rsVariant = "#6DA1AB";
+const rsTrait = "#8D91DC"; // traits, crates
+const rsLifetime = "#20999D"; // lifetimes, type parameters
+const rsMacro = "#4EADE5";
+const rsSelf = "#D98EB3";
+const rsStatic = "#9876AA";
+const rsQuestion = "#CC7832";
+const phpVariable = "#9876AA";
+const phpNamedArgument = "#467CDA";
+const rbMethod = "#FFC66D";
+const rbSymbol = "#89A6AF";
+const rbGlobal = "#D0D0FF";
+const rbEscape = "#CC7832";
+const lessVariable = "#D0D0FF";
+const rbRegexp = "#979E5A";
+const rbComment = "#808080";
+const rbNumber = "#74A4C8";
+const rbLocal = "#D4B01D";
+const rbConstant = "#FEFFF9";
+const rbSpecialCall = "#FC9800";
+const shCommand = "#C57633";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Terminal
+// ─────────────────────────────────────────────────────────────────────────────
+// VS Code re-tints any ANSI color below `terminal.integrated.minimumContrastRatio`
+// (default 4.5), so black and bright black text are lifted at render time.
+
+const terminalAnsi = {
+  black: black,
+  red: "#F27481",
+  green: "#6BCC62",
+  yellow: "#E0CE70",
+  blue: "#5594FA",
+  magenta: "#C092FA",
+  cyan: "#47CCBD",
+  white: "#CED0D6",
+  brightBlack: "#4E5157",
+  brightRed: "#FF6B7A",
+  brightGreen: "#67FF59",
+  brightYellow: "#FFEC1A",
+  brightBlue: "#3399FF",
+  brightMagenta: "#D970FF",
+  brightCyan: "#40FFE9",
+  brightWhite: white,
+};
+const terminalBlock = "#2B2D30"; // command block / pinned command
+const terminalBlockSeparator = "#393B40";
+const terminalSelectedBlock = blueVivid;
+const terminalSearchMatch = "#FFEA00";
+const terminalSearchCurrent = "#FF941A";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Color helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+type Rgb = [number, number, number];
+
+const toRgb = (hex: string): Rgb =>
+  [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)) as Rgb;
+
+const toHex = (channels: number[]): string =>
+  "#" +
+  channels
+    .map((v) =>
+      Math.max(0, Math.min(255, Math.round(v)))
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")
+    .toUpperCase();
+
+/** Opaque blend of `weight` parts `fg` over `bg`. */
+function mix(fg: string, bg: string, weight: number): string {
+  const f = toRgb(fg);
+  const b = toRgb(bg);
+  return toHex(f.map((v, i) => v * weight + b[i] * (1 - weight)));
+}
+
+/**
+ * Translucent color that, drawn at `alpha` over `base`, composites back to
+ * exactly `target`. VS Code requires most editor decorations to be
+ * non-opaque; this keeps their on-screen color identical to the palette.
+ */
+function overlay(target: string, alpha: number, base: string = editorBackground): string {
+  const t = toRgb(target);
+  const b = toRgb(base);
+  const alphaHex = Math.round(alpha * 255)
+    .toString(16)
+    .padStart(2, "0")
+    .toUpperCase();
+  return toHex(t.map((v, i) => (v - (1 - alpha) * b[i]) / alpha)) + alphaHex;
+}
+
+// Changed lines use 40% of the diff color over the editor background; changed
+// words inside them use the full diff color on top of that line tint.
+const diffLine = (color: string): string => color + "66";
+const diffWord = (color: string): string =>
+  overlay(color, 0.8, mix(color, editorBackground, 0.4));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Theme definition type
@@ -266,1151 +378,1273 @@ const theme: ThemeDefinition = {
   // ───────────────────────────────────────────────────────────────────────────
   colors: {
     // ── Base / shared ──
-    foreground: editorForeground,
-    disabledForeground: gray6,
-    descriptionForeground: gray7,
-    errorForeground: red7,
-    focusBorder: blue6,
-    "icon.foreground": gray10,
-    "selection.background": blue3,
-    "sash.hoverBorder": blue6,
-    "window.activeBorder": gray1,
-    "window.inactiveBorder": gray1,
-    "widget.border": gray4b,
-    "widget.shadow": blackAlpha40,
+    foreground: gray130,
+    disabledForeground: gray60,
+    descriptionForeground: gray100,
+    errorForeground: red100,
+    focusBorder: blue80,
+    strongForeground: white,
+    "icon.foreground": gray120,
+    "selection.background": blue50,
+    "sash.hoverBorder": blue80,
+    "widget.border": gray40,
+    "widget.shadow": shadow,
+    "window.activeBorder": windowBorder,
+    "window.inactiveBorder": gray50,
+    "scrollbar.shadow": transparent,
+    "scrollbar.background": transparent,
+    "scrollbarSlider.background": scrollbarThumb,
+    "scrollbarSlider.hoverBackground": scrollbarThumbHover,
+    "scrollbarSlider.activeBackground": scrollbarThumbHover,
+    "progressBar.background": blue80,
 
     // ── Text ──
-    "textBlockQuote.background": gray2,
-    "textBlockQuote.border": gray4,
-    "textCodeBlock.background": gray3,
-    "textLink.foreground": blue9,
-    "textLink.activeForeground": blue9, // not blue8: on the gray3 hover row blue8 drops to 3.4:1, blue9 holds 4.1:1
-    "textPreformat.foreground": syntaxString,
-    "textPreformat.background": gray3, // inline code — same as code blocks
-    "textSeparator.foreground": gray4,
+    "textLink.foreground": blue100,
+    "textLink.activeForeground": blue100,
+    "textBlockQuote.background": codeBlockBackground,
+    "textBlockQuote.border": synComment,
+    "textCodeBlock.background": codeBlockBackground,
+    "textPreformat.foreground": inlineCodeForeground,
+    "textPreformat.background": inlineCodeBackground,
+    "textPreformat.border": transparent,
+    "textSeparator.foreground": gray40,
 
-    // ── Toolbar (editor titlebar action buttons) ──
-    "toolbar.hoverBackground": whiteAlpha08,
+    // ── Toolbars ──
+    "toolbar.hoverBackground": wash20,
+    "toolbar.activeBackground": wash40,
     "toolbar.hoverOutline": transparent,
-    "toolbar.activeBackground": whiteAlpha15,
+    "actionBar.toggledBackground": blue60,
+
+    // ── Frame: title bar, command center, menu bar ──
+    "titleBar.activeBackground": gray30,
+    "titleBar.activeForeground": gray130,
+    "titleBar.inactiveBackground": gray30,
+    "titleBar.inactiveForeground": gray100,
+    "titleBar.border": transparent,
+    "commandCenter.background": wash10,
+    "commandCenter.foreground": gray130,
+    "commandCenter.activeBackground": wash20,
+    "commandCenter.activeForeground": gray130,
+    "commandCenter.inactiveForeground": gray100,
+    "commandCenter.border": wash30,
+    "commandCenter.activeBorder": wash40,
+    "commandCenter.inactiveBorder": wash10,
+    // Running / debugging tints the frame widgets green.
+    "commandCenter.debuggingBackground": green80 + "80",
+    "menubar.selectionBackground": wash20,
+    "menubar.selectionForeground": gray130,
+    "menubar.selectionBorder": transparent,
+
+    // ── Modern layout: panels floating on the frame ──
+    // Panel borders match the panel surface, so a panel is defined only by its
+    // contrast with the frame around it.
+    "modernUI.shellBackground": gray30,
+    "modernUI.inactiveShellBackground": gray30,
+    "surface.background": gray10,
+    "surface.foreground": gray130,
+    "surface.border": gray10,
+    "editor.border": gray10,
+    "modernPanel.border": gray10,
+    "modernSash.gripForeground": wash50,
+    "modernActivityBar.background": gray30,
+    "modernActivityBar.inactiveBackground": gray30,
+    "modernActivityBar.border": transparent,
+    "modernActivityBarItem.activeBackground": blue80,
+    "modernActivityBarItem.activeForeground": white,
+    "modernActivityBarItem.hoverBackground": wash20,
+    "modernActivityBarItem.hoverForeground": gray130,
+    // Modern tabs: the selected tab is a blue-tinted pill.
+    "modernTab.activeBackground": blue40,
+    "modernTab.activeForeground": gray130,
+    "modernTab.hoverBackground": wash20,
+    "modernTab.hoverForeground": gray130,
+    "modernEditorTab.activeBackground": blue40,
+    "modernEditorTab.activeForeground": gray130,
+    "modernEditorTab.activeHoverBackground": blue50,
+    "modernEditorTab.inactiveBackground": transparent,
+    "modernEditorTab.hoverBackground": wash20,
+    "modernEditorTab.hoverForeground": gray130,
+    "modernEditorTab.activeActionBackground": blue40,
+    "modernEditorTab.activeHoverActionBackground": blue50,
+    "modernEditorTab.hoverActionBackground": mix(white, editorBackground, 0x17 / 255),
+    "modernEditorTab.selectedActionBackground": blue30,
+    "browser.border": gray30,
+
+    // ── Activity bar ──
+    // The activity bar sits on the frame; the active item is a solid accent
+    // tile with a white glyph instead of an edge indicator.
+    "activityBar.background": gray30,
+    "activityBar.foreground": white,
+    "activityBar.inactiveForeground": gray120,
+    "activityBar.border": transparent,
+    "activityBar.activeBorder": transparent,
+    "activityBar.activeBackground": blue80,
+    "activityBar.activeFocusBorder": white,
+    "activityBar.dropBorder": blue80,
+    "activityBarBadge.background": blue90,
+    "activityBarBadge.foreground": gray10,
+    "activityErrorBadge.background": red80,
+    "activityErrorBadge.foreground": white,
+    "activityWarningBadge.background": yellow80,
+    "activityWarningBadge.foreground": white,
+    // Activity bar docked at the top of the side bar — inside the panel.
+    "activityBarTop.background": gray10,
+    "activityBarTop.foreground": gray130,
+    "activityBarTop.inactiveForeground": gray100,
+    "activityBarTop.activeBackground": blue40,
+    "activityBarTop.activeBorder": transparent,
+    "activityBarTop.dropBorder": blue80,
+
+    // ── Side bar ──
+    "sideBar.background": gray10,
+    "sideBar.foreground": gray130,
+    "sideBar.border": gray30,
+    "sideBar.dropBackground": dropTarget,
+    "sideBarTitle.background": gray10,
+    "sideBarTitle.foreground": gray130,
+    "sideBarTitle.border": gray30,
+    "sideBarSectionHeader.background": gray10,
+    "sideBarSectionHeader.foreground": gray130,
+    "sideBarSectionHeader.border": gray30,
+    "sideBarActivityBarTop.border": gray30,
+    "sideBarStickyScroll.background": gray10,
+    "sideBarStickyScroll.border": gray30,
+    "sideBarStickyScroll.shadow": shadow,
+
+    // ── Panel (problems, output, debug console, terminal, ports) ──
+    "panel.background": gray10,
+    "panel.border": gray30,
+    "panel.dropBorder": blue80,
+    "panelTitle.activeForeground": gray130,
+    "panelTitle.inactiveForeground": gray100,
+    "panelTitle.activeBorder": blue80,
+    "panelTitle.border": gray30,
+    "panelTitleBadge.background": gray80,
+    "panelTitleBadge.foreground": black,
+    "panelSection.border": gray30,
+    "panelSection.dropBackground": dropTarget,
+    "panelSectionHeader.background": gray10,
+    "panelSectionHeader.foreground": gray130,
+    "panelSectionHeader.border": gray30,
+    "panelInput.border": gray50,
+    "panelStickyScroll.background": gray10,
+    "panelStickyScroll.border": gray30,
+    "panelStickyScroll.shadow": shadow,
+    "outputView.background": gray10,
+    "outputViewStickyScroll.background": gray10,
+
+    // ── Status bar ──
+    "statusBar.background": gray30,
+    "statusBar.foreground": gray100,
+    "statusBar.border": transparent,
+    "statusBar.inactiveBackground": gray30,
+    "statusBar.focusBorder": blue80,
+    "statusBar.noFolderBackground": gray30,
+    "statusBar.noFolderForeground": gray100,
+    "statusBar.noFolderBorder": transparent,
+    "statusBar.debuggingBackground": green80,
+    "statusBar.debuggingForeground": white,
+    "statusBar.debuggingBorder": transparent,
+    "statusBarItem.hoverBackground": wash20,
+    "statusBarItem.hoverForeground": gray130,
+    "statusBarItem.activeBackground": wash40,
+    "statusBarItem.compactHoverBackground": wash40,
+    "statusBarItem.focusBorder": blue80,
+    "statusBarItem.prominentBackground": wash30,
+    "statusBarItem.prominentForeground": gray130,
+    "statusBarItem.prominentHoverBackground": wash40,
+    "statusBarItem.prominentHoverForeground": gray130,
+    "statusBarItem.remoteBackground": blue80,
+    "statusBarItem.remoteForeground": white,
+    "statusBarItem.remoteHoverBackground": blue70,
+    "statusBarItem.remoteHoverForeground": white,
+    "statusBarItem.errorBackground": red80,
+    "statusBarItem.errorForeground": white,
+    "statusBarItem.errorHoverBackground": red70,
+    "statusBarItem.errorHoverForeground": white,
+    "statusBarItem.warningBackground": yellow80,
+    "statusBarItem.warningForeground": white,
+    "statusBarItem.warningHoverBackground": yellow70,
+    "statusBarItem.warningHoverForeground": white,
+    "statusBarItem.offlineBackground": red80,
+    "statusBarItem.offlineForeground": white,
+    "statusBarItem.offlineHoverBackground": red70,
+    "statusBarItem.offlineHoverForeground": white,
+
+    // ── Editor groups and tabs ──
+    // Tabs live inside the editor panel: the strip shares the editor
+    // background, the selected tab is a blue-tinted block with a blue edge, and
+    // unselected labels are dimmed to 75%.
+    "editorGroup.border": gray30,
+    "editorGroup.dropBackground": dropTarget,
+    "editorGroup.emptyBackground": editorBackground,
+    "editorGroup.focusedEmptyBorder": blue80,
+    "editorGroup.dropIntoPromptBackground": gray30,
+    "editorGroup.dropIntoPromptForeground": gray130,
+    "editorGroup.dropIntoPromptBorder": gray40,
+    "editorGroupHeader.tabsBackground": editorBackground,
+    "editorGroupHeader.noTabsBackground": editorBackground,
+    "editorGroupHeader.connectedTabsBackground": editorBackground,
+    "editorGroupHeader.tabsBorder": gray30,
+    "editorGroupHeader.border": gray30,
+    "editorPane.background": editorBackground,
+    "sideBySideEditor.horizontalBorder": gray30,
+    "sideBySideEditor.verticalBorder": gray30,
+    "tab.activeBackground": blue40,
+    "tab.activeForeground": gray130,
+    "tab.activeBorder": blue60,
+    "tab.activeBorderTop": transparent,
+    "tab.inactiveBackground": editorBackground,
+    "tab.inactiveForeground": gray130 + "BF",
+    "tab.hoverBackground": wash20,
+    "tab.hoverForeground": gray130,
+    "tab.hoverBorder": transparent,
+    "tab.unfocusedActiveBackground": gray30,
+    "tab.unfocusedActiveForeground": gray130,
+    "tab.unfocusedActiveBorder": gray50,
+    "tab.unfocusedActiveBorderTop": transparent,
+    "tab.unfocusedInactiveBackground": editorBackground,
+    "tab.unfocusedInactiveForeground": gray130 + "BF",
+    "tab.unfocusedHoverBackground": wash20,
+    "tab.unfocusedHoverForeground": gray130,
+    "tab.unfocusedHoverBorder": transparent,
+    "tab.selectedBackground": blue30,
+    "tab.selectedForeground": gray130,
+    "tab.selectedBorderTop": transparent,
+    "tab.border": transparent,
+    "tab.divider": transparent,
+    "tab.lastPinnedBorder": wash30,
+    "tab.dragAndDropBorder": blue80,
+    "tab.activeModifiedBorder": modifiedTab,
+    "tab.inactiveModifiedBorder": modifiedTab + "B3",
+    "tab.unfocusedActiveModifiedBorder": modifiedTab + "80",
+    "tab.unfocusedInactiveModifiedBorder": modifiedTab + "60",
 
     // ── Editor ──
     "editor.background": editorBackground,
     "editor.foreground": editorForeground,
-    "editorLineNumber.foreground": lineNumberColor,
-    "editorLineNumber.activeForeground": lineNumberActiveColor,
-    "editorCursor.foreground": gray11,
+    "editorCursor.foreground": caret,
     "editorCursor.background": editorBackground,
-
-    // Editor selection — steel blue, desaturated so token colors survive on top
-    // (no selectionForeground override: selected code keeps its syntax colors).
-    "editor.selectionBackground": "#2A4D7BE6",
-    "editor.inactiveSelectionBackground": "#2A4D7B99",
-    // Other occurrences of the selected word — cobalt, low-alpha wash.
-    "editor.selectionHighlightBackground": "#1857C242",
-    "editor.selectionHighlightBorder": "#1857C273",
-
-    // Find — solid green active match + yellow wash on the others; both clearly
-    // distinct from the cobalt selection.
-    "editor.findMatchBackground": findMatchBackground,
-    "editor.findMatchBorder": findMatchBorder,
-    "editor.findMatchForeground": findMatchForeground,
-    "editor.findMatchHighlightBackground": findMatchHighlight,
-    "editor.findMatchHighlightBorder": yellow7 + "80",
-    // The active match carries BOTH the current-match and the all-matches-highlight
-    // decorations. Leaving findMatchHighlightForeground undefined lets syntax token
-    // colors bleed through the highlight layer (vscode#213686), tinting the active
-    // glyphs so findMatchForeground's white reads as a muted off-white. Define it
-    // explicitly so no layer bleeds — every match foreground is forced white.
-    "editor.findMatchHighlightForeground": findMatchForeground,
-    "editor.findRangeHighlightBackground": "#5480F018",
-    "editor.findRangeHighlightBorder": transparent,
-    // Search Editor results — yellow sibling wash, every hit looks equal, none claims focus.
-    "searchEditor.findMatchBackground": siblingMatchBackground,
-    "searchEditor.findMatchBorder": siblingMatchBorder,
-
-    // Word occurrences under the cursor.
-    // Teal  → read  (cool, calm — "this symbol is referenced here").
-    // Rose  → write (warm, vivid — "this symbol is modified here").
-    // Peach → text  (softer — pure-text match, no semantic info).
-    "editor.wordHighlightBackground": "#0DC4B030",
-    "editor.wordHighlightBorder": "#0DC4B058",
-    "editor.wordHighlightStrongBackground": "#E0558540",
-    "editor.wordHighlightStrongBorder": "#E0558562",
-    "editor.wordHighlightTextBackground": "#CF8E6D28",
-    "editor.wordHighlightTextBorder": "#CF8E6D48",
-
-    // Hover highlight — neutral white wash (no hue: just "thing under cursor").
-    "editor.hoverHighlightBackground": "#FFFFFF10",
-    // Range highlight — soft blue wash for Quick Open / Find in Selection.
-    "editor.rangeHighlightBackground": "#5480F018",
-    "editor.rangeHighlightBorder": transparent,
-    // Symbol highlight (go-to-def target) — vibrant violet, distinct destination marker.
-    "editor.symbolHighlightBackground": "#9B6DF540",
-    "editor.symbolHighlightBorder": "#9B6DF562",
-
-    // Unicode anomaly — warm yellow caution wash, clearly a "look at this" signal.
-    "editorUnicodeHighlight.background": "#F2C55C18",
-    "editorUnicodeHighlight.border": yellow7,
-
-    // Current line — flat row tint, no border (border would compete with cursor).
-    "editor.lineHighlightBackground": caretRowBackground,
+    "editorMultiCursor.primary.foreground": caret,
+    "editorMultiCursor.primary.background": editorBackground,
+    "editorMultiCursor.secondary.foreground": caret,
+    "editorMultiCursor.secondary.background": editorBackground,
+    "editor.lineHighlightBackground": caretRow,
+    "editor.inactiveLineHighlightBackground": caretRow,
     "editor.lineHighlightBorder": transparent,
+    "editorLineNumber.foreground": lineNumber,
+    "editorLineNumber.activeForeground": lineNumberActive,
+    "editorLineNumber.dimmedForeground": mix(lineNumber, editorBackground, 0.5),
+    "editorGutter.background": editorBackground,
+    "editor.compositionBorder": caret,
+    "editor.placeholder.foreground": gray80,
 
-    // Indent guides
-    "editorIndentGuide.background1": indentGuideColor,
+    // Selection — solid; selected code keeps its syntax colors.
+    "editor.selectionBackground": selection,
+    "editor.inactiveSelectionBackground": overlay(selectionInactive, 0.8),
+    // Occurrences of the word / selection under the caret.
+    "editor.selectionHighlightBackground": overlay(caretWord, 0.8),
+    "editor.selectionHighlightBorder": transparent,
+    "editor.wordHighlightBackground": overlay(caretWord, 0.8),
+    "editor.wordHighlightBorder": transparent,
+    "editor.wordHighlightStrongBackground": overlay(caretWriteWord, 0.8),
+    "editor.wordHighlightStrongBorder": transparent,
+    "editor.wordHighlightTextBackground": overlay(caretWord, 0.8),
+    "editor.wordHighlightTextBorder": transparent,
+
+    // Find — every result gets a teal block with a teal box; the current one is
+    // the selection inside that box. Match foregrounds stay unset so matched
+    // code keeps its syntax colors.
+    "editor.findMatchBackground": selection,
+    "editor.findMatchBorder": textSearchBorder,
+    "editor.findMatchHighlightBackground": overlay(textSearch, 0.8),
+    "editor.findMatchHighlightBorder": textSearchBorder,
+    "editor.findRangeHighlightBackground": wash10,
+    "editor.findRangeHighlightBorder": transparent,
+    "searchEditor.findMatchBackground": overlay(textSearch, 0.8),
+    "searchEditor.findMatchBorder": textSearchBorder,
+    "searchEditor.textInputBorder": gray50,
+    "search.resultsInfoForeground": gray100,
+
+    "editor.hoverHighlightBackground": wash10,
+    "editor.rangeHighlightBackground": wash10,
+    "editor.rangeHighlightBorder": transparent,
+    "editor.symbolHighlightBackground": overlay(usage, 0.8),
+    "editor.symbolHighlightBorder": transparent,
+    "editor.linkedEditingBackground": liveTemplate + "26",
+    "editorLink.activeForeground": hyperlink,
+    "editorUnicodeHighlight.background": transparent,
+    "editorUnicodeHighlight.border": warningUnderline,
+
+    // Snippets — placeholders are boxed; the active one is also selected.
+    "editor.snippetTabstopHighlightBackground": transparent,
+    "editor.snippetTabstopHighlightBorder": liveTemplateInactive,
+    "editor.snippetFinalTabstopHighlightBackground": transparent,
+    "editor.snippetFinalTabstopHighlightBorder": liveTemplate,
+
+    // Guides, rulers, whitespace
+    "editorIndentGuide.background1": indentGuide,
+    "editorIndentGuide.background2": indentGuide,
+    "editorIndentGuide.background3": indentGuide,
+    "editorIndentGuide.background4": indentGuide,
+    "editorIndentGuide.background5": indentGuide,
+    "editorIndentGuide.background6": indentGuide,
     "editorIndentGuide.activeBackground1": indentGuideActive,
+    "editorIndentGuide.activeBackground2": indentGuideActive,
+    "editorIndentGuide.activeBackground3": indentGuideActive,
+    "editorIndentGuide.activeBackground4": indentGuideActive,
+    "editorIndentGuide.activeBackground5": indentGuideActive,
+    "editorIndentGuide.activeBackground6": indentGuideActive,
+    "editorRuler.foreground": indentGuide,
+    "editorWhitespace.foreground": whitespace,
+    "editorWordWrapIndicator.foreground": whitespace,
 
-    // Rulers
-    "editorRuler.foreground": indentGuideColor,
-
-    // Bracket matching
-    "editorBracketMatch.background": "#43454A60",
-    "editorBracketMatch.border": gray5,
-    "editorBracketHighlight.foreground1": syntaxHtmlTag,
-    "editorBracketHighlight.foreground2": syntaxFunction,
-    "editorBracketHighlight.foreground3": syntaxString,
-    "editorBracketHighlight.foreground4": syntaxMember,
-    "editorBracketHighlight.foreground5": syntaxNumber,
-    "editorBracketHighlight.foreground6": syntaxMetadata,
-    "editorBracketHighlight.unexpectedBracket.foreground": red7,
-
-    // Bracket-pair indent guides — colors only apply when the user enables
-    // `editor.guides.bracketPairs`. Inactive rails are the bracket-pair hues
-    // dimmed so they read like guides; the active pair lifts to full color.
-    "editorBracketPairGuide.background1": syntaxHtmlTag + "40",
-    "editorBracketPairGuide.background2": syntaxFunction + "40",
-    "editorBracketPairGuide.background3": syntaxString + "40",
-    "editorBracketPairGuide.background4": syntaxMember + "40",
-    "editorBracketPairGuide.background5": syntaxNumber + "40",
-    "editorBracketPairGuide.background6": syntaxMetadata + "40",
-    "editorBracketPairGuide.activeBackground1": syntaxHtmlTag,
-    "editorBracketPairGuide.activeBackground2": syntaxFunction,
-    "editorBracketPairGuide.activeBackground3": syntaxString,
-    "editorBracketPairGuide.activeBackground4": syntaxMember,
-    "editorBracketPairGuide.activeBackground5": syntaxNumber,
-    "editorBracketPairGuide.activeBackground6": syntaxMetadata,
-
-    // Whitespace — should read as texture, not content (gray5: gray6 is nearly comment-bright).
-    "editorWhitespace.foreground": gray5,
+    // Brackets — brackets keep the text color at every nesting level; the
+    // matching pair gets a block and its guide lights up.
+    "editorBracketMatch.background": overlay(matchedBracket, 0.8),
+    "editorBracketMatch.border": transparent,
+    "editorBracketHighlight.foreground1": editorForeground,
+    "editorBracketHighlight.foreground2": editorForeground,
+    "editorBracketHighlight.foreground3": editorForeground,
+    "editorBracketHighlight.foreground4": editorForeground,
+    "editorBracketHighlight.foreground5": editorForeground,
+    "editorBracketHighlight.foreground6": editorForeground,
+    "editorBracketHighlight.unexpectedBracket.foreground": synInvalid,
+    "editorBracketPairGuide.background1": indentGuide,
+    "editorBracketPairGuide.background2": indentGuide,
+    "editorBracketPairGuide.background3": indentGuide,
+    "editorBracketPairGuide.background4": indentGuide,
+    "editorBracketPairGuide.background5": indentGuide,
+    "editorBracketPairGuide.background6": indentGuide,
+    "editorBracketPairGuide.activeBackground1": indentGuideActive,
+    "editorBracketPairGuide.activeBackground2": indentGuideActive,
+    "editorBracketPairGuide.activeBackground3": indentGuideActive,
+    "editorBracketPairGuide.activeBackground4": indentGuideActive,
+    "editorBracketPairGuide.activeBackground5": indentGuideActive,
+    "editorBracketPairGuide.activeBackground6": indentGuideActive,
 
     // Folding
-    "editor.foldBackground": "#393B40A0",
-    "editor.foldPlaceholderForeground": gray7,
+    "editor.foldBackground": foldedBackground + "40",
+    "editor.foldPlaceholderForeground": foldedForeground,
+    "editorGutter.foldingControlForeground": gray100,
 
-    // Linked editing
-    "editor.linkedEditingBackground": "#35538F60",
+    // Unused code — dimmed to ~53%, which renders default text at the unused
+    // gray (#6F737A).
+    "editorUnnecessaryCode.opacity": "#00000087",
+    "editorUnnecessaryCode.border": transparent,
 
-    // Ctrl/Cmd-hover link in the editor — same hue as hyperlinks elsewhere.
-    "editorLink.activeForeground": blue8,
+    // Inline hints, code lens, inline completions
+    "editorInlayHint.background": inlayBackground,
+    "editorInlayHint.foreground": inlayForeground,
+    "editorInlayHint.typeBackground": inlayBackground,
+    "editorInlayHint.typeForeground": inlayForeground,
+    "editorInlayHint.parameterBackground": inlayBackground,
+    "editorInlayHint.parameterForeground": inlayParameterForeground,
+    "editorCodeLens.foreground": inlayTextForeground,
+    "editorGhostText.foreground": ghostText,
+    "editorGhostText.background": transparent,
+    "editorGhostText.border": transparent,
 
-    // Unused/unreachable code — dim to 75% (default ~67%) so grayed-out code
-    // still clears 4.5:1 against the editor background.
-    "editorUnnecessaryCode.opacity": "#000000C0",
+    // Light bulbs — intention (yellow), quick fix (red), AI (lavender)
+    "editorLightBulb.foreground": iconYellow,
+    "editorLightBulbAutoFix.foreground": iconRed,
+    "editorLightBulbAi.foreground": iconLavender,
 
-    // Snippets
-    "editor.snippetTabstopHighlightBackground": "#35538F40",
-    "editor.snippetFinalTabstopHighlightBackground": "#35538F60",
-    "editor.snippetFinalTabstopHighlightBorder": blue6,
-
-    // Hover widget
-    "editorHoverWidget.background": gray3,
-    "editorHoverWidget.foreground": gray12,
-    "editorHoverWidget.border": gray4b,
-    "editorHoverWidget.statusBarBackground": gray2,
-    // Active parameter in signature help — blue10 holds 4.9:1 on the gray3 bg.
-    "editorHoverWidget.highlightForeground": blue10,
-
-    // Widget (find, suggest, etc.)
-    "editorWidget.background": gray2,
-    "editorWidget.foreground": gray12,
-    "editorWidget.border": gray4b,
-    "editorWidget.resizeBorder": blue6,
-
-    // Suggest widget
-    "editorSuggestWidget.background": gray2,
-    "editorSuggestWidget.foreground": editorForeground,
-    "editorSuggestWidget.border": gray4b,
-    "editorSuggestWidget.selectedBackground": blue2,
-    "editorSuggestWidget.selectedForeground": gray14, // white text on blue selection
-    // Matched characters: blue9 holds 5.1:1 on the gray2 rows; on the saturated
-    // blue selected row only white stays legible (blue8 there is 1.49:1).
-    "editorSuggestWidget.highlightForeground": blue9,
-    "editorSuggestWidget.focusHighlightForeground": gray14,
-    // Icon for the selected row — force white so the symbol-kind glyph stays
-    // legible against the saturated blue selection background.
-    "editorSuggestWidget.selectedIconForeground": gray14,
-    "editorSuggestWidget.focusOutline": transparent, // selection is a solid row, like lists
-    "editorSuggestWidgetStatus.foreground": gray9,
-
-    // Inline hints / inlays
-    "editorInlayHint.background": "#2F3135",
-    "editorInlayHint.foreground": gray7,
-    "editorInlayHint.typeBackground": "#2F3135",
-    "editorInlayHint.typeForeground": gray7,
-    "editorInlayHint.parameterBackground": "#2F3135",
-    "editorInlayHint.parameterForeground": gray7,
-
-    // Code lens
-    "editorCodeLens.foreground": gray7,
-
-    // Code-action list (Quick Fix / refactor popup) — uses the same palette as
-    // the suggest widget so the two surfaces look like siblings.
-    "editorActionList.background": gray2,
-    "editorActionList.foreground": gray12,
-    "editorActionList.focusBackground": blue2,
-    "editorActionList.focusForeground": gray14,
-
-    // Light bulb
-    "editorLightBulb.foreground": yellow7,
-    "editorLightBulbAutoFix.foreground": blue8,
-
-    // Gutter decorations
-    "editorGutter.background": editorBackground,
-    "editorGutter.modifiedBackground": gitModifiedBar,
-    "editorGutter.addedBackground": gitAddedBar,
-    "editorGutter.deletedBackground": gitDeletedBar,
-    "editorGutter.commentRangeForeground": gray6,
-    "editorGutter.foldingControlForeground": gray7,
-
-    // Editor pane / empty group
-    "editorGroup.border": gray4b,
-    "editorGroup.dropBackground": dropOverlay,
-    "editorGroup.emptyBackground": editorBackground,
-    "editorGroupHeader.noTabsBackground": gray1b,
-    "editorGroupHeader.tabsBackground": gray1b,
-    "editorGroupHeader.connectedTabsBackground": gray2, // connected-tabs container, one step above the tab bar
-    "editorGroupHeader.tabsBorder": gray4b,
-    "editorGroupHeader.border": gray4b,
-    "editorPane.background": editorBackground,
-
-    // Sticky scroll — slightly lifted from editor bg so the pinned region
-    // is distinguishable while scrolling, without clashing with syntax colors.
-    "editorStickyScroll.background": "#252629",
-    "editorStickyScroll.border": gray4b,
-    "editorStickyScroll.shadow": blackAlpha40,
-    "editorStickyScrollHover.background": gray3,
-
-    // Marker navigation
-    "editorMarkerNavigation.background": gray2,
-    "editorMarkerNavigationError.background": red5,
-    "editorMarkerNavigationWarning.background": yellow4,
-    "editorMarkerNavigationInfo.background": blue5,
-    "editorMarkerNavigationError.headerBackground": red3,
-    "editorMarkerNavigationWarning.headerBackground": yellow1,
-    "editorMarkerNavigationInfo.headerBackground": gray3,
-
-    // Inline diff — word-level highlight sits ON TOP of the line bg, so the two
-    // tints STACK on changed chars. Two competing goals: the word mark must stand
-    // out from the surrounding line tint (so you can see WHICH words changed in a
-    // mixed add/remove line), yet syntax-colored code on top must stay readable.
-    // The bright change-bar hues (green/red) give the most separation per unit of
-    // darkening, so at ~15% they lift the word mark ~1.3:1 vs the line tint
-    // (enough to spot, softer than the earlier ~20%) while default text holds
-    // ~5.9:1 and colored tokens ~3.3:1. Using the bar hues also ties the word
-    // marks to the gutter bars.
-    // A faint border (~25%) outlines each changed word — the fill alone can only
-    // separate so far before it crushes text, so the outline carries the rest of
-    // the "which words changed" signal at zero text-contrast cost.
-    "diffEditor.insertedTextBackground": "#3fb95026",
-    "diffEditor.insertedTextBorder": "#3fb95040",
-    "diffEditor.removedTextBackground": "#ff7b7226",
-    "diffEditor.removedTextBorder": "#ff7b7240",
-    "diffEditor.border": gray4,
-    "diffEditor.diagonalFill": "#43454A60",
-    "diffEditor.insertedLineBackground": insertedLineOverlay,
-    "diffEditor.removedLineBackground": removedLineOverlay,
-    "diffEditorGutter.insertedLineBackground": insertedLineOverlay,
-    "diffEditorGutter.removedLineBackground": removedLineOverlay,
-    "diffEditorOverview.insertedForeground": gitAddedBar,
-    "diffEditorOverview.removedForeground": gitDeletedBar,
-    "diffEditor.unchangedRegionBackground": "#2B2D3080",
-    "diffEditor.unchangedRegionForeground": gray9,
-    "diffEditor.unchangedCodeBackground": "#2B2D3040",
-
-    // Multi-diff editor
-    "multiDiffEditor.headerBackground": gray2,
-    "multiDiffEditor.background": editorBackground,
-    "multiDiffEditor.border": gray4b,
-
-    // Error / warning squiggles
-    "editorError.foreground": red7,
+    // Diagnostics — underline only, no line tint.
+    "editorError.foreground": errorUnderline,
     "editorError.border": transparent,
-    "editorError.background": errorBackgroundOverlay,
-    "editorWarning.foreground": yellow6,
+    "editorError.background": transparent,
+    "editorWarning.foreground": warningUnderline,
     "editorWarning.border": transparent,
-    "editorWarning.background": warningBackgroundOverlay,
-    "editorInfo.foreground": blue8,
+    "editorWarning.background": transparent,
+    "editorInfo.foreground": weakWarning,
     "editorInfo.border": transparent,
-    "editorInfo.background": infoBackgroundOverlay,
-    "editorHint.foreground": green7,
+    "editorInfo.background": transparent,
+    "editorHint.foreground": gray100,
     "editorHint.border": transparent,
+    "problemsErrorIcon.foreground": iconRed,
+    "problemsWarningIcon.foreground": iconYellow,
+    "problemsInfoIcon.foreground": iconBlue,
 
-    // Overview ruler
-    // Foreground markers need alpha so they don't fully obscure the underlying ruler content.
+    // Sticky scroll
+    "editorStickyScroll.background": editorBackground,
+    "editorStickyScroll.border": gray30,
+    "editorStickyScroll.shadow": shadow,
+    "editorStickyScrollGutter.background": editorBackground,
+    "editorStickyScrollHover.background": wash10,
+
+    // Gutter — change bars: added green, modified blue, deleted gray.
+    "editorGutter.addedBackground": gutterAdded,
+    "editorGutter.modifiedBackground": gutterModified,
+    "editorGutter.deletedBackground": gutterDeleted,
+    "editorGutter.addedSecondaryBackground": green60,
+    "editorGutter.modifiedSecondaryBackground": blue60,
+    "editorGutter.deletedSecondaryBackground": gray60,
+    "editorGutter.commentRangeForeground": gray50,
+    "editorGutter.commentGlyphForeground": gray120,
+    "editorGutter.commentUnresolvedGlyphForeground": iconBlue,
+    "editorGutter.commentDraftGlyphForeground": gray100,
+    "editorGutter.itemBackground": gray40,
+    "editorGutter.itemGlyphForeground": gray120,
+
+    // Overview ruler — scrollbar marks
     "editorOverviewRuler.background": editorBackground,
-    "editorOverviewRuler.border": gray4b,
-    "editorOverviewRuler.findMatchForeground": findMatchBorder + "B3",
-    "editorOverviewRuler.rangeHighlightForeground": "#5480F0B3",
-    "editorOverviewRuler.selectionHighlightForeground": "#1857C2B3",
-    "editorOverviewRuler.wordHighlightForeground": "#0DC4B0B3",
-    "editorOverviewRuler.wordHighlightStrongForeground": "#E05585B3",
-    "editorOverviewRuler.wordHighlightTextForeground": "#CF8E6DB3",
-    "editorOverviewRuler.modifiedForeground": gitModifiedBar + "D9",
-    "editorOverviewRuler.addedForeground": gitAddedBar + "D9",
-    "editorOverviewRuler.deletedForeground": gitDeletedBar + "D9",
-    "editorOverviewRuler.errorForeground": red7 + "B3",
-    "editorOverviewRuler.warningForeground": yellow6 + "B3",
-    "editorOverviewRuler.infoForeground": blue8 + "B3",
-    "editorOverviewRuler.bracketMatchForeground": gray5 + "B3",
-    // Merge regions in the ruler — match the conflict convention: current = accent
-    // blue, incoming = success green, common = neutral gray.
-    "editorOverviewRuler.currentContentForeground": "#1f6febB3",
-    "editorOverviewRuler.incomingContentForeground": "#2ea043B3",
-    "editorOverviewRuler.commonContentForeground": gray4 + "B3",
+    "editorOverviewRuler.border": transparent,
+    "editorOverviewRuler.findMatchForeground": textSearchMark,
+    "editorOverviewRuler.rangeHighlightForeground": gray80,
+    "editorOverviewRuler.selectionHighlightForeground": caretWordMark,
+    "editorOverviewRuler.wordHighlightForeground": caretWordMark,
+    "editorOverviewRuler.wordHighlightStrongForeground": caretWriteWordMark,
+    "editorOverviewRuler.wordHighlightTextForeground": caretWordMark,
+    "editorOverviewRuler.modifiedForeground": gutterModified,
+    "editorOverviewRuler.addedForeground": gutterAdded,
+    "editorOverviewRuler.deletedForeground": gutterDeleted,
+    "editorOverviewRuler.errorForeground": errorMark,
+    "editorOverviewRuler.warningForeground": warningMark,
+    "editorOverviewRuler.infoForeground": weakWarning,
+    "editorOverviewRuler.bracketMatchForeground": gray80,
+    "editorOverviewRuler.currentContentForeground": diffModifiedMark,
+    "editorOverviewRuler.incomingContentForeground": diffInsertedMark,
+    "editorOverviewRuler.commonContentForeground": diffDeletedMark,
+    "editorOverviewRuler.commentForeground": gray80,
+    "editorOverviewRuler.commentUnresolvedForeground": iconBlue,
+    "editorOverviewRuler.commentDraftForeground": gray100,
+    "editorOverviewRuler.inlineChatInserted": diffInsertedMark,
+    "editorOverviewRuler.inlineChatRemoved": diffDeletedMark,
+    "editorOverviewRuler.agentFeedbackForeground": iconBlue,
 
     // Minimap
     "minimap.background": editorBackground,
-    "minimap.findMatchHighlight": findMatchBorder + "B3",
-    "minimap.selectionHighlight": "#1857C2B3",
-    "minimap.selectionOccurrenceHighlight": "#0DC4B060",
-    "minimap.errorHighlight": red7,
-    "minimap.warningHighlight": yellow6,
-    "minimap.foregroundOpacity": "#000000C0",
-    "minimapGutter.addedBackground": gitAddedBar,
-    "minimapGutter.modifiedBackground": gitModifiedBar,
-    "minimapGutter.deletedBackground": gitDeletedBar,
-    "minimapSlider.background": whiteAlpha05,
-    "minimapSlider.hoverBackground": whiteAlpha08,
-    "minimapSlider.activeBackground": whiteAlpha15,
+    "minimap.foregroundOpacity": "#000000CC",
+    "minimap.findMatchHighlight": textSearchMark,
+    "minimap.selectionHighlight": selection,
+    "minimap.selectionOccurrenceHighlight": caretWordMark,
+    "minimap.errorHighlight": errorMark,
+    "minimap.warningHighlight": warningMark,
+    "minimap.infoHighlight": weakWarning,
+    "minimap.chatEditHighlight": aiPurple + "66",
+    "minimapGutter.addedBackground": gutterAdded,
+    "minimapGutter.modifiedBackground": gutterModified,
+    "minimapGutter.deletedBackground": gutterDeleted,
+    "minimapSlider.background": minimapThumb,
+    "minimapSlider.hoverBackground": scrollbarThumb,
+    "minimapSlider.activeBackground": scrollbarThumbHover,
+    "editorMinimap.inlineChatInserted": diffInsertedMark,
 
-    // Peek view
-    "peekView.border": gray4b,
-    "peekViewEditor.background": gray2,
-    // Peek match highlights — yellow sibling wash.
-    "peekViewEditor.matchHighlightBackground": siblingMatchBackground,
-    "peekViewEditor.matchHighlightBorder": siblingMatchBorder,
-    "peekViewEditorGutter.background": gray2,
-    "peekViewResult.background": gray2,
-    "peekViewResult.fileForeground": gray12,
-    "peekViewResult.lineForeground": gray9,
-    "peekViewResult.matchHighlightBackground": siblingMatchBackground,
-    "peekViewResult.selectionBackground": blue2,
-    "peekViewResult.selectionForeground": gray14,
-    "peekViewTitle.background": gray2,
-    "peekViewTitleDescription.foreground": gray9,
-    "peekViewTitleLabel.foreground": gray12,
-    "peekViewEditorStickyScroll.background": gray2,
+    // ── Editor widgets ──
+    // Find / replace and other in-editor widgets use the inline surface; hover
+    // docs and completion use the editor-popup surface.
+    "editorWidget.background": gray20,
+    "editorWidget.foreground": gray130,
+    "editorWidget.border": gray30,
+    "editorWidget.resizeBorder": blue80,
+    "editorHoverWidget.background": popupEditorBackground,
+    "editorHoverWidget.foreground": gray130,
+    "editorHoverWidget.border": gray40,
+    "editorHoverWidget.statusBarBackground": gray30,
+    "editorHoverWidget.highlightForeground": white, // active parameter in signature help
+    "editorSuggestWidget.background": popupEditorBackground,
+    "editorSuggestWidget.foreground": editorForeground,
+    "editorSuggestWidget.border": gray40,
+    "editorSuggestWidget.selectedBackground": blue50,
+    "editorSuggestWidget.selectedForeground": gray130,
+    "editorSuggestWidget.selectedIconForeground": gray120,
+    "editorSuggestWidget.highlightForeground": blue90,
+    "editorSuggestWidget.focusHighlightForeground": blue110,
+    "editorSuggestWidget.focusOutline": transparent,
+    "editorSuggestWidgetStatus.foreground": gray80,
+    "editorActionList.background": gray30,
+    "editorActionList.foreground": gray130,
+    "editorActionList.focusBackground": blue50,
+    "editorActionList.focusForeground": gray130,
 
-    // ── Activity bar ──
-    "activityBar.background": gray1b,
-    "activityBar.foreground": gray12,
-    "activityBar.inactiveForeground": gray6,
-    "activityBar.border": gray4b,
-    "activityBar.activeBorder": blue6,
-    "activityBar.activeBackground": "#3574F015",
-    "activityBar.activeFocusBorder": blue6,
-    "activityBar.dropBorder": blue6,
-    "activityBarBadge.background": blue5, // white badge digits at 5.1:1 (blue6 was 4.3)
-    "activityBarBadge.foreground": gray14,
-    // Error / warning badges — same pairings as the status-bar error/warning items.
-    "activityErrorBadge.background": red5,
-    "activityErrorBadge.foreground": gray14,
-    "activityWarningBadge.background": yellow5,
-    "activityWarningBadge.foreground": gray1,
-    "activityBarTop.foreground": gray12,
-    "activityBarTop.activeBorder": blue6,
-    "activityBarTop.inactiveForeground": gray7,
-    "activityBarTop.dropBorder": blue6,
-    "activityBarTop.background": gray1b,
-    "activityBarTop.activeBackground": "#3574F015",
+    // Error / warning navigation (F8)
+    "editorMarkerNavigation.background": gray20,
+    "editorMarkerNavigationError.background": red80,
+    "editorMarkerNavigationError.headerBackground": red40,
+    "editorMarkerNavigationWarning.background": yellow80,
+    "editorMarkerNavigationWarning.headerBackground": yellow40,
+    "editorMarkerNavigationInfo.background": blue80,
+    "editorMarkerNavigationInfo.headerBackground": blue40,
 
-    // ── Side bar ──
-    "sideBar.background": gray1b,
-    "sideBar.foreground": gray10,
-    "sideBar.border": gray4b,
-    "sideBar.dropBackground": dropOverlay,
-    "sideBarTitle.foreground": gray10,
-    "sideBarTitle.background": gray1b,
-    "sideBarSectionHeader.background": transparent,
-    "sideBarSectionHeader.foreground": gray10,
-    "sideBarSectionHeader.border": gray4b,
-    "sideBarActivityBarTop.border": gray4b,
-    // Sticky scroll lifted from the gray1b sideBar bg so pinned folders are
-    // distinguishable while scrolling, but kept below gray3 hover so it
-    // does not read as a permanently-hovered row.
-    "sideBarStickyScroll.background": "#35373C",
-    "sideBarStickyScroll.border": gray4b,
-    "sideBarStickyScroll.shadow": blackAlpha40,
+    // Peek view — embedded editor on the inline surface, results on the popup
+    // surface; usages are marked green.
+    "peekView.border": gray40,
+    "peekViewEditor.background": gray20,
+    "peekViewEditorGutter.background": gray20,
+    "peekViewEditorStickyScroll.background": gray20,
+    "peekViewEditorStickyScrollGutter.background": gray20,
+    "peekViewEditor.matchHighlightBackground": overlay(usage, 0.8, gray20),
+    "peekViewEditor.matchHighlightBorder": transparent,
+    "peekViewResult.background": gray30,
+    "peekViewResult.fileForeground": gray130,
+    "peekViewResult.lineForeground": gray100,
+    "peekViewResult.matchHighlightBackground": overlay(usage, 0.8, gray30),
+    "peekViewResult.selectionBackground": blue50,
+    "peekViewResult.selectionForeground": gray130,
+    "peekViewTitle.background": gray30,
+    "peekViewTitleLabel.foreground": gray130,
+    "peekViewTitleDescription.foreground": gray100,
 
-    // ── Tabs ──
-    // Tab bar sits on gray1b (chrome) so it reads distinct from the gray1 editor area.
-    // The active tab drops to gray1 to visually "merge" with the editor below it.
-    "tab.activeBackground": gray1,
-    "tab.activeForeground": gray12,
-    "tab.activeBorderTop": blue6,
-    "tab.activeBorder": gray1,
-    "tab.inactiveBackground": gray1b,
-    "tab.inactiveForeground": gray10,
-    "tab.inactiveModifiedBorder": blue9,
-    "tab.activeModifiedBorder": blue6,
-    "tab.unfocusedActiveModifiedBorder": gray7,
-    "tab.unfocusedInactiveModifiedBorder": gray7,
-    "tab.hoverBackground": gray3,
-    "tab.hoverForeground": gray12,
-    "tab.hoverBorder": transparent,
-    "tab.unfocusedActiveBackground": gray1,
-    "tab.unfocusedActiveForeground": gray10,
-    "tab.unfocusedActiveBorderTop": gray5,
-    "tab.unfocusedActiveBorder": gray1,
-    "tab.unfocusedHoverBackground": gray3,
-    "tab.unfocusedHoverForeground": gray11,
-    "tab.unfocusedInactiveForeground": gray7,
-    "tab.unfocusedInactiveBackground": gray1b,
-    "tab.border": gray4b,
-    "tab.lastPinnedBorder": gray5,
-    "tab.dragAndDropBorder": blue6,
-    "tab.selectedBackground": gray1,
-    "tab.selectedForeground": gray12,
-    "tab.selectedBorderTop": blue6,
+    // ── Diff editor ──
+    // Inserted = green, removed = gray (deletions read as gray throughout,
+    // matching the gutter bar and file decoration).
+    "diffEditor.insertedLineBackground": diffLine(diffInserted),
+    "diffEditor.removedLineBackground": diffLine(diffDeleted),
+    "diffEditor.insertedTextBackground": diffWord(diffInserted),
+    "diffEditor.removedTextBackground": diffWord(diffDeleted),
+    "diffEditor.insertedTextBorder": transparent,
+    "diffEditor.removedTextBorder": transparent,
+    "diffEditorGutter.insertedLineBackground": diffLine(diffInserted),
+    "diffEditorGutter.removedLineBackground": diffLine(diffDeleted),
+    "diffEditorOverview.insertedForeground": diffInsertedMark,
+    "diffEditorOverview.removedForeground": diffDeletedMark,
+    "diffEditor.border": gray30,
+    "diffEditor.diagonalFill": gray40 + "80",
+    "diffEditor.unchangedRegionBackground": codeBlockBackground,
+    "diffEditor.unchangedRegionForeground": gray100,
+    "diffEditor.unchangedRegionShadow": shadow,
+    "diffEditor.unchangedCodeBackground": transparent,
+    "diffEditor.move.border": gray80 + "9C",
+    "diffEditor.moveActive.border": gutterModified,
+    "multiDiffEditor.background": editorBackground,
+    "multiDiffEditor.headerBackground": gray20,
+    "multiDiffEditor.border": gray30,
 
-    // ── Title bar ──
-    "titleBar.activeBackground": gray1b,
-    "titleBar.activeForeground": gray12,
-    "titleBar.inactiveBackground": gray1b,
-    "titleBar.inactiveForeground": gray7,
-    "titleBar.border": gray4b,
+    // ── Merge conflicts ──
+    // Current (ours) = modified blue, incoming (theirs) = inserted green,
+    // common base = deleted gray; unresolved conflicts are outlined in the
+    // conflict red-brown.
+    "merge.currentHeaderBackground": overlay(diffModified, 0.8),
+    "merge.currentContentBackground": diffLine(diffModified),
+    "merge.incomingHeaderBackground": overlay(diffInserted, 0.8),
+    "merge.incomingContentBackground": diffLine(diffInserted),
+    "merge.commonHeaderBackground": overlay(diffDeleted, 0.8),
+    "merge.commonContentBackground": diffLine(diffDeleted),
+    "merge.border": transparent,
+    "mergeEditor.change.background": diffLine(diffModified),
+    "mergeEditor.change.word.background": diffWord(diffModified),
+    "mergeEditor.changeBase.background": diffLine(diffDeleted),
+    "mergeEditor.changeBase.word.background": diffWord(diffDeleted),
+    "mergeEditor.conflict.input1.background": diffLine(diffModified),
+    "mergeEditor.conflict.input2.background": diffLine(diffInserted),
+    "mergeEditor.conflictingLines.background": overlay(diffConflict, 0.8),
+    "mergeEditor.conflict.unhandledUnfocused.border": diffConflictMark + "B3",
+    "mergeEditor.conflict.unhandledFocused.border": diffConflictMark,
+    "mergeEditor.conflict.handledUnfocused.border": gray50,
+    "mergeEditor.conflict.handledFocused.border": gray80,
+    "mergeEditor.conflict.unhandled.minimapOverViewRuler": diffConflictMark,
+    "mergeEditor.conflict.handled.minimapOverViewRuler": gray80,
 
-    // ── Command center ──
-    "commandCenter.foreground": gray11,
-    "commandCenter.activeForeground": gray12,
-    "commandCenter.inactiveForeground": gray7,
-    "commandCenter.background": gray3,
-    "commandCenter.activeBackground": gray4,
-    "commandCenter.border": gray4b,
-    "commandCenter.activeBorder": gray4b,
-    "commandCenter.inactiveBorder": gray4b,
-    "commandCenter.debuggingBackground": red3 + "B3",
+    // ── Source control ──
+    "gitDecoration.addedResourceForeground": fileAdded,
+    "gitDecoration.modifiedResourceForeground": fileModified,
+    "gitDecoration.deletedResourceForeground": fileDeleted,
+    "gitDecoration.renamedResourceForeground": fileModified,
+    "gitDecoration.untrackedResourceForeground": fileUnversioned,
+    "gitDecoration.ignoredResourceForeground": fileIgnored,
+    "gitDecoration.conflictingResourceForeground": fileConflict,
+    "gitDecoration.submoduleResourceForeground": gray100,
+    "gitDecoration.stageModifiedResourceForeground": fileModified,
+    "gitDecoration.stageDeletedResourceForeground": fileDeleted,
+    "git.blame.editorDecorationForeground": blameText,
+    // History graph — lanes on the accent ramp; refs: local branch green,
+    // remote purple, base ref yellow.
+    "scmGraph.foreground1": blue100,
+    "scmGraph.foreground2": green100,
+    "scmGraph.foreground3": purple100,
+    "scmGraph.foreground4": orange100,
+    "scmGraph.foreground5": teal100,
+    "scmGraph.historyItemRefColor": branchLocal,
+    "scmGraph.historyItemRemoteRefColor": branchRemote,
+    "scmGraph.historyItemBaseRefColor": branchHead,
+    "scmGraph.historyItemHoverDefaultLabelBackground": blue90,
+    "scmGraph.historyItemHoverDefaultLabelForeground": gray10,
+    "scmGraph.historyItemHoverLabelForeground": gray10,
+    "scmGraph.historyItemHoverAdditionsForeground": fileAdded,
+    "scmGraph.historyItemHoverDeletionsForeground": red100,
 
-    // ── Menu ──
-    "menu.background": gray2,
-    "menu.foreground": gray12,
-    "menu.selectionBackground": blue2,
-    "menu.selectionForeground": gray14,
+    // ── Quick input / command palette ──
+    "quickInput.background": gray30,
+    "quickInput.foreground": gray130,
+    "quickInputTitle.background": gray30,
+    "quickInputList.focusBackground": blue50,
+    "quickInputList.focusForeground": gray130,
+    "quickInputList.focusIconForeground": gray120,
+    "quickInputList.focusHighlightForeground": yellow110,
+    "pickerGroup.border": gray40,
+    "pickerGroup.foreground": gray80,
+
+    // ── Menus ──
+    "menu.background": gray30,
+    "menu.foreground": gray130,
+    "menu.border": gray40,
+    "menu.selectionBackground": blue50,
+    "menu.selectionForeground": gray130,
     "menu.selectionBorder": transparent,
-    "menu.separatorBackground": gray4,
-    "menu.border": gray4b,
-    "menubar.selectionBackground": gray3,
-    "menubar.selectionForeground": gray12,
-    "menubar.selectionBorder": transparent,
+    "menu.separatorBackground": gray40,
 
-    // ── Status bar ──
-    "statusBar.background": gray1b,
-    "statusBar.inactiveBackground": gray1b, // matches titleBar.inactiveBackground
-    "statusBar.foreground": gray9,
-    "statusBar.border": gray4b,
-    "statusBar.debuggingBackground": red3,
-    "statusBar.debuggingForeground": gray12,
-    "statusBar.debuggingBorder": transparent,
-    "statusBar.noFolderBackground": gray1b,
-    "statusBar.noFolderForeground": gray9,
-    "statusBar.noFolderBorder": gray4b,
-    "statusBar.focusBorder": blue6,
-    "statusBarItem.hoverBackground": whiteAlpha08,
-    "statusBarItem.activeBackground": whiteAlpha15,
-    "statusBarItem.hoverForeground": gray12,
-    "statusBarItem.prominentBackground": gray3,
-    "statusBarItem.prominentHoverBackground": gray4,
-    "statusBarItem.prominentForeground": gray12,
-    // Remote/warning status badges use dark text — these mid-bright backgrounds need dark foreground.
-    "statusBarItem.remoteBackground": green6,
-    "statusBarItem.remoteForeground": gray1,
-    "statusBarItem.remoteHoverBackground": green7,
-    "statusBarItem.remoteHoverForeground": gray1,
-    "statusBarItem.errorBackground": red5,
-    "statusBarItem.errorForeground": gray14,
-    "statusBarItem.errorHoverBackground": red6,
-    "statusBarItem.errorHoverForeground": gray14,
-    "statusBarItem.warningBackground": yellow5, // gray1 text at 6.0:1 (yellow4 was 4.47)
-    "statusBarItem.warningForeground": gray1,
-    "statusBarItem.warningHoverBackground": yellow6,
-    "statusBarItem.warningHoverForeground": gray1,
-    "statusBarItem.compactHoverBackground": whiteAlpha15,
-    "statusBarItem.focusBorder": blue6,
-    "statusBarItem.offlineBackground": red5,
-    "statusBarItem.offlineForeground": gray14,
-    "statusBarItem.offlineHoverBackground": red6,
-    "statusBarItem.offlineHoverForeground": gray14,
-
-    // ── Quick input / Command palette ──
-    "quickInput.background": gray2,
-    "quickInput.foreground": gray12,
-    "quickInputList.focusBackground": "#2E3F5C",
-    "quickInputList.focusForeground": gray12,
-    "quickInputList.focusIconForeground": gray12,
-    "quickInputList.focusHighlightForeground": blue10, // matched chars, 4.7:1 on the focus row
-    "quickInputTitle.background": gray3,
-
-    // ── Picker group ──
-    "pickerGroup.border": gray4b,
-    "pickerGroup.foreground": gray7,
-
-    // ── Lists / Trees ──
-    "list.activeSelectionBackground": blue2,
-    "list.activeSelectionForeground": gray14,
-    "list.activeSelectionIconForeground": gray14,
-    // Inactive selection uses a desaturated blue (not gray) so a row clicked in
-    // the Search results list — which doesn't immediately receive list focus —
-    // still reads as "selected" after the first click rather than looking unfocused.
-    "list.inactiveSelectionBackground": "#2E436E80",
-    "list.inactiveSelectionForeground": gray12,
-    "list.inactiveSelectionIconForeground": gray11,
-    "list.hoverBackground": gray3,
-    "list.hoverForeground": gray12,
-    "list.focusBackground": blue2,
-    "list.focusForeground": gray14,
+    // ── Lists / trees ──
+    // Selection keeps the normal text color; keyboard focus without selection
+    // gets the muted accent. Matched characters are gold, as in type-to-find.
+    "list.activeSelectionBackground": blue50,
+    "list.activeSelectionForeground": gray130,
+    "list.activeSelectionIconForeground": gray120,
+    "list.inactiveSelectionBackground": gray40,
+    "list.inactiveSelectionForeground": gray130,
+    "list.inactiveSelectionIconForeground": gray120,
+    "list.hoverBackground": wash10,
+    "list.hoverForeground": gray130,
+    "list.focusBackground": blue40,
+    "list.focusForeground": gray130,
     "list.focusOutline": transparent,
     "list.focusAndSelectionOutline": transparent,
-    "list.dropBackground": dropOverlay,
-    "list.dropBetweenBackground": blue6,
-    // Matched characters in lists — white on the blue focus row (blue9 there
-    // would be only 1.8:1); blue9 on unfocused rows. Quick input's focus row is
-    // darker, so it gets its own key above (quickInputList.focusHighlightForeground).
-    "list.highlightForeground": blue9,
-    "list.focusHighlightForeground": gray14,
-    "list.invalidItemForeground": red7,
-    "list.errorForeground": red7,
-    "list.warningForeground": yellow6,
-    "list.deemphasizedForeground": gray6,
-    // List/tree filter matches (Type-to-Search in Explorer, etc.) — sibling tone.
-    "list.filterMatchBackground": siblingMatchBackground,
-    "list.filterMatchBorder": siblingMatchBorder,
-    "listFilterWidget.background": gray1,
-    "listFilterWidget.outline": blue6,
-    "listFilterWidget.noMatchesOutline": red5,
-    "listFilterWidget.shadow": blackAlpha40,
-    "tree.indentGuidesStroke": gray5,
-    "tree.inactiveIndentGuidesStroke": gray4,
-    "tree.tableColumnsBorder": gray4b,
-    "tree.tableOddRowsBackground": "#FFFFFF03",
+    "list.inactiveFocusBackground": transparent,
+    "list.inactiveFocusOutline": transparent,
+    "list.highlightForeground": matchGold,
+    "list.focusHighlightForeground": yellow110,
+    "list.filterMatchBackground": matchGold + "40",
+    "list.filterMatchBorder": matchGold,
+    "list.dropBackground": blueVivid + "26",
+    "list.dropBetweenBackground": blue80,
+    "list.errorForeground": red100,
+    "list.warningForeground": yellow100,
+    "list.invalidItemForeground": red100,
+    "list.deemphasizedForeground": gray80,
+    "listFilterWidget.background": gray10,
+    "listFilterWidget.outline": gray50,
+    "listFilterWidget.noMatchesOutline": red80,
+    "listFilterWidget.shadow": shadow,
+    "tree.indentGuidesStroke": gray50,
+    "tree.inactiveIndentGuidesStroke": gray40,
+    "tree.tableColumnsBorder": gray30,
+    "tree.tableOddRowsBackground": gray20,
 
-    // ── Input ──
-    "input.background": gray3,
-    "input.foreground": gray12,
-    "input.border": gray5,
-    "input.placeholderForeground": gray7,
-    "inputOption.activeBackground": blue3,
-    "inputOption.activeBorder": blue6,
-    "inputOption.activeForeground": gray14, // white text on blue selection
-    "inputOption.hoverBackground": gray3,
-    "inputValidation.errorBackground": red3,
-    "inputValidation.errorBorder": red6,
-    "inputValidation.errorForeground": gray14,
-    "inputValidation.infoBackground": "#25324D",
-    "inputValidation.infoBorder": blue4,
-    "inputValidation.infoForeground": gray12,
-    "inputValidation.warningBackground": yellow1,
-    "inputValidation.warningBorder": yellow3,
-    "inputValidation.warningForeground": gray14,
+    // ── Inputs ──
+    // Outlined fields on the surface they sit on.
+    "input.background": gray10,
+    "input.foreground": gray130,
+    "input.border": gray50,
+    "input.placeholderForeground": gray80,
+    "inputOption.activeBackground": blue60,
+    "inputOption.activeBorder": blue60,
+    "inputOption.activeForeground": white,
+    "inputOption.hoverBackground": wash20,
+    "inputValidation.errorBackground": red40,
+    "inputValidation.errorBorder": red60,
+    "inputValidation.errorForeground": gray130,
+    "inputValidation.warningBackground": yellow40,
+    "inputValidation.warningBorder": yellow60,
+    "inputValidation.warningForeground": gray130,
+    "inputValidation.infoBackground": blue40,
+    "inputValidation.infoBorder": blue60,
+    "inputValidation.infoForeground": gray130,
+    "dropdown.background": gray30,
+    "dropdown.foreground": gray130,
+    "dropdown.border": gray50,
+    "dropdown.listBackground": gray30,
 
-    // ── Scrollbar ──
-    "scrollbar.shadow": blackAlpha40,
-    "scrollbarSlider.background": whiteAlpha15,
-    "scrollbarSlider.hoverBackground": whiteAlpha30,
-    "scrollbarSlider.activeBackground": whiteAlpha30,
+    // ── Buttons and toggles ──
+    "button.background": blue80,
+    "button.foreground": white,
+    "button.border": blue80,
+    "button.hoverBackground": blue70,
+    "button.separator": wash50,
+    "button.secondaryBackground": transparent,
+    "button.secondaryForeground": gray130,
+    "button.secondaryBorder": gray50,
+    "button.secondaryHoverBackground": wash20,
+    "checkbox.background": checkFill,
+    "checkbox.foreground": gray130,
+    "checkbox.border": checkBorder,
+    "checkbox.selectBackground": checkFill,
+    "checkbox.selectBorder": checkSelected,
+    "checkbox.disabled.background": checkDisabledFill,
+    "checkbox.disabled.foreground": checkDisabledMark,
+    "radio.activeBackground": blue60,
+    "radio.activeForeground": white,
+    "radio.activeBorder": blue60,
+    "radio.inactiveBackground": transparent,
+    "radio.inactiveForeground": gray130,
+    "radio.inactiveBorder": gray50,
+    "radio.inactiveHoverBackground": wash20,
 
-    // ── Badge ──
-    "badge.background": blue5,
-    "badge.foreground": gray14,
+    // ── Badges ──
+    // Counters are neutral gray with dark digits; notification-style badges
+    // are light blue with dark digits.
+    "badge.background": gray80,
+    "badge.foreground": black,
+    "profileBadge.background": gray80,
+    "profileBadge.foreground": black,
+    "extensionBadge.remoteBackground": blue90,
+    "extensionBadge.remoteForeground": gray10,
 
-    // ── Banner (workspace-trust / restricted-mode strip) ──
-    "banner.background": gray3,
-    "banner.foreground": gray12,
-    "banner.iconForeground": blue8,
+    // ── Keybindings ──
+    "keybindingLabel.background": transparent,
+    "keybindingLabel.foreground": gray100,
+    "keybindingLabel.border": wash50,
+    "keybindingLabel.bottomBorder": wash50,
+    "keybindingTable.headerBackground": gray30,
+    "keybindingTable.rowsBackground": gray20,
 
-    // ── Progress bar ──
-    "progressBar.background": blue7,
+    // ── Settings editor ──
+    "settings.headerForeground": gray130,
+    "settings.settingsHeaderHoverForeground": gray150,
+    "settings.modifiedItemIndicator": blue100,
+    "settings.headerBorder": gray30,
+    "settings.sashBorder": gray30,
+    "settings.dropdownBackground": gray30,
+    "settings.dropdownForeground": gray130,
+    "settings.dropdownBorder": gray50,
+    "settings.dropdownListBorder": gray40,
+    "settings.checkboxBackground": checkFill,
+    "settings.checkboxForeground": gray130,
+    "settings.checkboxBorder": checkBorder,
+    "settings.textInputBackground": gray10,
+    "settings.textInputForeground": gray130,
+    "settings.textInputBorder": gray50,
+    "settings.numberInputBackground": gray10,
+    "settings.numberInputForeground": gray130,
+    "settings.numberInputBorder": gray50,
+    "settings.focusedRowBackground": wash20,
+    "settings.focusedRowBorder": blue80,
+    "settings.rowHoverBackground": wash10,
+    "profiles.sashBorder": gray30,
+    "simpleFindWidget.sashBorder": gray30,
 
     // ── Breadcrumbs ──
     "breadcrumb.background": editorBackground,
-    "breadcrumb.foreground": gray9,
-    "breadcrumb.activeSelectionForeground": gray11,
-    "breadcrumb.focusForeground": gray12,
-    "breadcrumbPicker.background": gray2,
+    "breadcrumb.foreground": breadcrumbForeground,
+    "breadcrumb.focusForeground": breadcrumbActive,
+    "breadcrumb.activeSelectionForeground": breadcrumbActive,
+    "breadcrumbPicker.background": gray30,
 
-    // ── Extensions / Marketplace ──
-    "extensionButton.background": blue5,
-    "extensionButton.foreground": gray14,
-    "extensionButton.hoverBackground": blue4,
-    "extensionButton.separator": "#FFFFFF40",
-    "extensionButton.prominentBackground": blue5,
-    "extensionButton.prominentForeground": gray14,
-    "extensionButton.prominentHoverBackground": blue4,
-    "extensionBadge.remoteBackground": blue4,
-    "extensionBadge.remoteForeground": gray14,
-    "extensionIcon.starForeground": yellow7,
-    "extensionIcon.verifiedForeground": blue8,
-    "extensionIcon.preReleaseForeground": orange6,
-    "extensionIcon.sponsorForeground": syntaxMember,
+    // ── Notifications and banners ──
+    "notifications.background": gray40,
+    "notifications.foreground": gray130,
+    "notifications.border": gray40,
+    "notificationLink.foreground": blue100,
+    "notificationCenter.border": gray40,
+    "notificationCenterHeader.background": gray40,
+    "notificationCenterHeader.foreground": gray130,
+    "notificationToast.border": gray40,
+    "notificationsErrorIcon.foreground": iconRed,
+    "notificationsWarningIcon.foreground": iconYellow,
+    "notificationsInfoIcon.foreground": iconBlue,
+    "banner.background": blue40,
+    "banner.foreground": gray130,
+    "banner.iconForeground": iconBlue,
 
-    // ── Buttons ──
-    // blue5 (not blue6) keeps the white label at 5.1:1 AA; hover darkens to blue4.
-    "button.background": blue5,
-    "button.foreground": gray14,
-    "button.border": blue5,
-    "button.hoverBackground": blue4,
-    "button.secondaryBackground": gray2,
-    "button.secondaryForeground": gray12,
-    "button.secondaryHoverBackground": gray3,
-    "button.secondaryBorder": gray5, // same edge as inputs/dropdowns
-    "button.separator": "#FFFFFF40",
-    "checkbox.background": gray3,
-    "checkbox.foreground": gray12,
-    "checkbox.border": gray5,
-    "checkbox.selectBackground": blue6,
-    "checkbox.selectBorder": blue6,
-
-    // ── Dropdowns ──
-    "dropdown.background": gray3,
-    "dropdown.foreground": gray12,
-    "dropdown.border": gray5,
-    "dropdown.listBackground": gray2,
-
-    // ── Keybinding ──
-    "keybindingTable.headerBackground": gray3,
-    "keybindingTable.rowsBackground": transparent,
-    "keybindingLabel.background": gray3,
-    "keybindingLabel.foreground": gray12,
-    "keybindingLabel.border": gray5,
-    "keybindingLabel.bottomBorder": gray5,
-
-    // ── Settings ──
-    "settings.headerForeground": gray12,
-    "settings.modifiedItemIndicator": blue4,
-    "settings.dropdownBackground": gray3,
-    "settings.dropdownForeground": gray12,
-    "settings.dropdownBorder": gray5,
-    "settings.dropdownListBorder": gray4,
-    "settings.checkboxBackground": gray3,
-    "settings.checkboxForeground": gray12,
-    "settings.checkboxBorder": gray5,
-    "settings.textInputBackground": gray3,
-    "settings.textInputForeground": gray12,
-    "settings.textInputBorder": gray5,
-    "settings.numberInputBackground": gray3,
-    "settings.numberInputForeground": gray12,
-    "settings.numberInputBorder": gray5,
-    "settings.focusedRowBackground": blueRowFocus,
-    "settings.focusedRowBorder": blue6,
-    "settings.rowHoverBackground": blueRowHover,
-    "settings.sashBorder": gray4,
-    "settings.headerBorder": gray3,
-    "settings.settingsHeaderHoverForeground": gray13,
-
-    // ── Notebook ──
-    // Jupyter cell anatomy on the gray1 page canvas — every state gets a
-    // distinct border + background pairing:
-    //   • idle cell (code or markdown) → gray6 hairline
-    //   • hovered cell                 → subtle dark wash (VS Code exposes no
-    //                                    hover-border key, so hover is bg-only)
-    //   • selected cell (command mode) → gray5 border, no wash
-    //   • focused/active cell          → string-green border, no wash (the blue
-    //                                    accent read too loud, so the active cell
-    //                                    is marked by the green border alone)
-    // VS Code has no markdown-vs-code or executed-state keys: markdown cells
-    // inherit this same set, and "executed" reads via the status icons below.
-    // Page canvas matches the gray1 cell-editor bg: the cell editor is a
-    // sharp-cornered rect under a rounded cell border, so a lighter page let
-    // the rect's dark corners poke past the border's arc. Same color = the
-    // protruding corners blend into the page; the rounded border alone frames.
-    "notebook.editorBackground": gray1,
-    "notebook.cellBorderColor": gray6,
-    "notebook.focusedCellBorder": syntaxString,
-    "notebook.inactiveFocusedCellBorder": gray5,
-    "notebook.focusedEditorBorder": syntaxString,
-    "notebook.cellHoverBackground": blackAlpha20,
-    "notebook.focusedCellBackground": transparent,
-    "notebook.selectedCellBackground": transparent,
-    "notebook.selectedCellBorder": gray5,
-    "notebook.inactiveSelectedCellBorder": gray5,
-    "notebook.cellEditorBackground": editorBackground,
-    "notebook.cellInsertionIndicator": blue6,
-    "notebook.cellStatusBarItemHoverBackground": whiteAlpha08,
-    "notebook.cellToolbarSeparator": gray4,
-    // Output area — sits just above the gray1 page as a faintly lighter block.
-    // The container border draws a hairline between the code editor and its
-    // output below, separating the two regions of the grouped cell.
-    "notebook.outputContainerBackgroundColor": "#25272B",
-    "notebook.outputContainerBorderColor": gray6,
-    "notebookStatusSuccessIcon.foreground": green7,
-    "notebookStatusErrorIcon.foreground": red7,
-    "notebookStatusRunningIcon.foreground": blue8,
-    "notebookEditorOverviewRuler.runningCellForeground": blue8,
-    "notebookScrollbarSlider.activeBackground": whiteAlpha30,
-    "notebookScrollbarSlider.background": whiteAlpha15,
-    "notebookScrollbarSlider.hoverBackground": whiteAlpha30,
-
-    // ── Panel (terminal, output, etc.) ──
-    "panel.background": gray1b,
-    "panel.border": gray4b,
-    "panel.dropBorder": blue6,
-    "panelTitle.activeBorder": blue6,
-    "panelTitle.activeForeground": gray12,
-    "panelTitle.inactiveForeground": gray7,
-    "panelTitle.border": gray4b,
-    "panelSection.border": gray4b,
-    "panelSection.dropBackground": dropOverlay,
-    "panelSectionHeader.background": gray1b,
-    "panelSectionHeader.foreground": gray10,
-    "panelSectionHeader.border": gray4b,
-    "panelInput.border": gray4,
-    "panelStickyScroll.background": gray1,
-    "panelStickyScroll.border": gray4b,
-    "panelStickyScroll.shadow": blackAlpha40,
+    // ── Extensions ──
+    "extensionButton.background": blue80,
+    "extensionButton.foreground": white,
+    "extensionButton.border": blue80,
+    "extensionButton.hoverBackground": blue70,
+    "extensionButton.separator": wash50,
+    "extensionButton.prominentBackground": blue80,
+    "extensionButton.prominentForeground": white,
+    "extensionButton.prominentHoverBackground": blue70,
+    "extensionIcon.starForeground": iconYellow,
+    "extensionIcon.verifiedForeground": iconBlue,
+    "extensionIcon.preReleaseForeground": iconOrange,
+    "extensionIcon.sponsorForeground": red100,
+    "extensionIcon.privateForeground": gray80,
+    "mcpIcon.starForeground": iconYellow,
 
     // ── Terminal ──
-    // Mirrors the code editor: same bg/fg, same selection, same find colors,
-    // and an ANSI palette built from the syntax colors (see termBg / termFg).
-    "terminal.background": termBg,
-    "terminal.foreground": termFg,
-    "terminal.border": gray4b,
-    "terminal.tab.activeBorder": transparent,
-    "terminal.initialHintForeground": gray6, // same as editor ghost text
-    // Selection — the editor's steel blue, so selected output looks like
-    // selected code (no selectionForeground: colored output keeps its colors).
-    "terminal.selectionBackground": "#2A4D7BE6",
-    "terminal.inactiveSelectionBackground": "#2A4D7B99",
-    // Find — the editor's find colors: solid green active match, yellow wash
-    // on the other matches.
-    "terminal.findMatchBackground": findMatchBackground,
-    "terminal.findMatchBorder": findMatchBorder,
-    "terminal.findMatchHighlightBackground": findMatchHighlight,
-    "terminal.findMatchHighlightBorder": yellow7 + "80",
-    "terminal.hoverHighlightBackground": "#FFFFFF10", // editor.hoverHighlightBackground
-    // Sticky scroll — same lift as the editor's sticky scroll.
-    "terminalStickyScroll.background": "#252629",
-    "terminalStickyScroll.border": gray4b,
-    "terminalStickyScrollHover.background": gray3,
-    // Cursor — same as the editor cursor, with the cell's bg showing through
-    // the glyph beneath the block.
-    "terminalCursor.background": termBg,
-    "terminalCursor.foreground": gray11,
-    // Command decorations in the gutter — same success/error hues as the
-    // debug/test icons.
-    "terminalCommandDecoration.defaultBackground": gray6,
-    "terminalCommandDecoration.successBackground": green7,
-    "terminalCommandDecoration.errorBackground": red7,
-    "terminalOverviewRuler.cursorForeground": gray11,
-    "terminalOverviewRuler.findMatchForeground": findMatchBorder + "B3",
-    "terminalOverviewRuler.border": gray4b,
-
-    // Terminal ANSI colors — the editor's syntax palette, slots 0–15.
-    "terminal.ansiBlack": termBlack,
-    "terminal.ansiRed": termRed,
-    "terminal.ansiGreen": termGreen,
-    "terminal.ansiYellow": termYellow,
-    "terminal.ansiBlue": termBlue,
-    "terminal.ansiMagenta": termMagenta,
-    "terminal.ansiCyan": termCyan,
-    "terminal.ansiWhite": termWhite,
-    "terminal.ansiBrightBlack": termBrightBlack,
-    "terminal.ansiBrightRed": termBrightRed,
-    "terminal.ansiBrightGreen": termBrightGreen,
-    "terminal.ansiBrightYellow": termBrightYellow,
-    "terminal.ansiBrightBlue": termBrightBlue,
-    "terminal.ansiBrightMagenta": termBrightMagenta,
-    "terminal.ansiBrightCyan": termBrightCyan,
-    "terminal.ansiBrightWhite": termBrightWhite,
-
-    // ── Notifications ──
-    "notifications.background": gray3,
-    "notifications.foreground": gray12,
-    "notifications.border": gray4,
-    "notificationLink.foreground": blue9,
-    "notificationsErrorIcon.foreground": red7,
-    "notificationsWarningIcon.foreground": yellow6,
-    "notificationsInfoIcon.foreground": blue8,
-    "notificationCenterHeader.background": gray2,
-    "notificationCenterHeader.foreground": gray10,
-    "notificationCenter.border": gray4,
-    "notificationToast.border": gray4,
+    "terminal.background": editorBackground,
+    "terminal.foreground": editorForeground,
+    "terminal.border": gray30,
+    "terminal.tab.activeBorder": blue80,
+    "terminal.dropBackground": dropTarget,
+    "terminal.initialHintForeground": gray80,
+    "terminal.selectionBackground": selection,
+    "terminal.inactiveSelectionBackground": overlay(selectionInactive, 0.8),
+    "terminal.hoverHighlightBackground": wash10,
+    // Find — every match yellow, the current one orange, both translucent so
+    // the output text stays readable.
+    "terminal.findMatchBackground": terminalSearchCurrent + "59",
+    "terminal.findMatchBorder": terminalSearchCurrent,
+    "terminal.findMatchHighlightBackground": terminalSearchMatch + "40",
+    "terminal.findMatchHighlightBorder": terminalSearchMatch + "80",
+    "terminalCursor.foreground": caret,
+    "terminalCursor.background": editorBackground,
+    "terminalCommandDecoration.defaultBackground": gray80,
+    "terminalCommandDecoration.successBackground": iconGreen,
+    "terminalCommandDecoration.errorBackground": iconRed,
+    "terminalCommandGuide.foreground": terminalSelectedBlock,
+    "terminalOverviewRuler.cursorForeground": gray100,
+    "terminalOverviewRuler.findMatchForeground": terminalSearchCurrent,
+    "terminalOverviewRuler.border": transparent,
+    "terminalStickyScroll.background": terminalBlock,
+    "terminalStickyScroll.border": terminalBlockSeparator,
+    "terminalStickyScrollHover.background": wash05,
+    "terminal.ansiBlack": terminalAnsi.black,
+    "terminal.ansiRed": terminalAnsi.red,
+    "terminal.ansiGreen": terminalAnsi.green,
+    "terminal.ansiYellow": terminalAnsi.yellow,
+    "terminal.ansiBlue": terminalAnsi.blue,
+    "terminal.ansiMagenta": terminalAnsi.magenta,
+    "terminal.ansiCyan": terminalAnsi.cyan,
+    "terminal.ansiWhite": terminalAnsi.white,
+    "terminal.ansiBrightBlack": terminalAnsi.brightBlack,
+    "terminal.ansiBrightRed": terminalAnsi.brightRed,
+    "terminal.ansiBrightGreen": terminalAnsi.brightGreen,
+    "terminal.ansiBrightYellow": terminalAnsi.brightYellow,
+    "terminal.ansiBrightBlue": terminalAnsi.brightBlue,
+    "terminal.ansiBrightMagenta": terminalAnsi.brightMagenta,
+    "terminal.ansiBrightCyan": terminalAnsi.brightCyan,
+    "terminal.ansiBrightWhite": terminalAnsi.brightWhite,
+    // Terminal suggest widget icons — same families as the symbol icons.
+    "terminalSymbolIcon.aliasForeground": iconBlue,
+    "terminalSymbolIcon.argumentForeground": iconOrange,
+    "terminalSymbolIcon.branchForeground": branchLocal,
+    "terminalSymbolIcon.commitForeground": gray120,
+    "terminalSymbolIcon.fileForeground": gray120,
+    "terminalSymbolIcon.folderForeground": gray120,
+    "terminalSymbolIcon.flagForeground": iconPurple,
+    "terminalSymbolIcon.inlineSuggestionForeground": ghostText,
+    "terminalSymbolIcon.methodForeground": iconRed,
+    "terminalSymbolIcon.optionForeground": iconPurple,
+    "terminalSymbolIcon.optionValueForeground": iconPurple,
+    "terminalSymbolIcon.pullRequestForeground": iconGreen,
+    "terminalSymbolIcon.pullRequestDoneForeground": iconPurple,
+    "terminalSymbolIcon.remoteForeground": branchRemote,
+    "terminalSymbolIcon.stashForeground": gray120,
+    "terminalSymbolIcon.symbolText": gray120,
+    "terminalSymbolIcon.symbolicLinkFileForeground": gray120,
+    "terminalSymbolIcon.symbolicLinkFolderForeground": gray120,
+    "terminalSymbolIcon.tagForeground": branchTag,
 
     // ── Debug ──
-    "debugToolBar.background": gray2,
-    "debugToolBar.border": gray4,
-    "debugConsole.errorForeground": red7,
-    "debugConsole.warningForeground": yellow6,
-    "debugConsole.infoForeground": blue9,
-    "debugConsole.sourceForeground": syntaxString,
-    "debugConsoleInputIcon.foreground": blue8,
-    // Inline variable values shown at end-of-line while debugging.
-    "editor.inlineValuesForeground": gray7,
+    "debugToolBar.background": gray40,
+    "debugToolBar.border": gray40,
+    "debugExceptionWidget.background": red40,
+    "debugExceptionWidget.border": red60,
+    "editor.stackFrameHighlightBackground": overlay(executionLine, 0.8),
+    "editor.focusedStackFrameHighlightBackground": overlay(otherFrameLine, 0.8),
+    "editor.inlineValuesForeground": inlineValue,
     "editor.inlineValuesBackground": transparent,
-    "editor.stackFrameHighlightBackground": stackFrameOverlay,
-    "editor.focusedStackFrameHighlightBackground": focusedStackFrameOverlay,
-    "debugView.exceptionLabelBackground": red3,
-    "debugView.exceptionLabelForeground": gray12,
-    "debugView.stateLabelBackground": gray3,
-    "debugView.stateLabelForeground": gray10,
-    "debugView.valueChangedHighlight": blue4,
-    "debugTokenExpression.name": syntaxField,
-    "debugTokenExpression.value": orange8,
-    "debugTokenExpression.string": syntaxString,
-    "debugTokenExpression.boolean": syntaxKeyword,
-    "debugTokenExpression.number": syntaxNumber,
-    "debugTokenExpression.error": red7,
-    "debugIcon.breakpointForeground": red7,
-    "debugIcon.breakpointDisabledForeground": gray6,
-    "debugIcon.breakpointUnverifiedForeground": gray7,
-    "debugIcon.breakpointCurrentStackframeForeground": yellow7,
-    "debugIcon.breakpointStackframeForeground": yellow6,
-    "debugIcon.startForeground": green7,
-    "debugIcon.pauseForeground": blue8,
-    "debugIcon.stopForeground": red7,
-    "debugIcon.disconnectForeground": gray9,
-    "debugIcon.restartForeground": green7,
-    "debugIcon.stepOverForeground": blue8,
-    "debugIcon.stepIntoForeground": blue8,
-    "debugIcon.stepOutForeground": blue8,
-    "debugIcon.continueForeground": green7,
-    "debugIcon.stepBackForeground": blue8,
+    "debugConsole.infoForeground": editorForeground,
+    "debugConsole.warningForeground": yellow100,
+    "debugConsole.errorForeground": synInvalid,
+    "debugConsole.sourceForeground": hyperlink,
+    "debugConsoleInputIcon.foreground": iconBlue,
+    "debugView.exceptionLabelBackground": red40,
+    "debugView.exceptionLabelForeground": gray130,
+    "debugView.stateLabelBackground": wash40,
+    "debugView.stateLabelForeground": whiteMuted,
+    "debugView.valueChangedHighlight": debugChanged,
+    "debugTokenExpression.name": synMember,
+    "debugTokenExpression.value": debugValue,
+    "debugTokenExpression.string": synString,
+    "debugTokenExpression.boolean": synKeyword,
+    "debugTokenExpression.number": synNumber,
+    "debugTokenExpression.type": debugType,
+    "debugTokenExpression.error": red100,
+    "debugIcon.breakpointForeground": iconRed,
+    "debugIcon.breakpointDisabledForeground": iconRed + "80",
+    "debugIcon.breakpointUnverifiedForeground": gray120,
+    "debugIcon.breakpointCurrentStackframeForeground": iconYellow,
+    "debugIcon.breakpointStackframeForeground": gray120,
+    "debugIcon.startForeground": iconGreen,
+    "debugIcon.continueForeground": iconGreen,
+    "debugIcon.restartForeground": iconGreen,
+    "debugIcon.pauseForeground": gray120,
+    "debugIcon.stopForeground": iconRed,
+    "debugIcon.disconnectForeground": iconRed,
+    "debugIcon.stepOverForeground": gray120,
+    "debugIcon.stepIntoForeground": gray120,
+    "debugIcon.stepOutForeground": gray120,
+    "debugIcon.stepBackForeground": gray120,
+    "ports.iconRunningProcessForeground": iconGreen,
 
     // ── Testing ──
-    "testing.iconFailed": red7,
-    "testing.iconErrored": red7,
-    "testing.iconPassed": green7,
-    "testing.iconQueued": gray7,
-    "testing.iconUnset": gray7,
-    "testing.iconSkipped": yellow5,
-    "testing.peekBorder": gray4,
-    "testing.peekHeaderBackground": gray2,
-    "testing.runAction": green7,
-    "testing.iconErrored.retired": red3,
-    "testing.iconFailed.retired": red3,
-    "testing.iconPassed.retired": green3,
-    "testing.iconQueued.retired": gray3,
-    "testing.iconUnset.retired": gray3,
-    "testing.iconSkipped.retired": yellow1,
-    "testing.message.error.lineBackground": errorBackgroundOverlay,
-    "testing.message.info.decorationForeground": gray7,
+    // Failed assertions are yellow, errors red, skipped / queued neutral.
+    "testing.iconPassed": iconGreen,
+    "testing.iconFailed": iconYellow,
+    "testing.iconErrored": iconRed,
+    "testing.iconSkipped": gray120,
+    "testing.iconQueued": gray120,
+    "testing.iconUnset": gray120,
+    "testing.iconPassed.retired": iconGreen + "80",
+    "testing.iconFailed.retired": iconYellow + "80",
+    "testing.iconErrored.retired": iconRed + "80",
+    "testing.iconSkipped.retired": gray120 + "80",
+    "testing.iconQueued.retired": gray120 + "80",
+    "testing.iconUnset.retired": gray120 + "80",
+    "testing.runAction": iconGreen,
+    "testing.peekBorder": iconRed,
+    "testing.peekHeaderBackground": red40,
+    "testing.messagePeekBorder": iconBlue,
+    "testing.messagePeekHeaderBackground": blue40,
+    "testing.message.error.lineBackground": overlay(errorHint, 0.8),
+    "testing.message.error.badgeBackground": red80,
+    "testing.message.error.badgeBorder": red80,
+    "testing.message.error.badgeForeground": white,
+    "testing.message.info.decorationForeground": gray100,
     "testing.message.info.lineBackground": transparent,
-    "testing.coveredBackground": "#37523930",
-    "testing.coveredBorder": green6,
-    "testing.coveredGutterBackground": green6,
-    "testing.uncoveredBranchBackground": "#5E383830",
-    "testing.uncoveredBackground": "#5E383830",
-    "testing.uncoveredBorder": red6,
-    "testing.uncoveredGutterBackground": red6,
+    "testing.coverCountBadgeBackground": gray80,
+    "testing.coverCountBadgeForeground": black,
+    // Coverage — full green, partial amber, none red.
+    "testing.coveredBackground": coverageFull + "40",
+    "testing.coveredBorder": coverageFull,
+    "testing.coveredGutterBackground": coverageFull,
+    "testing.coveredMinimapBackground": coverageFull,
+    "testing.uncoveredBranchBackground": coveragePartial + "40",
+    "testing.uncoveredBackground": coverageNone + "40",
+    "testing.uncoveredBorder": coverageNone,
+    "testing.uncoveredGutterBackground": coverageNone,
+    "testing.uncoveredMinimapBackground": coverageNone,
 
-    // ── Git decorations ──
-    // See the git palette block above: every state except ignored/submodule
-    // clears 5.7:1 on the SCM list; the base hues dip to ~3.9:1 on the
-    // selected-blue row.
-    "gitDecoration.addedResourceForeground": gitAdded,
-    "gitDecoration.modifiedResourceForeground": gitModified,
-    "gitDecoration.deletedResourceForeground": gitDeleted,
-    "gitDecoration.renamedResourceForeground": gitRenamed,
-    "gitDecoration.untrackedResourceForeground": gitUntracked,
-    "gitDecoration.ignoredResourceForeground": gitIgnored,
-    "gitDecoration.conflictingResourceForeground": gitConflict,
-    "gitDecoration.submoduleResourceForeground": gitSubmodule,
-    "gitDecoration.stageDeletedResourceForeground": gitDeleted,
-    "gitDecoration.stageModifiedResourceForeground": gitModified,
+    // ── Notebooks ──
+    "notebook.editorBackground": editorBackground,
+    "notebook.cellEditorBackground": gray20,
+    "notebook.cellBorderColor": gray40,
+    "notebook.cellHoverBackground": wash10,
+    "notebook.focusedCellBackground": transparent,
+    "notebook.focusedCellBorder": blue80,
+    "notebook.focusedEditorBorder": blue80,
+    "notebook.inactiveFocusedCellBorder": gray50,
+    "notebook.selectedCellBackground": transparent,
+    "notebook.selectedCellBorder": gray50,
+    "notebook.inactiveSelectedCellBorder": gray50,
+    "notebook.symbolHighlightBackground": wash10,
+    "notebook.cellInsertionIndicator": blue80,
+    "notebook.cellStatusBarItemHoverBackground": wash20,
+    "notebook.cellToolbarSeparator": gray40,
+    "notebook.outputContainerBackgroundColor": editorBackground,
+    "notebook.outputContainerBorderColor": gray30,
+    "notebookStatusSuccessIcon.foreground": iconGreen,
+    "notebookStatusErrorIcon.foreground": iconRed,
+    "notebookStatusRunningIcon.foreground": iconBlue,
+    "notebookEditorOverviewRuler.runningCellForeground": iconBlue,
+    "notebookScrollbarSlider.background": scrollbarThumb,
+    "notebookScrollbarSlider.hoverBackground": scrollbarThumbHover,
+    "notebookScrollbarSlider.activeBackground": scrollbarThumbHover,
+    "interactive.activeCodeBorder": blue80,
+    "interactive.inactiveCodeBorder": gray50,
 
-    // ── Source Control ──
-    // History-graph swimlanes + ref badges on the accent ramp. Ref colors:
-    // local = accent blue, base = success green, remote = purple.
-    // Additions/deletions reuse the git added/deleted hues.
-    "scmGraph.foreground1": gitGraph1,
-    "scmGraph.foreground2": gitGraph2,
-    "scmGraph.foreground3": gitGraph3,
-    "scmGraph.foreground4": gitGraph4,
-    "scmGraph.foreground5": gitGraph5,
-    "scmGraph.historyItemRefColor": gitGraph1,
-    "scmGraph.historyItemBaseRefColor": gitGraph2,
-    "scmGraph.historyItemRemoteRefColor": gitGraph3,
-    "scmGraph.historyItemHoverDefaultLabelForeground": gray14,
-    "scmGraph.historyItemHoverDefaultLabelBackground": blue6,
-    "scmGraph.historyItemHoverLabelForeground": gray12,
-    "scmGraph.historyItemHoverAdditionsForeground": gitAdded,
-    "scmGraph.historyItemHoverDeletionsForeground": gitDeleted,
+    // ── Welcome / walkthrough ──
+    "welcomePage.background": editorBackground,
+    "welcomePage.tileBackground": gray20,
+    "welcomePage.tileHoverBackground": gray30,
+    "welcomePage.tileBorder": gray30,
+    "welcomePage.progress.background": gray50,
+    "welcomePage.progress.foreground": blue80,
+    "walkThrough.embeddedEditorBackground": gray20,
+    "walkthrough.stepTitle.foreground": gray130,
 
-    // ── Merge conflicts ──
-    // Derived from the accent ramp following the diff convention: current/ours =
-    // accent blue (#1f6feb), incoming/theirs = success green (#2ea043),
-    // common = neutral gray.
-    // Content regions sit at ~18% alpha (code on top reads at 6.9–7.4:1); headers
-    // are denser (~40%) since they carry only the conflict-label text.
-    "merge.currentHeaderBackground": "#1f6feb66", // accent blue @ 40%
-    "merge.currentContentBackground": "#1f6feb2E", // accent blue @ 18%
-    "merge.incomingHeaderBackground": "#2ea04366", // success green @ 40%
-    "merge.incomingContentBackground": "#2ea0432E", // success green @ 18%
-    "merge.border": transparent,
-    "merge.commonContentBackground": "#6e76812E", // neutral gray @ 18%
-    "merge.commonHeaderBackground": "#6e76814D", // neutral gray @ 30%
-    // New (3-way) merge editor — accent-blue change wash; word-level wash denser
-    // so the exact changed tokens stand out within an already-tinted line.
-    "mergeEditor.change.background": "#1f6feb21",
-    "mergeEditor.change.word.background": "#1f6feb4D",
-    "mergeEditor.conflict.unhandledUnfocused.border": yellow4,
-    "mergeEditor.conflict.unhandledFocused.border": yellow6,
-    "mergeEditor.conflict.handledUnfocused.border": gray5,
-    "mergeEditor.conflict.handledFocused.border": gray7,
+    // ── Comments (code review) ──
+    "editorCommentsWidget.rangeBackground": iconBlue + "1A",
+    "editorCommentsWidget.rangeActiveBackground": iconBlue + "33",
+    "editorCommentsWidget.resolvedBorder": gray80,
+    "editorCommentsWidget.unresolvedBorder": iconBlue,
+    "editorCommentsWidget.replyInputBackground": gray30,
+    "commentsView.resolvedIcon": gray80,
+    "commentsView.unresolvedIcon": iconBlue,
 
-    // ── Problems / diagnostics panel ──
-    "problemsErrorIcon.foreground": red7,
-    "problemsWarningIcon.foreground": yellow6,
-    "problemsInfoIcon.foreground": blue8,
+    // ── Markdown alerts ──
+    "markdownAlert.note.foreground": iconBlue,
+    "markdownAlert.tip.foreground": iconGreen,
+    "markdownAlert.important.foreground": iconLavender,
+    "markdownAlert.warning.foreground": iconYellow,
+    "markdownAlert.caution.foreground": iconRed,
 
-    // ── Symbol icons (outline / breadcrumbs) ──
-    "symbolIcon.arrayForeground": orange8,
-    "symbolIcon.booleanForeground": syntaxKeyword,
-    "symbolIcon.classForeground": syntaxType,
-    "symbolIcon.colorForeground": syntaxString,
-    "symbolIcon.constantForeground": syntaxMember,
-    "symbolIcon.constructorForeground": syntaxFunction,
-    "symbolIcon.enumeratorForeground": syntaxMember,
-    "symbolIcon.enumeratorMemberForeground": syntaxMember,
-    "symbolIcon.eventForeground": syntaxField,
-    "symbolIcon.fieldForeground": syntaxField,
-    "symbolIcon.fileForeground": gray9,
-    "symbolIcon.folderForeground": yellow7,
-    "symbolIcon.functionForeground": syntaxFunction,
-    "symbolIcon.interfaceForeground": syntaxType,
-    "symbolIcon.keyForeground": syntaxMetadata,
-    "symbolIcon.keywordForeground": syntaxKeyword,
-    "symbolIcon.methodForeground": syntaxFunction,
-    "symbolIcon.moduleForeground": syntaxHtmlTag,
-    "symbolIcon.namespaceForeground": syntaxType,
-    "symbolIcon.nullForeground": syntaxKeyword,
-    "symbolIcon.numberForeground": syntaxNumber,
-    "symbolIcon.objectForeground": syntaxField,
-    "symbolIcon.operatorForeground": editorForeground,
-    "symbolIcon.packageForeground": syntaxHtmlTag,
-    "symbolIcon.propertyForeground": syntaxField,
-    "symbolIcon.referenceForeground": blue8,
-    "symbolIcon.snippetForeground": green8,
-    "symbolIcon.stringForeground": syntaxString,
-    "symbolIcon.structForeground": syntaxType,
-    "symbolIcon.textForeground": editorForeground,
-    "symbolIcon.typeParameterForeground": syntaxTypeParam,
-    "symbolIcon.unitForeground": syntaxNumber,
-    "symbolIcon.variableForeground": editorForeground,
+    // ── Charts ──
+    "charts.foreground": gray130,
+    "charts.lines": gray40,
+    "charts.red": iconRed,
+    "charts.blue": iconBlue,
+    "charts.yellow": iconYellow,
+    "charts.orange": orange100,
+    "charts.green": iconGreen,
+    "charts.purple": iconPurple,
+    "chart.line": blueVivid,
+    "chart.axis": gray80,
+    "chart.guide": gray40,
 
-    // ── Charts / inline charts ──
-    "charts.foreground": editorForeground,
-    "charts.lines": gray4,
-    "charts.red": red7,
-    "charts.blue": blue8,
-    "charts.yellow": yellow7,
-    "charts.orange": orange6,
-    "charts.green": green7,
-    "charts.purple": syntaxMember,
-    "chart.line": gray4,
-    "chart.axis": gray5,
-    "chart.guide": gray3,
-
-    // ── Ports ──
-    "ports.iconRunningProcessForeground": green7,
-
-    // ── Welcome page ──
-    "welcomePage.background": gray1,
-    "welcomePage.tileBackground": gray2,
-    "welcomePage.tileHoverBackground": gray3,
-    "welcomePage.tileBorder": gray4,
-    "welcomePage.progress.background": gray3,
-    "welcomePage.progress.foreground": blue6,
-    "walkThrough.embeddedEditorBackground": editorBackground,
-    "walkthrough.stepTitle.foreground": gray12,
-
-    // ── Interactive window ──
-    "interactive.activeCodeBorder": blue6,
-    "interactive.inactiveCodeBorder": gray4,
-
-    // ── Action bar ──
-    "actionBar.toggledBackground": blue2,
+    // ── Symbol icons (outline, breadcrumbs, suggest) ──
+    // Kinds share a hue per family: types blue, interfaces green, enums
+    // purple, callables red, fields / variables orange, properties lavender,
+    // containers and text neutral.
+    "symbolIcon.classForeground": iconBlue,
+    "symbolIcon.structForeground": iconBlue,
+    "symbolIcon.objectForeground": iconBlue,
+    "symbolIcon.typeParameterForeground": iconBlue,
+    "symbolIcon.interfaceForeground": iconGreen,
+    "symbolIcon.enumeratorForeground": iconPurple,
+    "symbolIcon.enumeratorMemberForeground": iconPurple,
+    "symbolIcon.methodForeground": iconRed,
+    "symbolIcon.functionForeground": iconRed,
+    "symbolIcon.constructorForeground": iconRed,
+    "symbolIcon.fieldForeground": iconOrange,
+    "symbolIcon.variableForeground": iconOrange,
+    "symbolIcon.constantForeground": iconOrange,
+    "symbolIcon.arrayForeground": iconOrange,
+    "symbolIcon.booleanForeground": iconOrange,
+    "symbolIcon.numberForeground": iconOrange,
+    "symbolIcon.unitForeground": iconOrange,
+    "symbolIcon.eventForeground": iconOrange,
+    "symbolIcon.propertyForeground": iconLavender,
+    "symbolIcon.keyForeground": iconLavender,
+    "symbolIcon.fileForeground": gray120,
+    "symbolIcon.folderForeground": gray120,
+    "symbolIcon.moduleForeground": gray120,
+    "symbolIcon.namespaceForeground": gray120,
+    "symbolIcon.packageForeground": gray120,
+    "symbolIcon.keywordForeground": gray120,
+    "symbolIcon.operatorForeground": gray120,
+    "symbolIcon.nullForeground": gray120,
+    "symbolIcon.referenceForeground": gray120,
+    "symbolIcon.snippetForeground": gray120,
+    "symbolIcon.stringForeground": gray120,
+    "symbolIcon.textForeground": gray120,
+    "symbolIcon.colorForeground": gray120,
 
     // ── Inline chat ──
-    "inlineChatDiff.inserted": "#37523940",
-    "inlineChatDiff.removed": "#5E383840",
-    "inlineChat.background": gray2,
-    "inlineChat.foreground": gray12,
-    "inlineChat.border": gray4,
-    "inlineChat.shadow": blackAlpha40,
-    "inlineChatInput.background": gray3,
-    "inlineChatInput.border": gray5,
-    "inlineChatInput.focusBorder": blue6,
-    "inlineChatInput.placeholderForeground": gray7,
-    "editorGhostText.foreground": gray6,
-    "editorGhostText.background": transparent,
-    "editorGhostText.border": transparent,
-    // Empty-editor placeholder text (e.g., "Type to search" in the search editor).
-    "editor.placeholder.foreground": gray7,
+    // AI surfaces are tinted purple.
+    "inlineChat.background": purple20,
+    "inlineChat.foreground": gray130,
+    "inlineChat.border": purple50,
+    "inlineChat.shadow": shadow,
+    "inlineChatInput.background": gray10,
+    "inlineChatInput.border": purple50,
+    "inlineChatInput.focusBorder": aiPurple,
+    "inlineChatInput.placeholderForeground": gray80,
+    "inlineChatDiff.inserted": diffLine(diffInserted),
+    "inlineChatDiff.removed": diffLine(diffDeleted),
+
+    // ── Inline edits (next edit suggestions) ──
+    "inlineEdit.gutterIndicator.background": gray30,
+    "inlineEdit.gutterIndicator.primaryBackground": blue80 + "66",
+    "inlineEdit.gutterIndicator.primaryBorder": blue80,
+    "inlineEdit.gutterIndicator.primaryForeground": white,
+    "inlineEdit.gutterIndicator.secondaryBackground": popupEditorBackground,
+    "inlineEdit.gutterIndicator.secondaryBorder": gray40,
+    "inlineEdit.gutterIndicator.secondaryForeground": gray130,
+    "inlineEdit.gutterIndicator.successfulBackground": green80,
+    "inlineEdit.gutterIndicator.successfulBorder": green80,
+    "inlineEdit.gutterIndicator.successfulForeground": white,
+    "inlineEdit.modifiedBackground": diffInserted + "4D",
+    "inlineEdit.modifiedBorder": diffInsertedMark,
+    "inlineEdit.modifiedChangedLineBackground": diffLine(diffInserted),
+    "inlineEdit.modifiedChangedTextBackground": diffWord(diffInserted),
+    "inlineEdit.originalBackground": diffDeleted + "33",
+    "inlineEdit.originalBorder": diffDeletedMark,
+    "inlineEdit.originalChangedLineBackground": diffLine(diffDeleted),
+    "inlineEdit.originalChangedTextBackground": diffWord(diffDeleted),
+    "inlineEdit.tabWillAcceptModifiedBorder": diffInsertedMark,
+    "inlineEdit.tabWillAcceptOriginalBorder": diffDeletedMark,
 
     // ── Chat ──
-    "chat.requestBackground": gray1b,
-    "chat.requestBorder": gray4b,
-    "chat.slashCommandBackground": gray3,
-    "chat.slashCommandForeground": gray12,
-    "chat.avatarBackground": gray4,
-    "chat.avatarForeground": gray12,
-    "chat.requestBubbleBackground": whiteAlpha08,
-    "chat.requestBubbleHoverBackground": whiteAlpha15,
-    "chat.requestCodeBorder": blue4 + "B8",
-    "chat.checkpointSeparator": gray5,
-    "chat.inputWorkingBorderColor1": blue5,
-    // Edited files and +/- line counts use the git decoration hues.
-    "chat.editedFileForeground": gitModified,
-    "chat.linesAddedForeground": gitAdded,
-    "chat.linesRemovedForeground": gitDeleted,
-    "chat.workingProgressStableIconForeground": blue8,
-    "chat.workingProgressInsidersIconForeground": syntaxType,
-
-    // ── Comments widget (PR / review comment ranges) ──
-    "editorCommentsWidget.rangeBackground": blue8 + "18",
-    "editorCommentsWidget.rangeActiveBackground": blue8 + "30",
-
-    // ── Modern UI (floating side bar / panel "cards" on a shell) ──
-    // The shell is the chrome gray and every card keeps the structural border,
-    // so the floating layout reads like the classic one, just with gaps.
-    "modernUI.shellBackground": gray1b,
-    "modernUI.inactiveShellBackground": gray1b,
-    "surface.background": gray1b,
-    "surface.foreground": gray10,
-    "surface.border": gray4b,
-    "editor.border": gray4b,
-    "modernPanel.border": gray4b,
-    "modernActivityBar.border": gray4b,
-    // Activity bar pills — same tint as the classic active item; hover is the
-    // toolbar hover wash. (modernTab.* / modernEditorTab.* are left unset on
-    // purpose: VS Code then carries the tab.* colors above into modern tabs.)
-    "modernActivityBarItem.activeBackground": "#3574F015",
-    "modernActivityBarItem.activeForeground": gray12,
-    "modernActivityBarItem.hoverBackground": whiteAlpha08,
-    "modernActivityBarItem.hoverForeground": gray12,
-    "browser.border": transparent,
+    // User requests sit in a gray bubble; AI progress and slash commands use
+    // the purple accent.
+    "chat.requestBackground": gray10,
+    "chat.requestBorder": gray30,
+    "chat.requestBubbleBackground": gray40,
+    "chat.requestBubbleHoverBackground": gray50,
+    "chat.requestCodeBorder": gray30,
+    "chat.slashCommandBackground": purple70 + "B3",
+    "chat.slashCommandForeground": purple140,
+    "chat.avatarBackground": gray40,
+    "chat.avatarForeground": gray130,
+    "chat.checkpointSeparator": gray50,
+    "chat.statusBackground": wash10,
+    "chat.thinkingShimmer": purple140,
+    "chat.inputWorkingBorderColor1": aiPurple,
+    "chat.voiceGlowBaseColor": aiPurple,
+    "chat.editedFileForeground": fileModified,
+    "chat.linesAddedForeground": fileAdded,
+    "chat.linesRemovedForeground": red100,
+    "chat.findMatchBackground": selection,
+    "chat.findMatchHighlightBackground": overlay(textSearch, 0.8),
+    "chat.sessionStateIndicator.inProgressBorder": iconYellow,
+    "chat.sessionStateIndicator.needsInputBorder": iconRed,
+    "chat.sessionStateIndicator.unvisitedBorder": iconGreen,
+    "chat.mcpCompatibilityWarningForeground": yellow100,
+    "chat.workingProgressStableIconForeground": iconBlue,
+    "chat.workingProgressInsidersIconForeground": iconGreen,
+    "agentStatusIndicator.background": wash10,
 
     // ── Agents window ──
-    // Agent sessions use the same surfaces as the editor / side bar / inputs.
-    "agents.background": editorBackground,
-    "agentsPanel.background": gray1b,
-    "agentsPanel.foreground": gray10,
-    "agentsPanel.border": gray4b,
-    "agentsGradient.tintColor": blue5,
-    "agentsChatInput.background": gray3,
-    "agentsChatInput.foreground": gray12,
-    "agentsChatInput.border": gray5,
-    "agentsChatInput.focusBorder": blue6,
-    "agentsChatInput.placeholderForeground": gray7,
+    // Same model as the workbench: panels on a frame.
+    "agents.background": gray30,
+    "agentsPanel.background": gray10,
+    "agentsPanel.foreground": gray130,
+    "agentsPanel.border": gray10,
+    "agentsCard.border": gray10,
+    "agentsBottomPanel.border": gray10,
+    "agentsDetail.background": editorBackground,
+    "activeSessionView.background": gray10,
+    "activeSessionView.foreground": gray130,
+    "inactiveSessionView.background": gray30,
+    "inactiveSessionView.foreground": gray100,
+    "agentsGradient.tintColor": shellTint,
+    "agentsChatInput.background": gray10,
+    "agentsChatInput.foreground": gray130,
+    "agentsChatInput.border": gray50,
+    "agentsChatInput.focusBorder": blue80,
+    "agentsChatInput.placeholderForeground": gray80,
     "agentsNewSessionButton.background": transparent,
-    "agentsNewSessionButton.foreground": gray10,
-    "agentsNewSessionButton.border": gray5,
-    "agentsNewSessionButton.hoverBackground": whiteAlpha08,
-    "agentsBadge.background": blue5,
-    "agentsBadge.foreground": gray14,
-    "agentsUnreadBadge.background": blue5,
-    "agentsUnreadBadge.foreground": gray14,
-    "agentsMobileDiff.addedForeground": gitAdded,
-    "agentsMobileDiff.modifiedForeground": gitModified,
-    "agentsMobileDiff.deletedForeground": gitDeleted,
-    "agentsVoice.speakingForeground": syntaxMember,
-    "agentsVoice.speakingBackground": syntaxMember + "14",
-
-    // ── Keys whose VS Code defaults are hard-coded, off-palette hex values ──
-    "debugExceptionWidget.background": red3,
-    "debugExceptionWidget.border": red6,
-    "debugTokenExpression.type": syntaxType,
-    "diffEditor.move.border": gray6 + "9C",
-    "diffEditor.moveActive.border": orange6,
-    "diffEditor.unchangedRegionShadow": blackAlpha40,
-    // Merge editor base view — same red as the diff editor's removed lines/words.
-    "mergeEditor.changeBase.background": removedLineOverlay,
-    "mergeEditor.changeBase.word.background": "#ff7b7226",
-    "mergeEditor.conflictingLines.background": yellow7 + "26",
-    "mergeEditor.conflict.unhandled.minimapOverViewRuler": yellow6,
-    "mergeEditor.conflict.handled.minimapOverViewRuler": gray7 + "EE",
-    "mcpIcon.starForeground": yellow7, // same as extension stars
-    "extensionIcon.privateForeground": gray6,
-    "profileBadge.background": gray4,
-    "profileBadge.foreground": gray14,
-    "simpleFindWidget.sashBorder": gray4,
+    "agentsNewSessionButton.foreground": gray130,
+    "agentsNewSessionButton.border": gray50,
+    "agentsNewSessionButton.hoverBackground": wash20,
+    "agentsBadge.background": blue90,
+    "agentsBadge.foreground": gray10,
+    "agentsUnreadBadge.background": blue90,
+    "agentsUnreadBadge.foreground": gray10,
+    "agentsUpdateButton.downloadedBackground": blue80 + "B3",
+    "agentsUpdateButton.downloadingBackground": blue80 + "66",
+    "agentSessionReadIndicator.foreground": gray60,
+    "agentSessionSelectedBadge.border": wash50,
+    "agentSessionSelectedUnfocusedBadge.border": wash30,
+    "agentFeedbackEditorWidget.background": gray30,
+    "agentFeedbackEditorWidget.border": gray40,
+    "agentFeedbackInputWidget.border": gray40,
+    "agentsMobileDiff.addedForeground": fileAdded,
+    "agentsMobileDiff.modifiedForeground": fileModified,
+    "agentsMobileDiff.deletedForeground": fileDeleted,
+    "agentsVoice.speakingForeground": iconLavender,
+    "agentsVoice.speakingBackground": iconLavender + "14",
   },
 
   // ───────────────────────────────────────────────────────────────────────────
   // Semantic token colors
   // ───────────────────────────────────────────────────────────────────────────
+  // Styles resolve per attribute, so modifier rules that set only a font style
+  // (e.g. `*.static`) combine with the color of the base token type.
   semanticHighlighting: true,
   semanticTokenColors: {
-    // Literals and `new` — `new` is a keyword, not a member access
-    newOperator: syntaxKeyword,
-    stringLiteral: syntaxString,
-    customLiteral: syntaxFunction,
-    numberLiteral: syntaxNumber,
-
-    // Types
-    type: syntaxType,
-    "type.defaultLibrary": syntaxType,
-    class: syntaxType,
-    "class.defaultLibrary": syntaxType,
-    interface: syntaxType,
-    enum: syntaxType,
-    typeParameter: syntaxTypeParam,
-    struct: syntaxType,
-
-    // Members (key-like access: obj.prop, enum.MEMBER) → purple-pink
-    property: syntaxMember,
-    "property.readonly": syntaxMember,
-
-    // Variables of every flavor (var/let/const/readonly/static/parameter/etc.)
-    // are uniformly editorForeground. This deliberately overrides language
-    // servers that would otherwise tint static fields differently — we want
-    // one color for "identifier bound to a value" across all languages.
-    variable: editorForeground,
-    "variable.readonly": editorForeground,
-    "variable.defaultLibrary": editorForeground,
-    "variable.static": editorForeground,
-    "variable.readonly.static": editorForeground,
-    parameter: editorForeground,
-
-    // Functions/methods — one blue for all callables.
-    function: syntaxFunction,
-    "function.defaultLibrary": syntaxFunction,
-    method: syntaxFunction,
-    "method.static": syntaxFunction,
-    // Static properties stay member-colored, like every other property.
-    "property.static": syntaxMember,
-
-    // Namespaces/modules
-    namespace: syntaxType,
-
-    // Keywords / operators
-    keyword: syntaxKeyword,
+    // Literals and operators
+    keyword: synKeyword,
+    newOperator: synKeyword,
+    "builtinType:rust": synKeyword,
+    "boolean:rust": synKeyword,
+    string: synString,
+    stringLiteral: synString,
+    number: synNumber,
+    numberLiteral: synNumber,
+    customLiteral: synNumber,
+    regexp: jsRegexp,
+    escapeSequence: synKeyword,
+    formatSpecifier: synKeyword,
     operator: editorForeground,
+    "operator.controlFlow:rust": { foreground: rsQuestion, fontStyle: "bold" },
+    comment: synComment,
+    "comment.documentation": { foreground: synDocComment, fontStyle: "italic" },
 
-    // Strings, numbers, comments
-    string: syntaxString,
-    number: syntaxNumber,
-    regexp: syntaxRegexp,
-    comment: syntaxComment,
-    "comment.documentation": syntaxDocComment,
+    // Types — declarations and references read as plain text.
+    namespace: editorForeground,
+    type: editorForeground,
+    class: editorForeground,
+    interface: editorForeground,
+    enum: editorForeground,
+    struct: editorForeground,
+    record: editorForeground,
+    typeParameter: synTypeParameter,
+    "typeParameter:typescript": tsTypeParameter,
+    "typeParameter:typescriptreact": tsTypeParameter,
+    "typeParameter:python": editorForeground,
 
-    // Decorators / annotations
-    decorator: syntaxMetadata,
-
-    // Labels
-    label: syntaxLabel,
-
-    // Enum members
-    enumMember: syntaxMember,
-    macro: syntaxKeyword,
-
-    // Deprecated symbols — struck through (color preserved).
+    // Variables, parameters and members
+    variable: editorForeground,
+    parameter: editorForeground,
+    property: synMember,
+    "property.static": { fontStyle: "italic" },
+    recordComponent: synMember,
+    enumMember: { foreground: synMember, fontStyle: "italic" },
+    event: synMember,
+    annotationMember: editorForeground,
+    "*.mutable": { fontStyle: "underline" },
     "*.deprecated": { fontStyle: "strikethrough" },
+
+    // Functions — declarations blue, calls plain (italic when static).
+    function: editorForeground,
+    method: editorForeground,
+    "function.declaration": synFunction,
+    "method.declaration": synFunction,
+    "function.definition": synFunction,
+    "method.definition": synFunction,
+    "method.static": { fontStyle: "italic" },
+    "function.static": { fontStyle: "italic" },
+
+    // Metadata
+    decorator: synMetadata,
+    annotation: synMetadata,
+    macro: synMetadata,
+    modifier: synKeyword,
+    label: editorForeground,
+
+    // JavaScript / TypeScript — calls blue, locals gray-blue, platform
+    // globals (console, window, document…) purple italic.
+    "function:javascript": synFunction,
+    "function:javascriptreact": synFunction,
+    "function:typescript": synFunction,
+    "function:typescriptreact": synFunction,
+    "method:javascript": synFunction,
+    "method:javascriptreact": synFunction,
+    "method:typescript": synFunction,
+    "method:typescriptreact": synFunction,
+    "method.static:javascript": { foreground: synMethod, fontStyle: "italic" },
+    "method.static:javascriptreact": { foreground: synMethod, fontStyle: "italic" },
+    "method.static:typescript": { foreground: synMethod, fontStyle: "italic" },
+    "method.static:typescriptreact": { foreground: synMethod, fontStyle: "italic" },
+    "variable.local:javascript": jsLocalVariable,
+    "variable.local:javascriptreact": jsLocalVariable,
+    "variable.local:typescript": jsLocalVariable,
+    "variable.local:typescriptreact": jsLocalVariable,
+    "variable.defaultLibrary:javascript": { foreground: jsGlobalVariable, fontStyle: "italic" },
+    "variable.defaultLibrary:javascriptreact": { foreground: jsGlobalVariable, fontStyle: "italic" },
+    "variable.defaultLibrary:typescript": { foreground: jsGlobalVariable, fontStyle: "italic" },
+    "variable.defaultLibrary:typescriptreact": { foreground: jsGlobalVariable, fontStyle: "italic" },
+
+    // Python — self / cls, builtins, plain attributes.
+    selfParameter: pySelf,
+    clsParameter: pySelf,
+    "*.builtin:python": pyBuiltin,
+    "property:python": editorForeground,
+
+    // Kotlin
+    "label:kotlin": kotlinLabel,
+
+    // Go — calls khaki, builtins orange, packages green, types teal.
+    "function:go": goCall,
+    "method:go": goCall,
+    "function.defaultLibrary:go": goBuiltin,
+    "type.defaultLibrary:go": goBuiltin,
+    "variable.defaultLibrary:go": goBuiltin,
+    "variable.readonly:go": { foreground: synMember, fontStyle: "italic" },
+    "namespace:go": goPackage,
+    "type:go": goType,
+    "property:go": editorForeground,
+
+    // Rust — calls blue, structs / enums olive, traits periwinkle.
+    "function:rust": synFunction,
+    "method:rust": synFunction,
+    "method.trait:rust": { fontStyle: "italic" },
+    "function.trait:rust": { fontStyle: "italic" },
+    "struct:rust": rsType,
+    "union:rust": rsType,
+    "enum:rust": { foreground: rsType, fontStyle: "italic" },
+    "typeAlias:rust": { foreground: rsType, fontStyle: "italic" },
+    "enumMember:rust": { foreground: rsVariant, fontStyle: "italic" },
+    "interface:rust": rsTrait,
+    "namespace.crateRoot:rust": rsTrait,
+    "typeParameter:rust": rsLifetime,
+    "lifetime:rust": { foreground: rsLifetime, fontStyle: "italic" },
+    "macro:rust": rsMacro,
+    "selfKeyword:rust": rsSelf,
+    "selfTypeKeyword:rust": rsSelf,
+    "static:rust": rsStatic,
+    "const:rust": { foreground: synMember, fontStyle: "italic" },
+    "attribute:rust": synMetadata,
+    "builtinAttribute:rust": synMetadata,
+    "unresolvedReference:rust": synInvalid,
   },
 
   // ───────────────────────────────────────────────────────────────────────────
   // TextMate token colors
-  // Reference: dark_vs.json + dark_plus.json scopes
   // ───────────────────────────────────────────────────────────────────────────
   tokenColors: [
     // ── Base / embedded ──
@@ -1434,64 +1668,50 @@ const theme: ThemeDefinition = {
     {
       name: "Comment",
       scope: "comment",
-      settings: { foreground: syntaxComment },
+      settings: { foreground: synComment },
     },
     {
-      name: "Doc comment",
-      scope: ["comment.block.documentation", "comment.line.documentation"],
-      settings: { foreground: syntaxDocComment },
+      name: "Doc comment / docstring",
+      scope: [
+        "comment.block.documentation",
+        "comment.line.documentation",
+        "comment.block.javadoc",
+        "string.quoted.docstring",
+      ],
+      settings: { foreground: synDocComment, fontStyle: "italic" },
     },
     {
       name: "Doc comment tag",
       scope: [
         "keyword.other.documentation",
-        "punctuation.definition.block.tag.jsdoc",
         "storage.type.class.jsdoc",
+        "punctuation.definition.block.tag.jsdoc",
+        "keyword.other.phpdoc",
       ],
-      settings: { foreground: syntaxDocTag },
-    },
-
-    // ── Keywords (general) ──
-    {
-      name: "Keyword",
-      scope: "keyword",
-      settings: { foreground: syntaxKeyword },
+      settings: { foreground: synDocTag, fontStyle: "italic" },
     },
     {
-      name: "Storage (var, let, const, function...)",
-      scope: "storage",
-      settings: { foreground: syntaxKeyword },
-    },
-    {
-      name: "Storage type",
-      scope: "storage.type",
-      settings: { foreground: syntaxKeyword },
-    },
-    {
-      name: "Storage modifier",
-      scope: ["storage.modifier", "keyword.operator.noexcept"],
-      settings: { foreground: syntaxKeyword },
-    },
-
-    // ── Control flow keywords ──
-    // `keyword.control` is more specific than `keyword`, so it wins. Control flow
-    // (if / return / for / using) gets member purple-pink to stand apart from
-    // declaration keywords (orange-tan).
-    {
-      name: "Control flow / special keywords",
+      name: "Doc comment tag value",
       scope: [
-        "keyword.control",
-        "source.cpp keyword.operator.new",
-        "keyword.operator.delete",
-        "keyword.other.using",
-        "keyword.other.directive.using",
-        "keyword.other.operator",
-        "entity.name.operator",
+        "variable.other.jsdoc",
+        "entity.name.type.instance.jsdoc",
+        "variable.parameter.javadoc",
       ],
-      settings: { foreground: syntaxMember },
+      settings: { foreground: synDocTagValue, fontStyle: "italic" },
+    },
+    {
+      name: "TODO marker",
+      scope: ["keyword.codetag.notation", "keyword.other.todo"],
+      settings: { foreground: synTodo, fontStyle: "italic" },
     },
 
-    // ── Operators ──
+    // ── Keywords ──
+    // One color for every keyword, control flow included.
+    {
+      name: "Keyword / storage",
+      scope: ["keyword", "storage", "storage.type", "storage.modifier"],
+      settings: { foreground: synKeyword },
+    },
     {
       name: "Word-like operators",
       scope: [
@@ -1503,181 +1723,182 @@ const theme: ThemeDefinition = {
         "keyword.operator.typeid",
         "keyword.operator.alignas",
         "keyword.operator.instanceof",
+        "keyword.operator.delete",
+        "keyword.operator.noexcept",
         "keyword.operator.logical.python",
         "keyword.operator.wordlike",
       ],
-      settings: { foreground: syntaxKeyword },
+      settings: { foreground: synKeyword },
     },
     {
       name: "Operator symbols",
-      scope: "keyword.operator",
+      scope: ["keyword.operator", "storage.type.function.arrow"],
       settings: { foreground: editorForeground },
     },
     {
-      name: "CSS units",
-      scope: "keyword.other.unit",
-      settings: { foreground: syntaxNumber },
+      name: "Primitive types",
+      scope: [
+        "support.type.primitive",
+        "support.type.builtin",
+        "storage.type.primitive",
+        "storage.type.built-in",
+        "entity.name.type.primitive",
+      ],
+      settings: { foreground: synKeyword },
     },
 
     // ── Constants ──
     {
-      name: "Language constant (true, false, null...)",
+      name: "Language constant (true, false, null…)",
       scope: "constant.language",
-      settings: { foreground: syntaxKeyword },
+      settings: { foreground: synKeyword },
     },
     {
-      name: "Numeric constant",
+      name: "Number",
       scope: [
         "constant.numeric",
         "keyword.operator.plus.exponent",
         "keyword.operator.minus.exponent",
+        "keyword.other.unit",
       ],
-      settings: { foreground: syntaxNumber },
+      settings: { foreground: synNumber },
     },
     {
-      name: "Enum member",
-      scope: "variable.other.enummember",
-      settings: { foreground: syntaxMember },
+      name: "Character literal",
+      scope: "constant.character",
+      settings: { foreground: synString },
     },
     {
-      // Const variable references (SCREAMING_CASE, etc.) — keep uniform with
-      // all other variable flavors: editorForeground, not purple-pink.
-      name: "Const variable reference",
-      scope: "variable.other.constant",
-      settings: { foreground: editorForeground },
+      name: "Escape / format placeholder",
+      scope: [
+        "constant.character.escape",
+        "constant.character.format.placeholder",
+        "constant.other.placeholder",
+      ],
+      settings: { foreground: synKeyword },
     },
     {
-      name: "Character escape",
-      scope: ["constant.character", "constant.other.option"],
-      settings: { foreground: syntaxKeyword },
-    },
-    {
-      name: "String escape",
-      scope: "constant.character.escape",
-      settings: { foreground: syntaxKeyword },
-    },
-    {
-      name: "Regexp constant",
-      scope: "constant.regexp",
-      settings: { foreground: syntaxRegexp },
-    },
-    {
-      name: "Placeholder constant",
-      scope: "constant.other.placeholder",
-      settings: { foreground: syntaxKeyword },
+      name: "Enum member / constant",
+      scope: [
+        "variable.other.enummember",
+        "constant.other.enum",
+        "constant.other.caps",
+      ],
+      settings: { foreground: synMember, fontStyle: "italic" },
     },
 
     // ── Strings ──
     {
       name: "String",
       scope: ["string", "meta.embedded.assembly"],
-      settings: { foreground: syntaxString },
-    },
-    { scope: "string.tag", settings: { foreground: syntaxString } },
-    { scope: "string.value", settings: { foreground: syntaxString } },
-    {
-      name: "Regexp string",
-      scope: "string.regexp",
-      settings: { foreground: syntaxRegexp },
+      settings: { foreground: synString },
     },
     {
-      name: "String interpolation punctuation",
+      name: "Regular expression",
+      scope: ["string.regexp", "constant.regexp", "string.regexp keyword.other"],
+      settings: { foreground: jsRegexp },
+    },
+    {
+      name: "Template / interpolation delimiters",
       scope: [
         "punctuation.definition.template-expression.begin",
         "punctuation.definition.template-expression.end",
         "punctuation.section.embedded",
       ],
-      settings: { foreground: syntaxKeyword },
+      settings: { foreground: synKeyword },
     },
     {
-      name: "Reset JS template expression",
-      scope: "meta.template.expression",
+      name: "JSX expression braces",
+      scope: [
+        "source.js.jsx punctuation.section.embedded",
+        "source.tsx punctuation.section.embedded",
+      ],
       settings: { foreground: editorForeground },
     },
     {
-      name: "PHP embedded",
-      scope: [
-        "punctuation.section.embedded.begin.php",
-        "punctuation.section.embedded.end.php",
-      ],
-      settings: { foreground: syntaxKeyword },
+      name: "Template expression content",
+      scope: "meta.template.expression",
+      settings: { foreground: editorForeground },
     },
 
-    // ── Functions / methods ──
+    // ── Functions ──
     {
       name: "Function declaration",
       scope: [
         "entity.name.function",
-        "support.function",
-        "support.constant.handlebars",
-        "source.powershell variable.other.member",
+        "support.function.git-rebase",
         "entity.name.operator.custom-literal",
       ],
-      settings: { foreground: syntaxFunction },
+      settings: { foreground: synFunction },
     },
     {
-      name: "Preprocessor function",
-      scope: ["meta.preprocessor", "entity.name.function.preprocessor"],
-      settings: { foreground: syntaxKeyword },
+      name: "Function / method call",
+      scope: [
+        "support.function",
+        "meta.method-call entity.name.function",
+        "meta.function-call.php entity.name.function",
+        "meta.method-call.php entity.name.function",
+        "entity.name.function.call",
+        "entity.name.function.member.cpp",
+        "entity.name.function.member.c",
+        "meta.function-call.cpp entity.name.function",
+        "meta.function-call.c entity.name.function",
+      ],
+      settings: { foreground: editorForeground },
+    },
+    {
+      name: "Function / method call (JavaScript, TypeScript)",
+      scope: [
+        "source.js support.function",
+        "source.ts support.function",
+        "source.tsx support.function",
+        "source.jsx support.function",
+      ],
+      settings: { foreground: synFunction },
+    },
+    {
+      name: "Preprocessor macro",
+      scope: ["entity.name.function.preprocessor", "meta.preprocessor.macro entity.name.function"],
+      settings: { foreground: synMetadata },
     },
 
-    // ── Types / classes ──
+    // ── Types ──
     {
-      name: "Type declaration and references",
+      name: "Types and namespaces (plain)",
       scope: [
+        "entity.name.type",
+        "entity.name.class",
+        "entity.name.namespace",
+        "entity.name.scope-resolution",
+        "entity.other.inherited-class",
         "support.class",
         "support.type",
-        "entity.name.type",
-        "entity.name.namespace",
-        "entity.other.attribute",
-        "entity.name.scope-resolution",
-        "entity.name.class",
-        "storage.type.numeric.go",
-        "storage.type.byte.go",
-        "storage.type.boolean.go",
-        "storage.type.string.go",
-        "storage.type.uintptr.go",
-        "storage.type.error.go",
-        "storage.type.rune.go",
-        "storage.type.cs",
-        "storage.type.generic.cs",
-        "storage.type.modifier.cs",
-        "storage.type.variable.cs",
-        "storage.type.generic.java",
-        "storage.type.java",
-        "storage.type.object.array.java",
-        "storage.type.primitive.array.java",
-        "storage.type.primitive.java",
-        "storage.type.token.java",
-        "storage.type.groovy",
-        "storage.type.annotation.groovy",
-        "storage.type.parameters.groovy",
-        "storage.type.generic.groovy",
-        "storage.type.object.array.groovy",
-        "storage.type.primitive.array.groovy",
-        "storage.type.primitive.groovy",
-      ],
-      settings: { foreground: syntaxType },
-    },
-    {
-      name: "Type references — TS/JS specific",
-      scope: [
         "meta.type.cast.expr",
         "meta.type.new.expr",
-        "support.constant.math",
-        "support.constant.dom",
-        "support.constant.json",
-        "entity.other.inherited-class",
-        "punctuation.separator.namespace.ruby",
+        // Grammars that scope type references as storage.type
+        "storage.type.java",
+        "storage.type.generic.java",
+        "storage.type.object.array.java",
+        "storage.type.token.java",
+        "storage.type.cs",
+        "storage.type.generic.cs",
+        "storage.type.groovy",
+        "storage.type.generic.groovy",
+        "storage.type.object.array.groovy",
+        "storage.type.parameters.groovy",
+        "storage.modifier.import.java",
+        "storage.modifier.package.java",
+        "variable.language.wildcard.java",
       ],
-      settings: { foreground: syntaxType },
+      settings: { foreground: editorForeground },
     },
 
-    // ── Variables ──
+    // ── Variables and members ──
     {
-      name: "Variable",
+      name: "Variable / parameter",
       scope: [
         "variable",
+        "variable.parameter",
         "meta.definition.variable.name",
         "support.variable",
         "entity.name.variable",
@@ -1685,448 +1906,376 @@ const theme: ThemeDefinition = {
       settings: { foreground: editorForeground },
     },
     {
-      // Python hover popups render annotated names like `(variable) name: str`
-      // through the TextMate grammar (no semantic tokens). MagicPython tags the
-      // identifier under `meta.attribute.python` and lets `support.type` bleed
-      // through — pinning it back to the foreground keeps hover and editor in sync.
-      name: "Python annotated identifier (hover popup parity)",
-      scope: ["meta.attribute.python", "meta.indexed-name.python"],
-      settings: { foreground: editorForeground },
-    },
-    {
-      // Keys in key-value structures for programming languages. Property reads
-      // on objects (obj.prop) and object literal keys share this color.
-      name: "Key-like tokens (object keys, property access)",
+      name: "Field / property / object key",
       scope: [
-        // JS/TS object literal keys
-        "meta.object-literal.key",
-        // Property access in JS/TS/Python/Ruby/PHP (obj.prop)
         "variable.other.property",
         "variable.other.object.property",
-        "variable.other.object.access",
         "variable.other.member",
+        "variable.other.field",
+        "entity.name.variable.field",
         "support.variable.property",
-        "support.variable.property.dom",
+        "meta.object-literal.key",
       ],
-      settings: { foreground: syntaxMember },
+      settings: { foreground: synMember },
     },
     {
-      // Keys in structured data / config file formats. Intentionally matches
-      // editorForeground so config keys read as plain identifiers, not code.
-      name: "Config file keys (JSON, YAML, TOML, Python dict)",
-      scope: [
-        // JSON keys
-        "support.type.property-name.json",
-        "support.type.property-name.json.comments",
-        // YAML keys
-        "entity.name.tag.yaml",
-        // TOML keys
-        "entity.name.tag.toml",
-        // Python dict key
-        "meta.structure.dictionary.key.python",
-      ],
-      settings: { foreground: editorForeground },
-    },
-    {
-      name: "Self / this / super",
-      // Same color (keyword orange-tan) for: JS `this`, Python `self`/`cls`,
-      // Rust `self`, Ruby `self`, PHP `$this`, Kotlin `this`/`super`.
-      scope: [
-        "variable.language",
-        "variable.parameter.function.language.python",
-        "variable.parameter.function.language.special.self.python",
-        "variable.parameter.function.language.special.cls.python",
-      ],
-      settings: { foreground: syntaxKeyword },
-    },
-    {
-      name: "CSS property name / custom var",
-      scope: [
-        "support.type.vendored.property-name",
-        "support.type.property-name",
-        "source.css variable",
-        "source.coffee.embedded",
-      ],
-      settings: { foreground: editorForeground },
+      name: "this / super",
+      scope: "variable.language",
+      settings: { foreground: synKeyword },
     },
 
-    // ── Decorators / annotations / metadata ──
-    // Same color (yellow-green) for: TS @Component, Python @decorator,
-    // Java @Override, C# [Attribute], Kotlin @JvmStatic, etc.
+    // ── Metadata ──
     {
-      name: "Decorator / annotation",
+      name: "Annotation / decorator / attribute",
       scope: [
-        "meta.decorator",
         "punctuation.decorator",
+        "meta.decorator entity.name.function",
+        "meta.decorator variable.other.readwrite",
         "storage.type.annotation",
-        "storage.type.annotation.java",
-        "meta.declaration.annotation.java",
-        "meta.function.decorator.python",
+        "punctuation.definition.annotation",
+        "entity.name.type.annotation",
         "entity.name.function.decorator",
-        "entity.name.function.decorator.python",
-        "support.attribute.builtin",
-        "meta.attribute.cs",
+        "punctuation.definition.decorator",
+        "meta.attribute.rust",
+        "meta.attribute.php",
       ],
-      settings: { foreground: syntaxMetadata },
+      settings: { foreground: synMetadata },
+    },
+
+    // ── Labels ──
+    {
+      name: "Label",
+      scope: ["entity.name.label", "punctuation.definition.label"],
+      settings: { foreground: editorForeground },
     },
 
     // ── HTML / XML ──
     {
-      name: "HTML/XML tag name",
-      scope: "entity.name.tag",
-      settings: { foreground: syntaxHtmlTag },
+      name: "Tag",
+      scope: ["entity.name.tag", "punctuation.definition.tag", "meta.tag.sgml.doctype"],
+      settings: { foreground: synTag },
     },
     {
-      name: "HTML/XML attribute name",
+      name: "Custom element",
+      scope: "entity.name.tag.custom",
+      settings: { foreground: synCustomTag },
+    },
+    {
+      name: "Attribute name",
       scope: "entity.other.attribute-name",
+      settings: { foreground: synAttribute },
+    },
+    {
+      name: "XML attribute name",
+      scope: "text.xml entity.other.attribute-name",
       settings: { foreground: editorForeground },
     },
     {
-      name: "JSX/TSX component (capitalized) — uses blue-purple",
+      name: "XML namespace prefix",
+      scope: [
+        "entity.name.tag.namespace",
+        "entity.other.attribute-name.namespace",
+      ],
+      settings: { foreground: synMember },
+    },
+    {
+      name: "Entity reference",
+      scope: ["constant.character.entity", "punctuation.definition.entity.html", "punctuation.definition.entity.xml"],
+      settings: { foreground: synEntity },
+    },
+    {
+      name: "JSX / TSX component",
       scope: [
         "support.class.component",
-        "support.class.component.jsx",
-        "support.class.component.tsx",
-        "meta.tag.attributes.jsx entity.other.attribute-name",
-        "meta.tag.attributes.tsx entity.other.attribute-name",
+        "entity.name.tag.component",
       ],
-      settings: { foreground: syntaxJsxComponent },
+      settings: { foreground: jsComponent },
     },
+
+    // ── CSS / SCSS / Less ──
     {
-      name: "CSS/Less tag",
-      scope: ["entity.name.tag.css", "entity.name.tag.less"],
-      settings: { foreground: syntaxHtmlTag },
-    },
-    {
-      name: "CSS class / id selectors",
+      name: "Selectors",
       scope: [
-        "entity.other.attribute-name.class.css",
-        "source.css entity.other.attribute-name.class",
-        "entity.other.attribute-name.id.css",
-        "entity.other.attribute-name.parent-selector.css",
-        "entity.other.attribute-name.parent.less",
-        "source.css entity.other.attribute-name.pseudo-class",
-        "entity.other.attribute-name.pseudo-element.css",
-        "source.css.less entity.other.attribute-name.id",
-        "entity.other.attribute-name.scss",
+        "entity.name.tag.css",
+        "entity.name.tag.scss",
+        "entity.name.tag.less",
+        "source.css entity.other.attribute-name",
+        "source.css.scss entity.other.attribute-name",
+        "source.css.less entity.other.attribute-name",
+        "source.sass entity.other.attribute-name",
+        "entity.other.keyframe-offset",
+        "source.css punctuation.definition.entity",
+        "source.css.scss punctuation.definition.entity",
+        "source.css.less punctuation.definition.entity",
       ],
-      settings: { foreground: syntaxHtmlTag },
+      settings: { foreground: synTag },
     },
     {
-      name: "Tag punctuation brackets",
-      scope: "punctuation.definition.tag",
-      settings: { foreground: gray6 },
+      name: "CSS property name",
+      scope: [
+        "support.type.property-name",
+        "support.type.vendored.property-name",
+        "meta.property-name",
+        "source.css variable",
+        "source.css.scss variable.css",
+      ],
+      settings: { foreground: synAttribute },
     },
     {
-      name: "CSS property value",
+      name: "CSS property value / unit",
       scope: [
         "support.constant.property-value",
+        "support.constant.vendored.property-value",
         "support.constant.font-name",
-        "support.constant.media-type",
         "support.constant.media",
+        "support.constant.media-type",
+        "source.css keyword.other.unit",
+        "source.css.scss keyword.other.unit",
+        "source.css.less keyword.other.unit",
+      ],
+      settings: { foreground: synString },
+    },
+    {
+      name: "CSS color",
+      scope: [
         "constant.other.color.rgb-value",
         "constant.other.rgb-value",
         "support.constant.color",
       ],
-      settings: { foreground: syntaxString },
+      settings: { foreground: synEntity },
     },
     {
-      name: "XML prologue / preprocessor strings",
-      scope: ["meta.preprocessor.string"],
-      settings: { foreground: syntaxString },
-    },
-    {
-      name: "Preprocessor numeric",
-      scope: "meta.preprocessor.numeric",
-      settings: { foreground: syntaxNumber },
-    },
-
-    // ─────────────────────────────────────────────────────────────────────
-    // Cross-language consistency
-    // Ensure the same language feature gets the same color across grammars.
-    // Using JavaScript/TypeScript scopes as the visual reference.
-    // ─────────────────────────────────────────────────────────────────────
-
-    // Function / method calls — Ruby & PHP grammars use `variable.function`
-    // for invocations; align with JS `entity.name.function` (blue).
-    {
-      name: "Method invocation (cross-language)",
+      name: "CSS function",
       scope: [
-        "variable.function",
-        "entity.name.function.call",
-        "meta.function-call entity.name.function",
-        "meta.function-call.generic.python entity.name.function",
+        "support.function.misc.css",
+        "support.function.transform.css",
+        "support.function.gradient.css",
+        "support.function.calc.css",
+        "support.function.url.css",
+        "support.function.misc.scss",
+        "support.function.misc.less",
       ],
-      settings: { foreground: syntaxFunction },
+      settings: { foreground: synTag },
+    },
+    {
+      name: "CSS url",
+      scope: ["variable.parameter.url", "string.unquoted.url"],
+      settings: { foreground: cssUrl },
+    },
+    {
+      name: "CSS !important",
+      scope: "keyword.other.important",
+      settings: { foreground: synKeyword, fontStyle: "bold" },
+    },
+    {
+      name: "Less variable",
+      scope: ["variable.other.less", "source.css.less variable"],
+      settings: { foreground: lessVariable },
     },
 
-    // Built-in functions — print (Python), console.log (JS), puts (Ruby),
-    // len/range, etc. Same blue as user-defined functions.
+    // ── JSON ──
     {
-      name: "Built-in functions (cross-language)",
+      name: "JSON key",
       scope: [
-        "support.function.builtin",
-        "support.function.builtin.python",
-        "support.function.magic.python",
-        "support.function.kernel.ruby",
-        "support.function.builtin.shell",
+        "support.type.property-name.json",
+        "support.type.property-name.json.comments",
+        "punctuation.support.type.property-name.json",
       ],
-      settings: { foreground: syntaxFunction },
+      settings: { foreground: synMember },
     },
 
-    // Function parameters — JS, Python, Rust, Java, C#, Kotlin etc.
-    // Same default-foreground across languages (matches JS/TS).
+    // ── YAML ──
     {
-      name: "Function parameter (cross-language)",
-      scope: [
-        "variable.parameter",
-        "variable.parameter.function",
-        "variable.parameter.function-call",
-        "meta.function.parameters variable",
-      ],
-      settings: { foreground: editorForeground },
+      name: "YAML key",
+      scope: "entity.name.tag.yaml",
+      settings: { foreground: synKeyword },
     },
-
-    // Ruby instance / class variables (@foo, @@foo) — variables are uniformly
-    // editorForeground across all languages, regardless of scope qualifier.
     {
-      name: "Ruby instance / class variable",
+      name: "YAML plain scalar",
       scope: [
-        "variable.other.readwrite.instance.ruby",
-        "variable.other.readwrite.class.ruby",
-        "variable.other.constant.ruby",
+        "string.unquoted.plain.out.yaml",
+        "string.unquoted.plain.in.yaml",
+        "string.unquoted.block.yaml",
+        "source.yaml constant.numeric",
+        "source.yaml constant.language",
+        "entity.other.document.begin.yaml",
+        "entity.other.document.end.yaml",
       ],
       settings: { foreground: editorForeground },
     },
-
-    // PHP `$variable` — keep at default foreground so PHP variables look
-    // like JS variables, not like a separate language feature.
     {
-      name: "PHP variable",
-      scope: ["variable.other.php", "punctuation.definition.variable.php"],
-      settings: { foreground: editorForeground },
-    },
-
-    // Rust lifetimes (`'a`) — type-level annotations, color them as type
-    // parameters (teal) rather than as members or variables.
-    {
-      name: "Rust lifetime",
+      name: "YAML anchor / alias",
       scope: [
-        "storage.modifier.lifetime.rust",
-        "entity.name.lifetime.rust",
-        "punctuation.definition.lifetime.rust",
+        "entity.name.type.anchor.yaml",
+        "variable.other.anchor.yaml",
+        "variable.other.alias.yaml",
+        "punctuation.definition.anchor.yaml",
+        "punctuation.definition.alias.yaml",
       ],
-      settings: { foreground: syntaxTypeParam },
+      settings: { foreground: yamlAnchor },
+    },
+    {
+      name: "YAML comment",
+      scope: "comment.line.number-sign.yaml",
+      settings: { foreground: synDocComment, fontStyle: "italic" },
     },
 
-    // Java enum constants — Java's grammar uses `constant.other.enum.java`
-    // for `Direction.UP`, while JS/TS use `variable.other.enummember`. Align
-    // Java enum constants with the cross-language member color (purple-pink).
+    // ── TOML / INI / properties / dotenv ──
     {
-      name: "Java enum constant",
-      scope: ["constant.other.enum.java"],
-      settings: { foreground: syntaxMember },
-    },
-
-    // C++ primitive types (`int`, `void`, `char`, `bool`, `float`, …) — the
-    // cpp grammar tags them as `storage.type.primitive.cpp` / `storage.type.built-in.cpp`,
-    // which would inherit the orange-tan keyword color. Java primitives are
-    // already pinned to teal in the main Types rule above; do the same for C++
-    // so that `int` reads the same in `int x;` (C++) as `int x;` (Java).
-    {
-      name: "C++ primitive types",
+      name: "Config file key / section",
       scope: [
-        "storage.type.primitive.cpp",
-        "storage.type.built-in.cpp",
-        "storage.type.built-in.primitive.cpp",
-        "support.type.built-in.cpp",
-        "support.type.built-in.primitive.cpp",
-      ],
-      settings: { foreground: syntaxType },
-    },
-
-    // C++ template parameters (`template<typename T>` → `T`) — keep generic
-    // type parameters teal across all languages (TS `<T>`, Java `<T>`, Rust `<T>`).
-    {
-      name: "C++ template parameter",
-      scope: [
-        "entity.name.type.template.cpp",
-        "entity.name.type.parameter.cpp",
-        "storage.type.template.cpp",
-      ],
-      settings: { foreground: syntaxTypeParam },
-    },
-
-    // TS `satisfies` operator — some grammar versions scope it under
-    // `keyword.control.satisfies.ts` (which would route to control-flow
-    // purple-pink). Pin it to the keyword orange-tan, alongside `as`, `typeof`,
-    // and `instanceof` (already covered by the word-like operators rule).
-    {
-      name: "TS satisfies operator",
-      scope: ["keyword.control.satisfies.ts", "keyword.control.satisfies.tsx"],
-      settings: { foreground: syntaxKeyword },
-    },
-
-    // ─────────────────────────────────────────────────────────────────────
-    // Markup / data-format cross-consistency
-    // The "key in a key/value structure" concept (section header, table
-    // header, .env name, config file key) uses editorForeground across data
-    // formats — config keys read as plain identifiers, not code. Type-like
-    // refs (XML namespaces, YAML tag handles) look like types: teal
-    // syntaxType. Datetimes and other primitive literals look like numbers.
-    // ─────────────────────────────────────────────────────────────────────
-
-    // YAML directives (`%YAML 1.2`) — these are metadata about the document,
-    // same family as decorators/annotations in code → yellow-green.
-    {
-      name: "YAML directive",
-      scope: [
-        "entity.tag.directive.yaml",
-        "punctuation.definition.directive.begin.yaml",
-      ],
-      settings: { foreground: syntaxMetadata },
-    },
-
-    // YAML tag handles (`!!str`, `!Foo`) — they declare a type, not a key
-    // or a keyword. Pin to type teal so they read like `int` / `str` do.
-    {
-      name: "YAML tag handle",
-      scope: ["storage.type.tag-handle.yaml", "entity.name.type.tag.yaml"],
-      settings: { foreground: syntaxType },
-    },
-
-    // TOML section / table headers (`[section]`, `[[array.of.tables]]`) —
-    // these ARE the keys of the document. Match editorForeground like other
-    // config-file keys (JSON/YAML/INI).
-    {
-      name: "TOML section / table header",
-      scope: [
-        "entity.name.section.toml",
-        "entity.name.table.toml",
+        "support.type.property-name.toml",
+        "support.type.property-name.table.toml",
+        "support.type.property-name.array.toml",
         "entity.other.attribute-name.table.toml",
+        "entity.name.section.toml",
+        "entity.name.tag.toml",
+        "keyword.other.definition.ini",
+        "entity.name.section.group-title.ini",
+        "support.constant.key.properties",
+        "entity.name.tag.properties",
+        "variable.other.key.env",
+        "variable.other.env",
       ],
-      settings: { foreground: editorForeground },
+      settings: { foreground: synKeyword },
     },
-
-    // TOML datetime literals — `1979-05-27T07:32:00-08:00` is a primitive
-    // value, not a string. Match number color so it visually groups with
-    // other scalars (ints, floats, booleans).
     {
-      name: "TOML datetime literal",
+      name: "Config file value",
+      scope: ["string.unquoted.value.properties", "string.unquoted.env"],
+      settings: { foreground: synString },
+    },
+    {
+      name: "TOML boolean / date",
       scope: [
+        "constant.language.boolean.toml",
         "constant.other.time.datetime.offset.toml",
         "constant.other.time.datetime.local.toml",
         "constant.other.time.date.toml",
         "constant.other.time.time.toml",
       ],
-      settings: { foreground: syntaxNumber },
+      settings: { foreground: editorForeground, fontStyle: "italic" },
     },
-
-    // XML namespace prefixes (`xmlns:foo`, `<foo:bar>`) — the prefix names
-    // a type/schema, not the tag itself. Color it teal so it stands apart
-    // from the tag-name gold and signals "this is a namespace reference".
     {
-      name: "XML namespace prefix",
+      name: "Key-value separator",
       scope: [
-        "entity.name.tag.namespace.xml",
-        "entity.other.attribute-name.namespace.xml",
-        "entity.name.tag.namespace",
+        "punctuation.separator.key-value.ini",
+        "punctuation.separator.key-value.properties",
       ],
-      settings: { foreground: syntaxType },
-    },
-
-    // JSON5 unquoted keys — JSON5 allows `{ foo: 1 }`. Some grammars scope
-    // these as `meta.mapping.key.json5` or `string.unquoted.key.json5`. Pin
-    // to the same editorForeground as quoted JSON keys for visual parity.
-    {
-      name: "JSON5 unquoted key",
-      scope: [
-        "meta.mapping.key.json5",
-        "string.unquoted.key.json5",
-        "entity.name.tag.json5",
-      ],
-      settings: { foreground: editorForeground },
-    },
-
-    // INI / .properties / .env keys and section headers — `[section]` and
-    // `KEY=value` are both keys-in-a-key-value-structure. Match editorForeground
-    // like other config-file keys (JSON/YAML/TOML) for visual consistency.
-    {
-      name: "INI / .env / .properties keys and sections",
-      scope: [
-        "entity.name.section.group-title.ini",
-        "entity.name.section.ini",
-        "keyword.other.definition.ini",
-        "variable.other.key.env",
-        "entity.name.tag.env",
-        "support.type.property-name.ini",
-      ],
-      settings: { foreground: editorForeground },
+      settings: { foreground: synSeparator },
     },
 
     // ── Markdown ──
     {
       name: "Markdown heading",
-      scope: "markup.heading",
-      settings: { fontStyle: "bold", foreground: syntaxFunction },
+      scope: ["markup.heading", "entity.name.section.markdown"],
+      settings: { foreground: synMember, fontStyle: "italic" },
     },
     {
-      name: "Markdown bold",
-      scope: "markup.bold",
-      settings: { fontStyle: "bold", foreground: syntaxFunction },
+      name: "Markdown markers",
+      scope: [
+        "punctuation.definition.heading.markdown",
+        "punctuation.definition.bold.markdown",
+        "punctuation.definition.italic.markdown",
+        "punctuation.definition.strikethrough.markdown",
+        "punctuation.definition.raw.markdown",
+        "punctuation.definition.markdown",
+        "punctuation.definition.list.begin.markdown",
+        "meta.separator.markdown",
+        "punctuation.separator.table.markdown",
+        "constant.other.reference.link.markdown",
+      ],
+      settings: { foreground: synKeyword },
+    },
+    { name: "Markdown bold", scope: "markup.bold", settings: { fontStyle: "bold" } },
+    { name: "Markdown italic", scope: "markup.italic", settings: { fontStyle: "italic" } },
+    {
+      name: "Markdown code",
+      scope: [
+        "markup.inline.raw",
+        "markup.fenced_code.block.markdown",
+        "markup.raw.block.markdown",
+      ],
+      settings: { foreground: editorForeground },
     },
     {
-      name: "Markdown italic",
-      scope: "markup.italic",
-      settings: { fontStyle: "italic", foreground: syntaxMember },
+      name: "Markdown fence language",
+      scope: "fenced_code.block.language",
+      settings: { foreground: synMember, fontStyle: "italic" },
     },
     {
-      name: "Markdown header symbol",
-      scope: "header",
-      settings: { foreground: syntaxFunction },
-    },
-    {
-      name: "Markdown blockquote",
+      name: "Markdown quote marker",
       scope: "punctuation.definition.quote.begin.markdown",
-      settings: { foreground: syntaxComment },
-    },
-    {
-      name: "Markdown list bullet",
-      scope: "punctuation.definition.list.begin.markdown",
-      settings: { foreground: blue8 },
-    },
-    {
-      name: "Markdown inline code",
-      scope: "markup.inline.raw",
-      settings: { foreground: syntaxString },
-    },
-    {
-      // Diff convention: green = inserted, red = deleted. These markup.* scopes
-      // also color .diff / .patch files, matching how diff tools signal changes.
-      name: "Markdown inserted",
-      scope: "markup.inserted",
-      settings: { foreground: syntaxString },
-    },
-    {
-      name: "Markdown deleted",
-      scope: "markup.deleted",
-      settings: { foreground: red7 },
-    },
-    {
-      name: "Markdown changed",
-      scope: "markup.changed",
-      settings: { foreground: syntaxKeyword },
+      settings: { foreground: synComment },
     },
     {
       name: "Markdown link text",
       scope: [
         "string.other.link.title.markdown",
-        "markup.underline.link.markdown",
+        "string.other.link.description.markdown",
+        "meta.link.inet markup.underline.link.markdown",
+        "meta.link.email markup.underline.link.markdown",
       ],
-      settings: { foreground: blue9 },
+      settings: { foreground: synFunction, fontStyle: "underline" },
+    },
+    {
+      name: "Markdown link destination",
+      scope: ["markup.underline.link.markdown", "markup.underline.link.image.markdown"],
+      settings: { foreground: synMethod, fontStyle: "italic" },
     },
 
-    // ── Regexp ──
+    // ── Diff / patch files ──
+    {
+      name: "Diff inserted",
+      scope: "markup.inserted",
+      settings: { foreground: fileAdded },
+    },
+    {
+      name: "Diff deleted",
+      scope: "markup.deleted",
+      settings: { foreground: gutterDeleted },
+    },
+    {
+      name: "Diff changed",
+      scope: "markup.changed",
+      settings: { foreground: fileModified },
+    },
+    {
+      name: "Diff header",
+      scope: ["meta.diff.header", "meta.diff.range"],
+      settings: { foreground: synKeyword },
+    },
+    {
+      name: "Git rebase SHA",
+      scope: "constant.sha.git-rebase",
+      settings: { foreground: synNumber },
+    },
+
+    // ── Regular expression internals ──
+    {
+      name: "Regexp character class",
+      scope: [
+        "constant.other.character-class.set.regexp",
+        "constant.character.character-class.regexp",
+        "constant.other.character-class.regexp",
+        "constant.character.set.regexp",
+      ],
+      settings: { foreground: synRegexpClass, fontStyle: "bold" },
+    },
+    {
+      name: "Regexp meta / anchor / alternation",
+      scope: [
+        "keyword.control.anchor.regexp",
+        "keyword.operator.or.regexp",
+        "keyword.operator.negation.regexp",
+        "keyword.other.back-reference.regexp",
+      ],
+      settings: { foreground: synKeyword },
+    },
+    {
+      name: "Regexp quantifier",
+      scope: "keyword.operator.quantifier.regexp",
+      settings: { foreground: synNumber },
+    },
     {
       name: "Regexp group punctuation",
       scope: [
@@ -2135,78 +2284,343 @@ const theme: ThemeDefinition = {
         "punctuation.definition.character-class.regexp",
         "punctuation.character.set.begin.regexp",
         "punctuation.character.set.end.regexp",
-        "keyword.operator.negation.regexp",
         "support.other.parenthesis.regexp",
-      ],
-      settings: { foreground: syntaxString },
-    },
-    {
-      name: "Regexp character class",
-      scope: [
-        "constant.character.character-class.regexp",
-        "constant.other.character-class.set.regexp",
-        "constant.other.character-class.regexp",
-        "constant.character.set.regexp",
-      ],
-      settings: { foreground: syntaxRegexp },
-    },
-    {
-      name: "Regexp alternation / anchor",
-      scope: ["keyword.operator.or.regexp", "keyword.control.anchor.regexp"],
-      settings: { foreground: syntaxFunction },
-    },
-    {
-      name: "Regexp quantifier",
-      scope: "keyword.operator.quantifier.regexp",
-      settings: { foreground: syntaxMetadata },
-    },
-
-    // ── Diffs ──
-    {
-      name: "Diff header",
-      scope: "meta.diff.header",
-      settings: { foreground: syntaxKeyword },
-    },
-
-    // ── Git rebase ──
-    {
-      name: "Git rebase function",
-      scope: "support.function.git-rebase",
-      settings: { foreground: syntaxFunction },
-    },
-    {
-      name: "Git rebase SHA",
-      scope: "constant.sha.git-rebase",
-      settings: { foreground: syntaxNumber },
-    },
-
-    // ── Java import / wildcard ──
-    {
-      name: "Java import / package / wildcard",
-      scope: [
-        "storage.modifier.import.java",
-        "variable.language.wildcard.java",
-        "storage.modifier.package.java",
       ],
       settings: { foreground: editorForeground },
     },
 
-    // ── Labels ──
+    // ─────────────────────────────────────────────────────────────────────
+    // Language-specific colors
+    // ─────────────────────────────────────────────────────────────────────
+
+    // JavaScript / TypeScript — locals gray-blue, platform globals purple
+    // italic.
     {
-      name: "Label",
-      scope: "entity.name.label",
-      settings: { foreground: syntaxLabel },
+      name: "JS/TS local variable",
+      scope: [
+        "source.js variable.other.readwrite",
+        "source.js variable.other.constant",
+        "source.js variable.other.object",
+        "source.jsx variable.other.readwrite",
+        "source.jsx variable.other.constant",
+        "source.jsx variable.other.object",
+        "source.ts variable.other.readwrite",
+        "source.ts variable.other.constant",
+        "source.ts variable.other.object",
+        "source.tsx variable.other.readwrite",
+        "source.tsx variable.other.constant",
+        "source.tsx variable.other.object",
+      ],
+      settings: { foreground: jsLocalVariable },
+    },
+    {
+      name: "JS/TS global object",
+      scope: [
+        "support.variable.dom",
+        "support.class.console",
+        "support.variable.object.process",
+        "support.variable.object.node",
+        "support.constant.math",
+        "support.constant.json",
+      ],
+      settings: { foreground: jsGlobalVariable, fontStyle: "italic" },
+    },
+
+    // Python
+    {
+      name: "Python self / cls",
+      scope: [
+        "variable.parameter.function.language.special.self.python",
+        "variable.language.special.self.python",
+        "variable.parameter.function.language.special.cls.python",
+        "variable.language.special.cls.python",
+      ],
+      settings: { foreground: pySelf },
+    },
+    {
+      name: "Python builtin",
+      scope: [
+        "support.function.builtin.python",
+        "support.type.python",
+        "support.type.exception.python",
+      ],
+      settings: { foreground: pyBuiltin },
+    },
+    {
+      name: "Python magic name",
+      scope: ["support.function.magic.python", "support.variable.magic.python"],
+      settings: { foreground: pyMagic },
+    },
+    {
+      name: "Python keyword argument",
+      scope: "variable.parameter.function-call.python",
+      settings: { foreground: pyKeywordArgument },
+    },
+    {
+      name: "Python bytes",
+      scope: [
+        "string.quoted.binary.single.python",
+        "string.quoted.binary.multi.python",
+        "string.quoted.binary.single.python storage.type.string.python",
+        "string.quoted.binary.multi.python storage.type.string.python",
+      ],
+      settings: { foreground: pyBytes },
+    },
+    {
+      name: "Python string prefix",
+      scope: "storage.type.string.python",
+      settings: { foreground: synString },
+    },
+    {
+      name: "Python f-string braces / format spec",
+      scope: [
+        "constant.character.format.placeholder.other.python",
+        "storage.type.format.python",
+      ],
+      settings: { foreground: synKeyword },
+    },
+
+    // Go
+    {
+      name: "Go builtin",
+      scope: [
+        "entity.name.function.support.builtin.go",
+        "storage.type.numeric.go",
+        "storage.type.string.go",
+        "storage.type.byte.go",
+        "storage.type.boolean.go",
+        "storage.type.rune.go",
+        "storage.type.error.go",
+        "storage.type.uintptr.go",
+        "entity.name.type.any.go",
+        "entity.name.type.comparable.go",
+        "constant.language.boolean.go",
+        "constant.language.null.go",
+        "constant.language.iota.go",
+      ],
+      settings: { foreground: goBuiltin },
+    },
+    {
+      name: "Go call",
+      scope: "entity.name.function.support.go",
+      settings: { foreground: goCall },
+    },
+    {
+      name: "Go package",
+      scope: "entity.name.type.package.go",
+      settings: { foreground: goPackage },
+    },
+    {
+      name: "Go type",
+      scope: "entity.name.type.go",
+      settings: { foreground: goType },
+    },
+    {
+      name: "Go constant",
+      scope: "variable.other.constant.go",
+      settings: { foreground: synMember, fontStyle: "italic" },
+    },
+    {
+      name: "Go field",
+      scope: "variable.other.property.go",
+      settings: { foreground: editorForeground },
+    },
+
+    // Rust
+    {
+      name: "Rust type",
+      scope: ["source.rust entity.name.type", "entity.name.type.struct.rust"],
+      settings: { foreground: rsType },
+    },
+    {
+      name: "Rust enum",
+      scope: "entity.name.type.enum.rust",
+      settings: { foreground: rsType, fontStyle: "italic" },
+    },
+    {
+      name: "Rust enum variant (Some / None / Ok / Err)",
+      scope: ["entity.name.type.option.rust", "entity.name.type.result.rust"],
+      settings: { foreground: rsVariant, fontStyle: "italic" },
+    },
+    {
+      name: "Rust trait",
+      scope: "entity.name.type.trait.rust",
+      settings: { foreground: rsTrait },
+    },
+    {
+      name: "Rust primitive type",
+      scope: ["entity.name.type.primitive.rust", "entity.name.type.numeric.rust"],
+      settings: { foreground: synKeyword },
+    },
+    {
+      name: "Rust lifetime",
+      scope: ["entity.name.type.lifetime.rust", "punctuation.definition.lifetime.rust"],
+      settings: { foreground: rsLifetime, fontStyle: "italic" },
+    },
+    {
+      name: "Rust macro",
+      scope: ["entity.name.function.macro.rust", "entity.name.function.macro.rules.rust"],
+      settings: { foreground: rsMacro },
+    },
+    {
+      name: "Rust self",
+      scope: "variable.language.self.rust",
+      settings: { foreground: rsSelf },
+    },
+    {
+      name: "Rust ? operator",
+      scope: "keyword.operator.question.rust",
+      settings: { foreground: rsQuestion, fontStyle: "bold" },
+    },
+
+    // PHP
+    {
+      name: "PHP variable / $this",
+      scope: [
+        "variable.other.php",
+        "punctuation.definition.variable.php",
+        "variable.language.this.php",
+      ],
+      settings: { foreground: phpVariable },
+    },
+    {
+      name: "PHP constant",
+      scope: ["constant.other.php", "constant.other.class.php"],
+      settings: { foreground: phpVariable, fontStyle: "italic" },
+    },
+    {
+      name: "PHP named argument",
+      scope: "entity.name.variable.parameter.php",
+      settings: { foreground: phpNamedArgument },
+    },
+    {
+      name: "PHP tags",
+      scope: [
+        "punctuation.section.embedded.begin.php",
+        "punctuation.section.embedded.end.php",
+      ],
+      settings: { foreground: synKeyword },
+    },
+
+    // Ruby
+    {
+      name: "Ruby method declaration",
+      scope: "source.ruby entity.name.function",
+      settings: { foreground: rbMethod },
+    },
+    {
+      name: "Ruby symbol / hash key",
+      scope: [
+        "constant.language.symbol.ruby",
+        "constant.language.symbol.hashkey.ruby",
+        "constant.other.symbol.ruby",
+        "constant.other.symbol.hashkey.ruby",
+        "punctuation.definition.constant.ruby",
+        "punctuation.definition.constant.hashkey.ruby",
+      ],
+      settings: { foreground: rbSymbol },
+    },
+    {
+      name: "Ruby instance variable",
+      scope: "variable.other.readwrite.instance.ruby",
+      settings: { foreground: synMember },
+    },
+    {
+      name: "Ruby class variable",
+      scope: "variable.other.readwrite.class.ruby",
+      settings: { foreground: synMember, fontStyle: "italic" },
+    },
+    {
+      name: "Ruby global variable",
+      scope: "variable.other.readwrite.global.ruby",
+      settings: { foreground: rbGlobal },
+    },
+    {
+      name: "Ruby local variable / parameter",
+      scope: ["source.ruby variable.other", "variable.parameter.function.ruby"],
+      settings: { foreground: rbLocal, fontStyle: "italic" },
+    },
+    {
+      name: "Ruby constant",
+      scope: "variable.other.constant.ruby",
+      settings: { foreground: rbConstant },
+    },
+    {
+      name: "Ruby regexp / heredoc",
+      scope: [
+        "string.regexp.classic.ruby",
+        "string.regexp.mod-r.ruby",
+        "string.regexp.interpolated.ruby",
+        "string.unquoted.heredoc.ruby",
+      ],
+      settings: { foreground: rbRegexp },
+    },
+    {
+      name: "Ruby comment",
+      scope: ["source.ruby comment"],
+      settings: { foreground: rbComment, fontStyle: "italic" },
+    },
+    {
+      name: "Ruby number",
+      scope: "source.ruby constant.numeric",
+      settings: { foreground: rbNumber },
+    },
+    {
+      name: "Ruby escape",
+      scope: "source.ruby constant.character.escape",
+      settings: { foreground: rbEscape },
+    },
+    {
+      name: "Ruby special method",
+      scope: ["keyword.other.special-method.ruby", "support.function.kernel.ruby"],
+      settings: { foreground: rbSpecialCall },
+    },
+
+    // Shell
+    {
+      name: "Shell command / function",
+      scope: [
+        "entity.name.command.shell",
+        "support.function.builtin.shell",
+        "entity.name.function.shell",
+        "entity.name.function.call.shell",
+      ],
+      settings: { foreground: shCommand },
+    },
+    {
+      name: "Shell variable",
+      scope: [
+        "variable.other.normal.shell",
+        "variable.other.special.shell",
+        "variable.other.positional.shell",
+        "variable.other.bracket.shell",
+        "punctuation.definition.variable.shell",
+      ],
+      settings: { foreground: editorForeground },
+    },
+    {
+      name: "Shell argument / option / heredoc body",
+      scope: [
+        "source.shell string.unquoted.argument",
+        "source.shell constant.other.option",
+        "string.unquoted.heredoc.shell",
+      ],
+      settings: { foreground: editorForeground },
+    },
+    {
+      name: "Shell shebang",
+      scope: ["meta.shebang", "punctuation.definition.comment.shebang"],
+      settings: { foreground: synComment, fontStyle: "bold" },
     },
 
     // ── Invalid ──
     {
       name: "Invalid",
-      scope: "invalid",
-      settings: { foreground: syntaxInvalid },
+      scope: ["invalid", "invalid.illegal"],
+      settings: { foreground: synInvalid },
     },
     {
-      // Deprecated ≠ broken: keep normal color, strike it through (otherwise
-      // the generic `invalid` red above would paint deprecated usages as errors).
+      // Deprecated ≠ broken: keep the normal color, strike it through.
       name: "Deprecated",
       scope: "invalid.deprecated",
       settings: { fontStyle: "strikethrough", foreground: editorForeground },
