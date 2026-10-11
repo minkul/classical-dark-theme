@@ -103,6 +103,10 @@ const checkDisabledMark = "#6F737A";
 
 const editorBackground = gray10;
 const editorForeground = "#BCBEC4";
+// Long-form text in panels (chat transcripts, side bar views, typed input)
+// uses the editor text tone; titles, menus, tabs and selections keep the
+// brighter gray130 so they read as a step above body text.
+const bodyText = editorForeground;
 const caret = "#CED0D6";
 const caretRow = "#1F2024";
 const lineNumber = "#4B5059";
@@ -113,7 +117,7 @@ const whitespace = "#6F737A";
 const selection = "#214283";
 const selectionInactive = "#4C4F56";
 const popupEditorBackground = "#27282B"; // completion list and documentation popups
-const codeBlockBackground = "#2B2D30"; // markdown code blocks / quotes, diff separators
+const blockBackground = "#2B2D30"; // markdown quotes, collapsed diff regions
 const inlineCodeBackground = "#343539";
 const inlineCodeForeground = "#CED0D6";
 const foldedForeground = "#868991";
@@ -377,7 +381,7 @@ const theme: ThemeDefinition = {
   // ───────────────────────────────────────────────────────────────────────────
   colors: {
     // ── Base / shared ──
-    foreground: gray130,
+    foreground: bodyText,
     disabledForeground: gray60,
     descriptionForeground: gray100,
     errorForeground: red100,
@@ -400,9 +404,11 @@ const theme: ThemeDefinition = {
     // ── Text ──
     "textLink.foreground": blue100,
     "textLink.activeForeground": blue100,
-    "textBlockQuote.background": codeBlockBackground,
+    "textBlockQuote.background": blockBackground,
     "textBlockQuote.border": synComment,
-    "textCodeBlock.background": codeBlockBackground,
+    // Code blocks in rendered markdown (hovers, previews, chat webviews) use
+    // the embedded-editor surface, one step off the editor background.
+    "textCodeBlock.background": gray20,
     "textPreformat.foreground": inlineCodeForeground,
     "textPreformat.background": inlineCodeBackground,
     "textPreformat.border": transparent,
@@ -440,7 +446,7 @@ const theme: ThemeDefinition = {
     "modernUI.shellBackground": gray30,
     "modernUI.inactiveShellBackground": gray30,
     "surface.background": gray10,
-    "surface.foreground": gray130,
+    "surface.foreground": bodyText,
     "surface.border": gray10,
     "editor.border": gray10,
     "modernPanel.border": gray10,
@@ -497,7 +503,7 @@ const theme: ThemeDefinition = {
 
     // ── Side bar ──
     "sideBar.background": gray10,
-    "sideBar.foreground": gray130,
+    "sideBar.foreground": bodyText,
     "sideBar.border": gray30,
     "sideBar.dropBackground": dropTarget,
     "sideBarTitle.background": gray10,
@@ -908,7 +914,7 @@ const theme: ThemeDefinition = {
     "diffEditorOverview.removedForeground": diffDeletedMark,
     "diffEditor.border": gray30,
     "diffEditor.diagonalFill": gray40 + "80",
-    "diffEditor.unchangedRegionBackground": codeBlockBackground,
+    "diffEditor.unchangedRegionBackground": blockBackground,
     "diffEditor.unchangedRegionForeground": gray100,
     "diffEditor.unchangedRegionShadow": shadow,
     "diffEditor.unchangedCodeBackground": transparent,
@@ -1030,7 +1036,7 @@ const theme: ThemeDefinition = {
     // ── Inputs ──
     // Outlined fields on the surface they sit on.
     "input.background": gray10,
-    "input.foreground": gray130,
+    "input.foreground": bodyText,
     "input.border": gray50,
     "input.placeholderForeground": gray80,
     "inputOption.activeBackground": blue60,
@@ -1108,10 +1114,10 @@ const theme: ThemeDefinition = {
     "settings.checkboxForeground": gray130,
     "settings.checkboxBorder": checkBorder,
     "settings.textInputBackground": gray10,
-    "settings.textInputForeground": gray130,
+    "settings.textInputForeground": bodyText,
     "settings.textInputBorder": gray50,
     "settings.numberInputBackground": gray10,
-    "settings.numberInputForeground": gray130,
+    "settings.numberInputForeground": bodyText,
     "settings.numberInputBorder": gray50,
     "settings.focusedRowBackground": wash20,
     "settings.focusedRowBorder": blue80,
@@ -1412,7 +1418,7 @@ const theme: ThemeDefinition = {
     // ── Inline chat ──
     // AI surfaces are tinted purple.
     "inlineChat.background": purple20,
-    "inlineChat.foreground": gray130,
+    "inlineChat.foreground": bodyText,
     "inlineChat.border": purple50,
     "inlineChat.shadow": shadow,
     "inlineChatInput.background": gray10,
@@ -1478,18 +1484,18 @@ const theme: ThemeDefinition = {
     // Same model as the workbench: panels on a frame.
     "agents.background": gray30,
     "agentsPanel.background": gray10,
-    "agentsPanel.foreground": gray130,
+    "agentsPanel.foreground": bodyText,
     "agentsPanel.border": gray10,
     "agentsCard.border": gray10,
     "agentsBottomPanel.border": gray10,
     "agentsDetail.background": editorBackground,
     "activeSessionView.background": gray10,
-    "activeSessionView.foreground": gray130,
+    "activeSessionView.foreground": bodyText,
     "inactiveSessionView.background": gray30,
     "inactiveSessionView.foreground": gray100,
     "agentsGradient.tintColor": shellTint,
     "agentsChatInput.background": gray10,
-    "agentsChatInput.foreground": gray130,
+    "agentsChatInput.foreground": bodyText,
     "agentsChatInput.border": gray50,
     "agentsChatInput.focusBorder": blue80,
     "agentsChatInput.placeholderForeground": gray80,
