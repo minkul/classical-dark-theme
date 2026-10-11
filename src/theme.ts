@@ -454,9 +454,9 @@ const theme: ThemeDefinition = {
     "modernActivityBar.background": gray30,
     "modernActivityBar.inactiveBackground": gray30,
     "modernActivityBar.border": transparent,
-    "modernActivityBarItem.activeBackground": blue80,
-    "modernActivityBarItem.activeForeground": white,
-    "modernActivityBarItem.hoverBackground": wash20,
+    "modernActivityBarItem.activeBackground": wash20,
+    "modernActivityBarItem.activeForeground": blue100,
+    "modernActivityBarItem.hoverBackground": wash10,
     "modernActivityBarItem.hoverForeground": gray130,
     // Modern tabs: the current tab is a filled block in the selection blue,
     // lifting one step on hover.
@@ -477,15 +477,16 @@ const theme: ThemeDefinition = {
     "browser.border": gray30,
 
     // ── Activity bar ──
-    // The activity bar sits on the frame; the active item is a solid accent
-    // tile with a white glyph instead of an edge indicator.
+    // The activity bar sits on the frame. The active item is a blue glyph on a
+    // faint neutral tile (the tile keeps a shape cue that does not rely on
+    // color); inactive glyphs are muted so the blue one reads as the selection.
     "activityBar.background": gray30,
-    "activityBar.foreground": white,
-    "activityBar.inactiveForeground": gray120,
+    "activityBar.foreground": blue100,
+    "activityBar.inactiveForeground": gray100,
     "activityBar.border": transparent,
     "activityBar.activeBorder": transparent,
-    "activityBar.activeBackground": blue80,
-    "activityBar.activeFocusBorder": white,
+    "activityBar.activeBackground": wash20,
+    "activityBar.activeFocusBorder": blue80,
     "activityBar.dropBorder": blue80,
     "activityBarBadge.background": blue90,
     "activityBarBadge.foreground": gray10,
@@ -495,9 +496,9 @@ const theme: ThemeDefinition = {
     "activityWarningBadge.foreground": white,
     // Activity bar docked at the top of the side bar — inside the panel.
     "activityBarTop.background": gray10,
-    "activityBarTop.foreground": gray130,
+    "activityBarTop.foreground": blue100,
     "activityBarTop.inactiveForeground": gray100,
-    "activityBarTop.activeBackground": blue40,
+    "activityBarTop.activeBackground": wash20,
     "activityBarTop.activeBorder": transparent,
     "activityBarTop.dropBorder": blue80,
 
