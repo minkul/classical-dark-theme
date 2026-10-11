@@ -14,7 +14,7 @@
 const gray10 = "#191A1C"; // panel surface: editor, side bar, panel, terminal, inputs
 const gray20 = "#212326"; // inline surface: find widget, peek editor, alternating rows
 const gray30 = "#26282C"; // frame: title/activity/status bars, modern shell; popups; panel separators
-const gray40 = "#33353B"; // popup borders, inactive selection, notifications, tree guides
+const gray40 = "#33353B"; // popup borders, inactive selection, current tab of an unfocused group, notifications
 const gray50 = "#40434A"; // control borders (inputs, dropdowns, secondary buttons), progress track
 const gray60 = "#4C4F56"; // disabled text
 const gray70 = "#5F6269"; // disabled icons, raised control borders
@@ -28,9 +28,8 @@ const black = "#000000";
 const transparent = "#00000000";
 
 // Blue ramp — accent, selection, focus
-const blue30 = "#1B283F"; // muted info surface (multi-selected tabs)
-const blue40 = "#233558"; // selected tab, info banners/validation, muted selection
-const blue50 = "#2A4371"; // list / menu / completion selection
+const blue40 = "#233558"; // multi-selected tabs, info banners / validation, keyboard focus row
+const blue50 = "#2A4371"; // current tab, list / menu / completion selection
 const blue60 = "#2E4D89"; // selected tab border, toggled options, secondary accent borders
 const blue70 = "#2F5EB9"; // accent hover
 const blue80 = "#3871E1"; // accent: primary buttons, focus ring, progress, selected activity item
@@ -453,21 +452,22 @@ const theme: ThemeDefinition = {
     "modernActivityBarItem.activeForeground": white,
     "modernActivityBarItem.hoverBackground": wash20,
     "modernActivityBarItem.hoverForeground": gray130,
-    // Modern tabs: the selected tab is a blue-tinted pill.
-    "modernTab.activeBackground": blue40,
+    // Modern tabs: the current tab is a filled block in the selection blue,
+    // lifting one step on hover.
+    "modernTab.activeBackground": blue50,
     "modernTab.activeForeground": gray130,
     "modernTab.hoverBackground": wash20,
     "modernTab.hoverForeground": gray130,
-    "modernEditorTab.activeBackground": blue40,
+    "modernEditorTab.activeBackground": blue50,
     "modernEditorTab.activeForeground": gray130,
-    "modernEditorTab.activeHoverBackground": blue50,
+    "modernEditorTab.activeHoverBackground": blue60,
     "modernEditorTab.inactiveBackground": transparent,
     "modernEditorTab.hoverBackground": wash20,
     "modernEditorTab.hoverForeground": gray130,
-    "modernEditorTab.activeActionBackground": blue40,
-    "modernEditorTab.activeHoverActionBackground": blue50,
+    "modernEditorTab.activeActionBackground": blue50,
+    "modernEditorTab.activeHoverActionBackground": blue60,
     "modernEditorTab.hoverActionBackground": mix(white, editorBackground, 0x17 / 255),
-    "modernEditorTab.selectedActionBackground": blue30,
+    "modernEditorTab.selectedActionBackground": blue40,
     "browser.border": gray30,
 
     // ── Activity bar ──
@@ -572,9 +572,16 @@ const theme: ThemeDefinition = {
     "statusBarItem.offlineHoverForeground": white,
 
     // ── Editor groups and tabs ──
-    // Tabs live inside the editor panel: the strip shares the editor
-    // background, the selected tab is a blue-tinted block with a blue edge, and
-    // unselected labels are dimmed to 75%.
+    // Tabs live inside the editor panel and the strip shares the editor
+    // background. The current tab is marked by its fill alone, with no edge
+    // line — selection blue in the focused group (~1.8:1 against the strip,
+    // label 6.6:1), the neutral inactive-selection gray elsewhere so it stays
+    // findable but subdued. Other labels are dimmed to 75%.
+    // The modern "connected" tab style always paints the current tab with the
+    // editor background (theme tab colors only reach the classic and "pill"
+    // styles), so there the strip carries the contrast instead: the other tabs
+    // sit on a lighter gray and the current tab reads as the dark top of the
+    // editor rising out of it.
     "editorGroup.border": gray30,
     "editorGroup.dropBackground": dropTarget,
     "editorGroup.emptyBackground": editorBackground,
@@ -584,31 +591,31 @@ const theme: ThemeDefinition = {
     "editorGroup.dropIntoPromptBorder": gray40,
     "editorGroupHeader.tabsBackground": editorBackground,
     "editorGroupHeader.noTabsBackground": editorBackground,
-    "editorGroupHeader.connectedTabsBackground": editorBackground,
+    "editorGroupHeader.connectedTabsBackground": gray40,
     "editorGroupHeader.tabsBorder": gray30,
     "editorGroupHeader.border": gray30,
     "editorPane.background": editorBackground,
     "sideBySideEditor.horizontalBorder": gray30,
     "sideBySideEditor.verticalBorder": gray30,
-    "tab.activeBackground": blue40,
+    "tab.activeBackground": blue50,
     "tab.activeForeground": gray130,
-    "tab.activeBorder": blue60,
+    "tab.activeBorder": transparent,
     "tab.activeBorderTop": transparent,
     "tab.inactiveBackground": editorBackground,
     "tab.inactiveForeground": gray130 + "BF",
     "tab.hoverBackground": wash20,
     "tab.hoverForeground": gray130,
     "tab.hoverBorder": transparent,
-    "tab.unfocusedActiveBackground": gray30,
+    "tab.unfocusedActiveBackground": gray40,
     "tab.unfocusedActiveForeground": gray130,
-    "tab.unfocusedActiveBorder": gray50,
+    "tab.unfocusedActiveBorder": transparent,
     "tab.unfocusedActiveBorderTop": transparent,
     "tab.unfocusedInactiveBackground": editorBackground,
     "tab.unfocusedInactiveForeground": gray130 + "BF",
     "tab.unfocusedHoverBackground": wash20,
     "tab.unfocusedHoverForeground": gray130,
     "tab.unfocusedHoverBorder": transparent,
-    "tab.selectedBackground": blue30,
+    "tab.selectedBackground": blue40,
     "tab.selectedForeground": gray130,
     "tab.selectedBorderTop": transparent,
     "tab.border": transparent,
