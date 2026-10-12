@@ -132,12 +132,14 @@ const breadcrumbForeground = "#9DA0A8";
 const breadcrumbActive = "#DFE1E5";
 
 // Highlights — each kind keeps its own hue:
-//   teal  → find results (box border + scrollbar mark)
+//   teal  → find results (box border + scrollbar mark); the current result
+//           is the selection in a light box
 //   green → usages / navigation targets
 //   gray-green / rose → occurrences under the caret (read / write)
 const textSearch = "#114957";
 const textSearchBorder = "#165E70";
 const textSearchMark = "#72D6D6";
+const textSearchCurrentBorder = caret;
 const usage = "#2D543F";
 const usageMark = "#42BD77";
 const caretWord = "#373B39";
@@ -287,8 +289,6 @@ const terminalAnsi = {
 const terminalBlock = "#2B2D30"; // command block / pinned command
 const terminalBlockSeparator = "#393B40";
 const terminalSelectedBlock = blueVivid;
-const terminalSearchMatch = "#FFEA00";
-const terminalSearchCurrent = "#FF941A";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Color helpers
@@ -670,10 +670,10 @@ const theme: ThemeDefinition = {
     "editor.wordHighlightTextBorder": transparent,
 
     // Find — every result gets a teal block with a teal box; the current one is
-    // the selection inside that box. Match foregrounds stay unset so matched
+    // the selection inside a light box. Match foregrounds stay unset so matched
     // code keeps its syntax colors.
     "editor.findMatchBackground": selection,
-    "editor.findMatchBorder": textSearchBorder,
+    "editor.findMatchBorder": textSearchCurrentBorder,
     "editor.findMatchHighlightBackground": overlay(textSearch, 0.8),
     "editor.findMatchHighlightBorder": textSearchBorder,
     "editor.findRangeHighlightBackground": wash10,
@@ -1179,12 +1179,12 @@ const theme: ThemeDefinition = {
     "terminal.selectionBackground": selection,
     "terminal.inactiveSelectionBackground": overlay(selectionInactive, 0.8),
     "terminal.hoverHighlightBackground": wash10,
-    // Find — every match yellow, the current one orange, both translucent so
-    // the output text stays readable.
-    "terminal.findMatchBackground": terminalSearchCurrent + "59",
-    "terminal.findMatchBorder": terminalSearchCurrent,
-    "terminal.findMatchHighlightBackground": terminalSearchMatch + "40",
-    "terminal.findMatchHighlightBorder": terminalSearchMatch + "80",
+    // Find — as in the editor: teal blocks in teal boxes, the current match
+    // the selection inside a light box. Both fills sit under the text.
+    "terminal.findMatchBackground": selection,
+    "terminal.findMatchBorder": textSearchCurrentBorder,
+    "terminal.findMatchHighlightBackground": overlay(textSearch, 0.8),
+    "terminal.findMatchHighlightBorder": textSearchBorder,
     "terminalCursor.foreground": caret,
     "terminalCursor.background": editorBackground,
     "terminalCommandDecoration.defaultBackground": gray80,
@@ -1192,7 +1192,7 @@ const theme: ThemeDefinition = {
     "terminalCommandDecoration.errorBackground": iconRed,
     "terminalCommandGuide.foreground": terminalSelectedBlock,
     "terminalOverviewRuler.cursorForeground": gray100,
-    "terminalOverviewRuler.findMatchForeground": terminalSearchCurrent,
+    "terminalOverviewRuler.findMatchForeground": textSearchMark,
     "terminalOverviewRuler.border": transparent,
     "terminalStickyScroll.background": terminalBlock,
     "terminalStickyScroll.border": terminalBlockSeparator,
