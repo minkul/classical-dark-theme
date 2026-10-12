@@ -181,9 +181,6 @@ const diffConflictMark = "#8F5247";
 const fileAdded = "#73BD79";
 const fileModified = "#70AEFF";
 const fileDeleted = "#6F737A";
-const fileUnversioned = "#E88F89";
-const fileIgnored = "#D69A6B";
-const fileConflict = "#DE6A66";
 const modifiedTab = "#4083C9";
 const blameText = "#8D9199";
 const branchHead = "#F5D273";
@@ -954,13 +951,16 @@ const theme: ThemeDefinition = {
     "mergeEditor.conflict.handled.minimapOverViewRuler": gray80,
 
     // ── Source control ──
+    // One hue per file status, none of them red: red names belong to files
+    // with errors (list.errorForeground). Untracked borrows the number cyan,
+    // ignored files recede like comments, conflicts take the keyword orange.
     "gitDecoration.addedResourceForeground": fileAdded,
     "gitDecoration.modifiedResourceForeground": fileModified,
     "gitDecoration.deletedResourceForeground": fileDeleted,
     "gitDecoration.renamedResourceForeground": fileModified,
-    "gitDecoration.untrackedResourceForeground": fileUnversioned,
-    "gitDecoration.ignoredResourceForeground": fileIgnored,
-    "gitDecoration.conflictingResourceForeground": fileConflict,
+    "gitDecoration.untrackedResourceForeground": synNumber,
+    "gitDecoration.ignoredResourceForeground": synComment,
+    "gitDecoration.conflictingResourceForeground": synKeyword,
     "gitDecoration.submoduleResourceForeground": gray100,
     "gitDecoration.stageModifiedResourceForeground": fileModified,
     "gitDecoration.stageDeletedResourceForeground": fileDeleted,
@@ -1024,8 +1024,9 @@ const theme: ThemeDefinition = {
     "list.filterMatchBorder": matchGold,
     "list.dropBackground": blueVivid + "26",
     "list.dropBetweenBackground": blue80,
-    "list.errorForeground": red100,
-    "list.warningForeground": yellow100,
+    // Files with problems take their squiggle colors.
+    "list.errorForeground": errorUnderline,
+    "list.warningForeground": warningUnderline,
     "list.invalidItemForeground": red100,
     "list.deemphasizedForeground": gray80,
     "listFilterWidget.background": gray10,
