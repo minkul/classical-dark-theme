@@ -14,7 +14,7 @@
 const gray10 = "#191A1C"; // editor surface: editor, editor-area terminals, inputs
 const gray20 = "#212326"; // panel surface: side bar, panel, output, chat; find widget, peek editor, alternating rows
 const gray30 = "#26282C"; // frame: title/activity/status bars, modern shell; popups; panel separators
-const gray40 = "#33353B"; // popup borders, inactive selection, current tab of an unfocused group, notifications
+const gray40 = "#33353B"; // popup borders, view section separators, inactive selection, current tab of an unfocused group, notifications
 const gray50 = "#40434A"; // control borders (inputs, dropdowns, secondary buttons), progress track
 const gray60 = "#4C4F56"; // disabled text
 const gray70 = "#5F6269"; // disabled icons, raised control borders
@@ -513,7 +513,9 @@ const theme: ThemeDefinition = {
     "sideBarTitle.border": gray30,
     "sideBarSectionHeader.background": gray20,
     "sideBarSectionHeader.foreground": gray130,
-    "sideBarSectionHeader.border": gray30,
+    // Separators between stacked views sit on the panel surface, where the
+    // frame color barely shows, so they step up one shade.
+    "sideBarSectionHeader.border": gray40,
     "sideBarActivityBarTop.border": gray30,
     "sideBarStickyScroll.background": gray20,
     "sideBarStickyScroll.border": gray30,
@@ -529,11 +531,11 @@ const theme: ThemeDefinition = {
     "panelTitle.border": gray30,
     "panelTitleBadge.background": gray80,
     "panelTitleBadge.foreground": black,
-    "panelSection.border": gray30,
+    "panelSection.border": gray40,
     "panelSection.dropBackground": dropTarget,
     "panelSectionHeader.background": gray20,
     "panelSectionHeader.foreground": gray130,
-    "panelSectionHeader.border": gray30,
+    "panelSectionHeader.border": gray40,
     "panelInput.border": gray50,
     "panelStickyScroll.background": gray20,
     "panelStickyScroll.border": gray30,
