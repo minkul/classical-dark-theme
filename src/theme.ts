@@ -11,8 +11,8 @@
 // classic layout a 1px frame-colored separator stands in for the gap.
 
 // Neutral ramp — surfaces, borders and text
-const gray10 = "#191A1C"; // panel surface: editor, side bar, panel, terminal, inputs
-const gray20 = "#212326"; // inline surface: find widget, peek editor, alternating rows
+const gray10 = "#191A1C"; // editor surface: editor, editor-area terminals, inputs
+const gray20 = "#212326"; // panel surface: side bar, panel, output, chat; find widget, peek editor, alternating rows
 const gray30 = "#26282C"; // frame: title/activity/status bars, modern shell; popups; panel separators
 const gray40 = "#33353B"; // popup borders, inactive selection, current tab of an unfocused group, notifications
 const gray50 = "#40434A"; // control borders (inputs, dropdowns, secondary buttons), progress track
@@ -406,9 +406,10 @@ const theme: ThemeDefinition = {
     "textLink.activeForeground": blue100,
     "textBlockQuote.background": blockBackground,
     "textBlockQuote.border": synComment,
-    // Code blocks in rendered markdown (hovers, previews, chat webviews) use
-    // the embedded-editor surface, one step off the editor background.
-    "textCodeBlock.background": gray20,
+    // Code blocks in rendered markdown (hovers, previews, chat webviews) sit on
+    // the editor background, so code in a panel reads like the editor. In the
+    // markdown preview the widget border keeps them outlined.
+    "textCodeBlock.background": editorBackground,
     "textPreformat.foreground": inlineCodeForeground,
     "textPreformat.background": inlineCodeBackground,
     "textPreformat.border": transparent,
@@ -449,7 +450,7 @@ const theme: ThemeDefinition = {
     "surface.foreground": bodyText,
     "surface.border": gray10,
     "editor.border": gray10,
-    "modernPanel.border": gray10,
+    "modernPanel.border": gray20,
     "modernSash.gripForeground": wash50,
     "modernActivityBar.background": gray30,
     "modernActivityBar.inactiveBackground": gray30,
@@ -495,7 +496,7 @@ const theme: ThemeDefinition = {
     "activityWarningBadge.background": yellow80,
     "activityWarningBadge.foreground": white,
     // Activity bar docked at the top of the side bar — inside the panel.
-    "activityBarTop.background": gray10,
+    "activityBarTop.background": gray20,
     "activityBarTop.foreground": blue100,
     "activityBarTop.inactiveForeground": gray100,
     "activityBarTop.activeBackground": wash20,
@@ -503,23 +504,23 @@ const theme: ThemeDefinition = {
     "activityBarTop.dropBorder": blue80,
 
     // ── Side bar ──
-    "sideBar.background": gray10,
+    "sideBar.background": gray20,
     "sideBar.foreground": bodyText,
     "sideBar.border": gray30,
     "sideBar.dropBackground": dropTarget,
-    "sideBarTitle.background": gray10,
+    "sideBarTitle.background": gray20,
     "sideBarTitle.foreground": gray130,
     "sideBarTitle.border": gray30,
-    "sideBarSectionHeader.background": gray10,
+    "sideBarSectionHeader.background": gray20,
     "sideBarSectionHeader.foreground": gray130,
     "sideBarSectionHeader.border": gray30,
     "sideBarActivityBarTop.border": gray30,
-    "sideBarStickyScroll.background": gray10,
+    "sideBarStickyScroll.background": gray20,
     "sideBarStickyScroll.border": gray30,
     "sideBarStickyScroll.shadow": shadow,
 
     // ── Panel (problems, output, debug console, terminal, ports) ──
-    "panel.background": gray10,
+    "panel.background": gray20,
     "panel.border": gray30,
     "panel.dropBorder": blue80,
     "panelTitle.activeForeground": gray130,
@@ -530,15 +531,15 @@ const theme: ThemeDefinition = {
     "panelTitleBadge.foreground": black,
     "panelSection.border": gray30,
     "panelSection.dropBackground": dropTarget,
-    "panelSectionHeader.background": gray10,
+    "panelSectionHeader.background": gray20,
     "panelSectionHeader.foreground": gray130,
     "panelSectionHeader.border": gray30,
     "panelInput.border": gray50,
-    "panelStickyScroll.background": gray10,
+    "panelStickyScroll.background": gray20,
     "panelStickyScroll.border": gray30,
     "panelStickyScroll.shadow": shadow,
-    "outputView.background": gray10,
-    "outputViewStickyScroll.background": gray10,
+    "outputView.background": gray20,
+    "outputViewStickyScroll.background": gray20,
 
     // ── Status bar ──
     "statusBar.background": gray30,
@@ -1166,7 +1167,8 @@ const theme: ThemeDefinition = {
     "mcpIcon.starForeground": iconYellow,
 
     // ── Terminal ──
-    "terminal.background": editorBackground,
+    // terminal.background is left unset so a terminal takes its host's surface:
+    // gray20 in the panel or side bar, the editor background in an editor tab.
     "terminal.foreground": editorForeground,
     "terminal.border": gray30,
     "terminal.tab.activeBorder": blue80,
@@ -1454,7 +1456,7 @@ const theme: ThemeDefinition = {
     // ── Chat ──
     // User requests sit in a gray bubble; AI progress and slash commands use
     // the purple accent.
-    "chat.requestBackground": gray10,
+    "chat.requestBackground": gray20,
     "chat.requestBorder": gray30,
     "chat.requestBubbleBackground": gray40,
     "chat.requestBubbleHoverBackground": gray50,
