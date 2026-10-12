@@ -204,12 +204,12 @@ const synKeyword = "#CF8E6D"; // keywords, primitive types, escapes, markup mark
 const synString = "#6AAB73";
 const synNumber = "#2AACB8";
 const synComment = "#7A7E85"; // line / block comments
-const synDocComment = "#5F826B"; // doc comments, docstrings (italic)
+const synDocComment = "#5F826B"; // doc comments, docstrings
 const synDocTag = "#67A37C"; // @param, @return …
 const synDocTagValue = "#ABADB3"; // doc tag arguments
 const synFunction = "#56A8F5"; // function / method declarations
 const synMethod = "#57AAF7"; // static / instance member functions
-const synMember = "#C77DBB"; // fields, properties, object keys, constants (italic)
+const synMember = "#C77DBB"; // fields, properties, object keys, constants
 const synMetadata = "#B3AE60"; // annotations, decorators, attributes
 const synTypeParameter = "#16BAAC";
 const synTag = "#D5B778"; // HTML / XML tags, CSS selectors and functions
@@ -1548,9 +1548,9 @@ const theme: ThemeDefinition = {
     escapeSequence: synKeyword,
     formatSpecifier: synKeyword,
     operator: editorForeground,
-    "operator.controlFlow:rust": { foreground: rsQuestion, fontStyle: "bold" },
+    "operator.controlFlow:rust": rsQuestion,
     comment: synComment,
-    "comment.documentation": { foreground: synDocComment, fontStyle: "italic" },
+    "comment.documentation": synDocComment,
 
     // Types — declarations and references read as plain text.
     namespace: editorForeground,
@@ -1569,23 +1569,20 @@ const theme: ThemeDefinition = {
     variable: editorForeground,
     parameter: editorForeground,
     property: synMember,
-    "property.static": { fontStyle: "italic" },
     recordComponent: synMember,
-    enumMember: { foreground: synMember, fontStyle: "italic" },
+    enumMember: synMember,
     event: synMember,
     annotationMember: editorForeground,
     "*.mutable": { fontStyle: "underline" },
     "*.deprecated": { fontStyle: "strikethrough" },
 
-    // Functions — declarations blue, calls plain (italic when static).
+    // Functions — declarations blue, calls plain.
     function: editorForeground,
     method: editorForeground,
     "function.declaration": synFunction,
     "method.declaration": synFunction,
     "function.definition": synFunction,
     "method.definition": synFunction,
-    "method.static": { fontStyle: "italic" },
-    "function.static": { fontStyle: "italic" },
 
     // Metadata
     decorator: synMetadata,
@@ -1595,7 +1592,7 @@ const theme: ThemeDefinition = {
     label: editorForeground,
 
     // JavaScript / TypeScript — calls blue, locals gray-blue, platform
-    // globals (console, window, document…) purple italic.
+    // globals (console, window, document…) purple.
     "function:javascript": synFunction,
     "function:javascriptreact": synFunction,
     "function:typescript": synFunction,
@@ -1604,18 +1601,18 @@ const theme: ThemeDefinition = {
     "method:javascriptreact": synFunction,
     "method:typescript": synFunction,
     "method:typescriptreact": synFunction,
-    "method.static:javascript": { foreground: synMethod, fontStyle: "italic" },
-    "method.static:javascriptreact": { foreground: synMethod, fontStyle: "italic" },
-    "method.static:typescript": { foreground: synMethod, fontStyle: "italic" },
-    "method.static:typescriptreact": { foreground: synMethod, fontStyle: "italic" },
+    "method.static:javascript": synMethod,
+    "method.static:javascriptreact": synMethod,
+    "method.static:typescript": synMethod,
+    "method.static:typescriptreact": synMethod,
     "variable.local:javascript": jsLocalVariable,
     "variable.local:javascriptreact": jsLocalVariable,
     "variable.local:typescript": jsLocalVariable,
     "variable.local:typescriptreact": jsLocalVariable,
-    "variable.defaultLibrary:javascript": { foreground: jsGlobalVariable, fontStyle: "italic" },
-    "variable.defaultLibrary:javascriptreact": { foreground: jsGlobalVariable, fontStyle: "italic" },
-    "variable.defaultLibrary:typescript": { foreground: jsGlobalVariable, fontStyle: "italic" },
-    "variable.defaultLibrary:typescriptreact": { foreground: jsGlobalVariable, fontStyle: "italic" },
+    "variable.defaultLibrary:javascript": jsGlobalVariable,
+    "variable.defaultLibrary:javascriptreact": jsGlobalVariable,
+    "variable.defaultLibrary:typescript": jsGlobalVariable,
+    "variable.defaultLibrary:typescriptreact": jsGlobalVariable,
 
     // Python — self / cls, builtins, plain attributes.
     selfParameter: pySelf,
@@ -1632,7 +1629,7 @@ const theme: ThemeDefinition = {
     "function.defaultLibrary:go": goBuiltin,
     "type.defaultLibrary:go": goBuiltin,
     "variable.defaultLibrary:go": goBuiltin,
-    "variable.readonly:go": { foreground: synMember, fontStyle: "italic" },
+    "variable.readonly:go": synMember,
     "namespace:go": goPackage,
     "type:go": goType,
     "property:go": editorForeground,
@@ -1640,22 +1637,20 @@ const theme: ThemeDefinition = {
     // Rust — calls blue, structs / enums olive, traits periwinkle.
     "function:rust": synFunction,
     "method:rust": synFunction,
-    "method.trait:rust": { fontStyle: "italic" },
-    "function.trait:rust": { fontStyle: "italic" },
     "struct:rust": rsType,
     "union:rust": rsType,
-    "enum:rust": { foreground: rsType, fontStyle: "italic" },
-    "typeAlias:rust": { foreground: rsType, fontStyle: "italic" },
-    "enumMember:rust": { foreground: rsVariant, fontStyle: "italic" },
+    "enum:rust": rsType,
+    "typeAlias:rust": rsType,
+    "enumMember:rust": rsVariant,
     "interface:rust": rsTrait,
     "namespace.crateRoot:rust": rsTrait,
     "typeParameter:rust": rsLifetime,
-    "lifetime:rust": { foreground: rsLifetime, fontStyle: "italic" },
+    "lifetime:rust": rsLifetime,
     "macro:rust": rsMacro,
     "selfKeyword:rust": rsSelf,
     "selfTypeKeyword:rust": rsSelf,
     "static:rust": rsStatic,
-    "const:rust": { foreground: synMember, fontStyle: "italic" },
+    "const:rust": synMember,
     "attribute:rust": synMetadata,
     "builtinAttribute:rust": synMetadata,
     "unresolvedReference:rust": synInvalid,
@@ -1677,6 +1672,8 @@ const theme: ThemeDefinition = {
     },
 
     // ── Typography ──
+    // Code tokens are never bold or italic; prose emphasis keeps its style
+    // because the author wrote it.
     { scope: "emphasis", settings: { fontStyle: "italic" } },
     { scope: "strong", settings: { fontStyle: "bold" } },
     { scope: "markup.underline", settings: { fontStyle: "underline" } },
@@ -1696,7 +1693,7 @@ const theme: ThemeDefinition = {
         "comment.block.javadoc",
         "string.quoted.docstring",
       ],
-      settings: { foreground: synDocComment, fontStyle: "italic" },
+      settings: { foreground: synDocComment },
     },
     {
       name: "Doc comment tag",
@@ -1706,7 +1703,7 @@ const theme: ThemeDefinition = {
         "punctuation.definition.block.tag.jsdoc",
         "keyword.other.phpdoc",
       ],
-      settings: { foreground: synDocTag, fontStyle: "italic" },
+      settings: { foreground: synDocTag },
     },
     {
       name: "Doc comment tag value",
@@ -1715,12 +1712,12 @@ const theme: ThemeDefinition = {
         "entity.name.type.instance.jsdoc",
         "variable.parameter.javadoc",
       ],
-      settings: { foreground: synDocTagValue, fontStyle: "italic" },
+      settings: { foreground: synDocTagValue },
     },
     {
       name: "TODO marker",
       scope: ["keyword.codetag.notation", "keyword.other.todo"],
-      settings: { foreground: synTodo, fontStyle: "italic" },
+      settings: { foreground: synTodo },
     },
 
     // ── Keywords ──
@@ -1802,7 +1799,7 @@ const theme: ThemeDefinition = {
         "constant.other.enum",
         "constant.other.caps",
       ],
-      settings: { foreground: synMember, fontStyle: "italic" },
+      settings: { foreground: synMember },
     },
 
     // ── Strings ──
@@ -2083,7 +2080,7 @@ const theme: ThemeDefinition = {
     {
       name: "CSS !important",
       scope: "keyword.other.important",
-      settings: { foreground: synKeyword, fontStyle: "bold" },
+      settings: { foreground: synKeyword },
     },
     {
       name: "Less variable",
@@ -2135,7 +2132,7 @@ const theme: ThemeDefinition = {
     {
       name: "YAML comment",
       scope: "comment.line.number-sign.yaml",
-      settings: { foreground: synDocComment, fontStyle: "italic" },
+      settings: { foreground: synDocComment },
     },
 
     // ── TOML / INI / properties / dotenv ──
@@ -2171,7 +2168,7 @@ const theme: ThemeDefinition = {
         "constant.other.time.date.toml",
         "constant.other.time.time.toml",
       ],
-      settings: { foreground: editorForeground, fontStyle: "italic" },
+      settings: { foreground: editorForeground },
     },
     {
       name: "Key-value separator",
@@ -2186,7 +2183,7 @@ const theme: ThemeDefinition = {
     {
       name: "Markdown heading",
       scope: ["markup.heading", "entity.name.section.markdown"],
-      settings: { foreground: synMember, fontStyle: "italic" },
+      settings: { foreground: synMember },
     },
     {
       name: "Markdown markers",
@@ -2218,7 +2215,7 @@ const theme: ThemeDefinition = {
     {
       name: "Markdown fence language",
       scope: "fenced_code.block.language",
-      settings: { foreground: synMember, fontStyle: "italic" },
+      settings: { foreground: synMember },
     },
     {
       name: "Markdown quote marker",
@@ -2238,7 +2235,7 @@ const theme: ThemeDefinition = {
     {
       name: "Markdown link destination",
       scope: ["markup.underline.link.markdown", "markup.underline.link.image.markdown"],
-      settings: { foreground: synMethod, fontStyle: "italic" },
+      settings: { foreground: synMethod },
     },
 
     // ── Diff / patch files ──
@@ -2277,7 +2274,7 @@ const theme: ThemeDefinition = {
         "constant.other.character-class.regexp",
         "constant.character.set.regexp",
       ],
-      settings: { foreground: synRegexpClass, fontStyle: "bold" },
+      settings: { foreground: synRegexpClass },
     },
     {
       name: "Regexp meta / anchor / alternation",
@@ -2311,8 +2308,7 @@ const theme: ThemeDefinition = {
     // Language-specific colors
     // ─────────────────────────────────────────────────────────────────────
 
-    // JavaScript / TypeScript — locals gray-blue, platform globals purple
-    // italic.
+    // JavaScript / TypeScript — locals gray-blue, platform globals purple.
     {
       name: "JS/TS local variable",
       scope: [
@@ -2341,7 +2337,7 @@ const theme: ThemeDefinition = {
         "support.constant.math",
         "support.constant.json",
       ],
-      settings: { foreground: jsGlobalVariable, fontStyle: "italic" },
+      settings: { foreground: jsGlobalVariable },
     },
 
     // Python
@@ -2436,7 +2432,7 @@ const theme: ThemeDefinition = {
     {
       name: "Go constant",
       scope: "variable.other.constant.go",
-      settings: { foreground: synMember, fontStyle: "italic" },
+      settings: { foreground: synMember },
     },
     {
       name: "Go field",
@@ -2453,12 +2449,12 @@ const theme: ThemeDefinition = {
     {
       name: "Rust enum",
       scope: "entity.name.type.enum.rust",
-      settings: { foreground: rsType, fontStyle: "italic" },
+      settings: { foreground: rsType },
     },
     {
       name: "Rust enum variant (Some / None / Ok / Err)",
       scope: ["entity.name.type.option.rust", "entity.name.type.result.rust"],
-      settings: { foreground: rsVariant, fontStyle: "italic" },
+      settings: { foreground: rsVariant },
     },
     {
       name: "Rust trait",
@@ -2473,7 +2469,7 @@ const theme: ThemeDefinition = {
     {
       name: "Rust lifetime",
       scope: ["entity.name.type.lifetime.rust", "punctuation.definition.lifetime.rust"],
-      settings: { foreground: rsLifetime, fontStyle: "italic" },
+      settings: { foreground: rsLifetime },
     },
     {
       name: "Rust macro",
@@ -2488,7 +2484,7 @@ const theme: ThemeDefinition = {
     {
       name: "Rust ? operator",
       scope: "keyword.operator.question.rust",
-      settings: { foreground: rsQuestion, fontStyle: "bold" },
+      settings: { foreground: rsQuestion },
     },
 
     // PHP
@@ -2504,7 +2500,7 @@ const theme: ThemeDefinition = {
     {
       name: "PHP constant",
       scope: ["constant.other.php", "constant.other.class.php"],
-      settings: { foreground: phpVariable, fontStyle: "italic" },
+      settings: { foreground: phpVariable },
     },
     {
       name: "PHP named argument",
@@ -2546,7 +2542,7 @@ const theme: ThemeDefinition = {
     {
       name: "Ruby class variable",
       scope: "variable.other.readwrite.class.ruby",
-      settings: { foreground: synMember, fontStyle: "italic" },
+      settings: { foreground: synMember },
     },
     {
       name: "Ruby global variable",
@@ -2556,7 +2552,7 @@ const theme: ThemeDefinition = {
     {
       name: "Ruby local variable / parameter",
       scope: ["source.ruby variable.other", "variable.parameter.function.ruby"],
-      settings: { foreground: rbLocal, fontStyle: "italic" },
+      settings: { foreground: rbLocal },
     },
     {
       name: "Ruby constant",
@@ -2576,7 +2572,7 @@ const theme: ThemeDefinition = {
     {
       name: "Ruby comment",
       scope: ["source.ruby comment"],
-      settings: { foreground: rbComment, fontStyle: "italic" },
+      settings: { foreground: rbComment },
     },
     {
       name: "Ruby number",
@@ -2628,7 +2624,7 @@ const theme: ThemeDefinition = {
     {
       name: "Shell shebang",
       scope: ["meta.shebang", "punctuation.definition.comment.shebang"],
-      settings: { foreground: synComment, fontStyle: "bold" },
+      settings: { foreground: synComment },
     },
 
     // ── Invalid ──
