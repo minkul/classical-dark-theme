@@ -455,7 +455,7 @@ const theme: ThemeDefinition = {
     "modernActivityBar.background": gray30,
     "modernActivityBar.inactiveBackground": gray30,
     "modernActivityBar.border": transparent,
-    "modernActivityBarItem.activeBackground": wash20,
+    "modernActivityBarItem.activeBackground": transparent,
     "modernActivityBarItem.activeForeground": blue100,
     "modernActivityBarItem.hoverBackground": wash10,
     "modernActivityBarItem.hoverForeground": gray130,
@@ -478,15 +478,15 @@ const theme: ThemeDefinition = {
     "browser.border": gray30,
 
     // ── Activity bar ──
-    // The activity bar sits on the frame. The active item is a blue glyph on a
-    // faint neutral tile (the tile keeps a shape cue that does not rely on
-    // color); inactive glyphs are muted so the blue one reads as the selection.
+    // The activity bar sits on the frame. The active item is marked by its blue
+    // glyph alone, with no tile behind it; inactive glyphs stay neutral so the
+    // blue one reads as the selection.
     "activityBar.background": gray30,
     "activityBar.foreground": blue100,
     "activityBar.inactiveForeground": gray100,
     "activityBar.border": transparent,
     "activityBar.activeBorder": transparent,
-    "activityBar.activeBackground": wash20,
+    "activityBar.activeBackground": transparent,
     "activityBar.activeFocusBorder": blue80,
     "activityBar.dropBorder": blue80,
     "activityBarBadge.background": blue90,
@@ -499,7 +499,7 @@ const theme: ThemeDefinition = {
     "activityBarTop.background": gray20,
     "activityBarTop.foreground": blue100,
     "activityBarTop.inactiveForeground": gray100,
-    "activityBarTop.activeBackground": wash20,
+    "activityBarTop.activeBackground": transparent,
     "activityBarTop.activeBorder": transparent,
     "activityBarTop.dropBorder": blue80,
 
