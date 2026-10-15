@@ -319,7 +319,11 @@ function mix(fg: string, bg: string, weight: number): string {
  * exactly `target`. VS Code requires most editor decorations to be
  * non-opaque; this keeps their on-screen color identical to the palette.
  */
-function overlay(target: string, alpha: number, base: string = editorBackground): string {
+function overlay(
+  target: string,
+  alpha: number,
+  base: string = editorBackground,
+): string {
   const t = toRgb(target);
   const b = toRgb(base);
   const alphaHex = Math.round(alpha * 255)
@@ -329,11 +333,14 @@ function overlay(target: string, alpha: number, base: string = editorBackground)
   return toHex(t.map((v, i) => (v - (1 - alpha) * b[i]) / alpha)) + alphaHex;
 }
 
-// Changed lines use 40% of the diff color over the editor background; changed
-// words inside them use the full diff color on top of that line tint.
-const diffLine = (color: string): string => color + "66";
+// Changed lines show 40% of the diff color over the editor background; changed
+// words inside them show the full diff color on top of that line tint. Diff
+// fills are drawn above the selection, so they are kept highly translucent
+// (same on-screen color via overlay) to let a selection beneath show through.
+const diffLine = (color: string): string =>
+  overlay(mix(color, editorBackground, 0.4), 0.2);
 const diffWord = (color: string): string =>
-  overlay(color, 0.8, mix(color, editorBackground, 0.4));
+  overlay(color, 0.3, mix(color, editorBackground, 0.4));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Theme definition type
@@ -470,7 +477,11 @@ const theme: ThemeDefinition = {
     "modernEditorTab.hoverForeground": gray130,
     "modernEditorTab.activeActionBackground": blue50,
     "modernEditorTab.activeHoverActionBackground": blue60,
-    "modernEditorTab.hoverActionBackground": mix(white, editorBackground, 0x17 / 255),
+    "modernEditorTab.hoverActionBackground": mix(
+      white,
+      editorBackground,
+      0x17 / 255,
+    ),
     "modernEditorTab.selectedActionBackground": blue40,
     "browser.border": gray30,
 
@@ -1811,7 +1822,11 @@ const theme: ThemeDefinition = {
     },
     {
       name: "Regular expression",
-      scope: ["string.regexp", "constant.regexp", "string.regexp keyword.other"],
+      scope: [
+        "string.regexp",
+        "constant.regexp",
+        "string.regexp keyword.other",
+      ],
       settings: { foreground: jsRegexp },
     },
     {
@@ -1874,7 +1889,10 @@ const theme: ThemeDefinition = {
     },
     {
       name: "Preprocessor macro",
-      scope: ["entity.name.function.preprocessor", "meta.preprocessor.macro entity.name.function"],
+      scope: [
+        "entity.name.function.preprocessor",
+        "meta.preprocessor.macro entity.name.function",
+      ],
       settings: { foreground: synMetadata },
     },
 
@@ -1968,7 +1986,11 @@ const theme: ThemeDefinition = {
     // ── HTML / XML ──
     {
       name: "Tag",
-      scope: ["entity.name.tag", "punctuation.definition.tag", "meta.tag.sgml.doctype"],
+      scope: [
+        "entity.name.tag",
+        "punctuation.definition.tag",
+        "meta.tag.sgml.doctype",
+      ],
       settings: { foreground: synTag },
     },
     {
@@ -1996,15 +2018,16 @@ const theme: ThemeDefinition = {
     },
     {
       name: "Entity reference",
-      scope: ["constant.character.entity", "punctuation.definition.entity.html", "punctuation.definition.entity.xml"],
+      scope: [
+        "constant.character.entity",
+        "punctuation.definition.entity.html",
+        "punctuation.definition.entity.xml",
+      ],
       settings: { foreground: synEntity },
     },
     {
       name: "JSX / TSX component",
-      scope: [
-        "support.class.component",
-        "entity.name.tag.component",
-      ],
+      scope: ["support.class.component", "entity.name.tag.component"],
       settings: { foreground: jsComponent },
     },
 
@@ -2202,8 +2225,16 @@ const theme: ThemeDefinition = {
       ],
       settings: { foreground: synKeyword },
     },
-    { name: "Markdown bold", scope: "markup.bold", settings: { fontStyle: "bold" } },
-    { name: "Markdown italic", scope: "markup.italic", settings: { fontStyle: "italic" } },
+    {
+      name: "Markdown bold",
+      scope: "markup.bold",
+      settings: { fontStyle: "bold" },
+    },
+    {
+      name: "Markdown italic",
+      scope: "markup.italic",
+      settings: { fontStyle: "italic" },
+    },
     {
       name: "Markdown code",
       scope: [
@@ -2235,7 +2266,10 @@ const theme: ThemeDefinition = {
     },
     {
       name: "Markdown link destination",
-      scope: ["markup.underline.link.markdown", "markup.underline.link.image.markdown"],
+      scope: [
+        "markup.underline.link.markdown",
+        "markup.underline.link.image.markdown",
+      ],
       settings: { foreground: synMethod },
     },
 
@@ -2464,17 +2498,26 @@ const theme: ThemeDefinition = {
     },
     {
       name: "Rust primitive type",
-      scope: ["entity.name.type.primitive.rust", "entity.name.type.numeric.rust"],
+      scope: [
+        "entity.name.type.primitive.rust",
+        "entity.name.type.numeric.rust",
+      ],
       settings: { foreground: synKeyword },
     },
     {
       name: "Rust lifetime",
-      scope: ["entity.name.type.lifetime.rust", "punctuation.definition.lifetime.rust"],
+      scope: [
+        "entity.name.type.lifetime.rust",
+        "punctuation.definition.lifetime.rust",
+      ],
       settings: { foreground: rsLifetime },
     },
     {
       name: "Rust macro",
-      scope: ["entity.name.function.macro.rust", "entity.name.function.macro.rules.rust"],
+      scope: [
+        "entity.name.function.macro.rust",
+        "entity.name.function.macro.rules.rust",
+      ],
       settings: { foreground: rsMacro },
     },
     {
@@ -2587,7 +2630,10 @@ const theme: ThemeDefinition = {
     },
     {
       name: "Ruby special method",
-      scope: ["keyword.other.special-method.ruby", "support.function.kernel.ruby"],
+      scope: [
+        "keyword.other.special-method.ruby",
+        "support.function.kernel.ruby",
+      ],
       settings: { foreground: rbSpecialCall },
     },
 
