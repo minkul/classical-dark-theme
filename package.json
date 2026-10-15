@@ -2,7 +2,7 @@
   "name": "classical-dark-theme",
   "displayName": "Classical Dark Theme",
   "description": "A simple dark theme for Visual Studio Code inspired by the classic color scheme.",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "publisher": "minkul",
   "license": "MIT",
   "preview": false,
