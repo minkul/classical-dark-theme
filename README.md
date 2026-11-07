@@ -9,7 +9,12 @@ A simple dark theme for Visual Studio Code inspired by the classic color scheme.
 3. Search for **Classical Dark Theme**
 4. Click **Install**
 5. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
-6. Select **Preferences: Color Theme** and choose **Classical Dark**
+6. Select **Preferences: Color Theme** and choose **Classical Dark** or **Classical Dark Midnight**
+
+## Themes
+
+- **Classical Dark**
+- **Classical Dark Midnight**
 
 ## Preview
 

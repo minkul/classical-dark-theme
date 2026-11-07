@@ -34,6 +34,11 @@
         "label": "Classical Dark",
         "uiTheme": "vs-dark",
         "path": "./themes/classical-dark.json"
+      },
+      {
+        "label": "Classical Dark Midnight",
+        "uiTheme": "vs-dark",
+        "path": "./themes/classical-dark-midnight.json"
       }
     ]
   },
