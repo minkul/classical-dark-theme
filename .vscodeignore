@@ -7,4 +7,4 @@ yarn.lock
 *.vsix
 icon_large.png
 .idea/
-sample.png
+previews/**

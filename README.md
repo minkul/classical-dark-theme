@@ -18,7 +18,13 @@ A simple dark theme for Visual Studio Code inspired by the classic color scheme.
 
 ## Preview
 
-![Classical Dark Theme](https://raw.githubusercontent.com/minkul/classical-dark-theme/refs/heads/master/sample.png)
+### Classical Dark
+
+![Classical Dark](https://raw.githubusercontent.com/minkul/classical-dark-theme/refs/heads/master/previews/classic.png)
+
+### Classical Dark Midnight
+
+![Classical Dark Midnight](https://raw.githubusercontent.com/minkul/classical-dark-theme/refs/heads/master/previews/midnight.png)
 
 ## Build from Source
 
