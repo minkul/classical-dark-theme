@@ -33,7 +33,7 @@ const green = "#5AF78E";
 const cyan = "#8BE9FD";
 const yellow = "#F1FA8C";
 const purple = "#BD93F9";
-const orange = "#DAA464";
+const orange = "#F3BA78";
 const red = "#FF6E6E";
 const blue = "#82AAFF";
 
