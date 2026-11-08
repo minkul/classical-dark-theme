@@ -9,191 +9,29 @@
 // (`gray30`): title bar, activity bar, status bar and the shell that shows
 // between floating panels in the modern layout.
 //
-// Syntax model: eight hues, each with a single job, and no bold or italic on
-// code tokens (prose emphasis in markdown keeps its style).
-//   pink   → keywords, storage, operators, tags, escapes
+// Syntax model: seven hues plus the comment slate, each with a single job, and
+// no bold or italic on code tokens (prose emphasis in markdown keeps its style).
+//   pink   → keywords, storage, operators, tags, escapes; key / value and
+//            namespace separators; interpolation delimiters; string prefixes
 //   green  → functions and methods (declarations and calls), decorators,
 //            markup attribute names, CSS selectors
 //   cyan   → types, classes, interfaces, built-in types; keys in data files,
-//            CSS property names
+//            CSS property names; regexp character classes
 //   yellow → strings
 //   purple → numbers, booleans, null, language constants, this / self
-//   orange → parameters, markdown bold
+//   orange → parameters, markdown bold, regexp groups
 //   red    → regular expressions, invalid code
-//   slate  → comments
-// The terminal's ANSI palette reuses these hues, so command output reads like
-// code; ANSI blue stays a true blue (#82AAFF) since no syntax hue is blue.
+//   slate  → comments and docstrings, delimiters and escapes included
+// Nested brackets cycle white → pink → cyan → green → purple → orange, so each
+// nesting level reads apart at a glance; their pair guides follow suit.
+//
+// Palette: every color below is one of the palette constants, a neutral of the
+// ramp, or a tint / shade of a palette hue (mixed toward the editor surface).
+// The terminal's ANSI palette is the palette itself; it has no true blue, so
+// ANSI blue is purple and bright blue lavender. In the UI, "modified" and
+// "information" are cyan.
 
 import type { ThemeDefinition } from "./theme";
-
-// Hues — the syntax hues plus ANSI blue. Accents, icons, highlights and file
-// states below reference these names, so retuning a hue retunes it everywhere.
-const pink = "#FF79C6";
-const green = "#5AF78E";
-const cyan = "#8BE9FD";
-const yellow = "#F1FA8C";
-const purple = "#BD93F9";
-const orange = "#F3BA78";
-const red = "#FF6E6E";
-const blue = "#82AAFF";
-
-// Neutral ramp — surfaces, borders and text (cool indigo tint)
-const gray10 = "#282A36"; // editor surface: editor, inputs
-const gray20 = "#2B2C3A"; // panel surface: side bar, panel, output, chat; find widget, peek editor, alternating rows
-const gray30 = "#313342"; // frame: title/activity/status bars, modern shell; popups; panel separators
-const gray40 = "#3D3F52"; // popup borders, view section separators, inactive selection, current tab of an unfocused group, notifications
-const gray50 = "#4B4E63"; // structural borders (notebook cells, merge regions), progress track
-const gray60 = "#5C5F77"; // disabled text
-// Control borders reach 3:1 against every surface (WCAG 1.4.11), so the edge
-// of an input, dropdown or checkbox is findable without its fill.
-const gray70 = "#7A7D94"; // control borders (inputs, dropdowns, checkboxes, secondary buttons), line numbers
-const gray80 = "#8E91A8"; // tertiary text on the editor: placeholders, code lens, blame; neutral counter badges
-const gray100 = "#A0A3BC"; // muted text: status bar, descriptions, inactive titles
-const gray120 = "#C4C6D8"; // icons
-const gray130 = "#D9DAE6"; // primary UI text
-const gray150 = "#EEEEF5"; // emphasized text
-const white = "#FFFFFF";
-const black = "#000000";
-const transparent = "#00000000";
-
-// Accent ramp (violet) — selection, focus, primary actions
-const accent40 = "#352F52"; // multi-selected tabs, keyboard focus row
-const accent50 = "#443B6E"; // current tab, list / menu / completion selection
-const accent60 = "#54498B"; // selected tab border, toggled options, secondary accent borders
-const accent70 = "#6247BF"; // accent hover
-const accent80 = "#7056CF"; // accent: primary buttons, progress, drop targets, active panel title
-const accent90 = "#A48BF5"; // accent badge
-const accent100 = purple; // active activity item, modified-setting marker
-const accentVivid = "#8A6CF0"; // focus ring, checked boxes, chart lines, selected terminal block
-// Keyboard focus outlines stay at 3:1 or more on every surface (WCAG 1.4.11).
-const focusRing = accentVivid;
-
-// Blue ramp — information and "modified". Accent violet means selection and
-// action; blue means "for your information", as on the info icons.
-const blue40 = "#363D54"; // info surface: banners, validation, info peek headers (blue at 15% over gray10)
-const blue60 = "#48577C"; // info surface border, secondary "modified" gutter bar (blue at 35% over gray10)
-const blue80 = "#6E95E8"; // info / modified accent: gutter bar, F8 info border
-
-// Green / red / yellow / purple ramps — feedback surfaces and accents
-const green60 = "#2A5A3E";
-const green80 = "#2B7F4F"; // success / running accent
-const green100 = "#6EE59A"; // success text, added files
-const red40 = "#512736"; // error surface
-const red60 = "#7A3343"; // error surface border
-const red70 = "#A33849";
-const red80 = "#C2455A"; // error accent / error border
-const red100 = "#FF7A85"; // error text
-const yellow40 = "#3F3F27"; // warning surface
-const yellow60 = "#5E5D2A"; // warning surface border
-const yellow70 = "#6A6512";
-const yellow80 = "#7D7716"; // warning accent / warning border
-const yellow100 = "#E6EE85"; // warning text
-const yellow110 = yellow; // match text on the selected row
-const purple20 = "#2E2748"; // AI surface
-const purple50 = "#4A3C80"; // AI surface border
-const purple70 = "#6B52C2";
-const purple100 = purple;
-const purple140 = "#E6DCFF";
-const pink100 = pink;
-const cyan100 = cyan;
-const matchCyan = cyan; // matched characters in lists and type-to-find
-const shellTint = "#3B3470"; // gradient tint of the agents shell
-
-// Translucent washes, shadow and scrollbar thumbs
-const wash05 = "#FFFFFF0A"; // hovered terminal block
-const wash10 = "#FFFFFF0F"; // list / tree / editor hover
-const wash20 = "#FFFFFF17"; // toolbar / tab / status item hover
-const wash30 = "#FFFFFF21"; // separators on the frame
-const wash40 = "#FFFFFF29"; // pressed state, neutral badge
-const wash50 = "#FFFFFF3B"; // keybinding outline, sash grips
-const shadow = "#0000004D";
-// Outline drawn around every workbench area (panels, editor, bars). Translucent
-// so one value reads as the same soft edge on the panels and on the frame.
-const uiOutline = "#FFFFFF21";
-const dropTarget = "#7056CF4D"; // drag-and-drop target area
-const whiteMuted = "#FFFFFFCC"; // text on neutral translucent badges
-const scrollbarThumb = "#8B8FB04D";
-const scrollbarThumbHover = "#8B8FB080";
-const minimapThumb = "#8B8FB02E";
-const windowBorder = gray60;
-
-// Icon colors (status glyphs, symbol kinds, run / debug controls) — the
-// syntax hues. Types, callables, constants and keywords take the hue they have
-// in code; variables / fields (blue) and properties (lavender) are plain text
-// in code, so their icons get hues of their own to stay distinguishable.
-const iconRed = red; // error, breakpoint, stop
-const iconYellow = yellow; // warning, failed test, light bulb, execution point
-const iconBlue = blue; // info, running, fields / variables
-const iconGreen = green; // success, run / debug / resume, functions / methods
-const iconCyan = cyan; // classes / types / interfaces
-const iconPurple = purple; // enums, constants, literals
-const iconPink = pink; // keywords, operators, events
-const iconLavender = "#C9B3FB"; // properties, AI
-const aiPurple = "#9A7CF2"; // AI working accent
-
-// Checkbox / radio glyphs
-const checkFill = gray30;
-const checkBorder = gray70;
-const checkSelected = accentVivid;
-const checkDisabledFill = gray40;
-const checkDisabledMark = "#646782";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Syntax colors
-// ─────────────────────────────────────────────────────────────────────────────
-
-const synForeground = "#F0F0EA"; // variables, properties, punctuation, default text
-const synComment = "#8792BE"; // comments, doc comments
-const synKeyword = pink; // pink: keywords, storage, operators, tags, escapes
-const synFunction = green; // green: functions, methods, decorators, attribute names
-const synType = cyan; // cyan: types, classes, interfaces, keys in data files
-const synString = yellow; // yellow: strings
-const synConstant = purple; // purple: numbers, booleans, null, this / self
-const synParameter = orange; // orange: parameters, keyword arguments
-const synRegexp = red; // red: regular expressions
-const synInvalid = "#FF5555"; // red: invalid / illegal code
-const synTodo = cyan; // TODO / FIXME markers inside comments
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Editor palette
-// ─────────────────────────────────────────────────────────────────────────────
-
-const editorBackground = gray10;
-const editorForeground = synForeground;
-// Long-form text in panels (chat transcripts, side bar views, typed input)
-// is one step softer than code so the editor stays the brightest surface.
-const bodyText = "#E2E3EC";
-const caret = "#F8F8F2";
-const caretRowBorder = "#474A5F"; // outline around the caret line (no fill)
-const lineNumber = gray70;
-const lineNumberActive = gray120;
-const indentGuide = "#353748"; // indent guides, rulers
-const indentGuideActive = "#5A5D7C"; // active indent guide, matched-bracket guide
-const whitespace = gray60;
-// Midway between gray40 and gray50: clearly visible on the editor, dark enough
-// that every syntax hue (comments included) keeps 3:1 on top of it.
-const selection = "#44475A";
-const selectionInactive = "#3F4155";
-const popupEditorBackground = "#2E3040"; // completion list and documentation popups
-const blockBackground = gray30; // markdown quotes, collapsed diff regions
-// Sticky scroll headers sit one step below the surface they pin over, so the
-// pinned lines read as a recessed band. Opaque: the terminal hands this color
-// to xterm, which flattens alpha to black unless image support is on.
-const editorStickyBackground = "#22242F"; // editor (gray10) minus one step
-const terminalStickyBackground = "#252632"; // terminal (gray20) minus one step
-const inlineCodeBackground = "#383A4C";
-const inlineCodeForeground = synForeground;
-const foldedForeground = gray100;
-const foldedBackground = gray40;
-const inlayBackground = "#333546";
-const inlayForeground = gray100;
-const inlayParameterForeground = gray100;
-const inlayTextForeground = gray80; // hints without background: code lens
-const ghostText = "#8287A1"; // inline completions
-const matchedBracket = selection;
-const matchedBracketBorder = "#7C7F99";
-const breadcrumbForeground = gray100;
-const breadcrumbActive = gray150;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Color helpers
@@ -242,6 +80,200 @@ function overlay(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Palette
+// ─────────────────────────────────────────────────────────────────────────────
+// Accents, icons, highlights and file states below reference these names, so
+// retuning a hue retunes it everywhere.
+
+const background = "#282A36";
+const backgroundDark = "#21222C";
+const backgroundLight = "#343746";
+const backgroundLighter = "#424450";
+const currentLine = "#44475A";
+const foreground = "#F8F8F2";
+const comment = "#6272A4";
+const pink = "#FF79C6";
+const green = "#50FA7B";
+const cyan = "#8BE9FD";
+const yellow = "#F1FA8C";
+const purple = "#BD93F9";
+const orange = "#F3BA78";
+const red = "#FF5555";
+// Bright variants: the terminal's bright ANSI colors, and lighter accents in
+// the UI (staged file states, data-member icons, error text).
+const brightRed = "#FF6E6E";
+const brightGreen = "#69FF94";
+const brightYellow = "#FFFFA5";
+const lavender = "#D6ACFF";
+const brightPink = "#FF92DF";
+const brightCyan = "#A4FFFF";
+
+// Neutral ramp — surfaces, borders and text (cool indigo tint)
+const gray10 = background; // editor surface: editor, inputs
+const gray20 = "#2B2C3A"; // panel surface: side bar, panel, output, chat; find widget, peek editor, alternating rows
+const gray30 = backgroundLight; // frame: title/activity/status bars, modern shell; popups; panel separators
+const gray40 = backgroundLighter; // popup borders, view section separators, inactive selection, current tab of an unfocused group, notifications
+const gray50 = "#4B4E63"; // structural borders (notebook cells, merge regions), progress track
+const gray60 = "#5C5F77"; // disabled text
+// Control borders reach 3:1 against every surface (WCAG 1.4.11), so the edge
+// of an input, dropdown or checkbox is findable without its fill.
+const gray70 = "#7A7D94"; // control borders (inputs, dropdowns, checkboxes, secondary buttons), line numbers
+const gray80 = "#8E91A8"; // tertiary text on the editor: placeholders, code lens, blame; neutral counter badges
+const gray100 = "#A0A3BC"; // muted text: status bar, descriptions, inactive titles
+const gray120 = "#C4C6D8"; // icons
+const gray130 = "#D9DAE6"; // primary UI text
+const gray150 = "#EEEEF5"; // emphasized text
+const white = "#FFFFFF";
+const black = "#000000";
+const transparent = "#00000000";
+
+// Accent ramp (violet) — selection, focus, primary actions
+const accent40 = "#352F52"; // multi-selected tabs, keyboard focus row
+const accent50 = "#443B6E"; // current tab, list / menu / completion selection
+const accent60 = "#54498B"; // selected tab border, toggled options, secondary accent borders
+const accent70 = "#6247BF"; // accent hover
+const accent80 = "#7056CF"; // accent: primary buttons, progress, drop targets, active panel title
+const accent90 = "#A48BF5"; // accent badge
+const accent100 = purple; // active activity item, modified-setting marker
+const accentVivid = "#8A6CF0"; // focus ring, checked boxes, chart lines, selected terminal block
+// Keyboard focus outlines stay at 3:1 or more on every surface (WCAG 1.4.11).
+const focusRing = accentVivid;
+
+// Cyan ramp — information and "modified". Accent violet means selection and
+// action; cyan means "for your information", as on the info icons.
+const cyan40 = mix(cyan, gray10, 0.15); // info surface: banners, validation, info peek headers
+const cyan60 = mix(cyan, gray10, 0.35); // info surface border, secondary "modified" gutter bar
+const cyan80 = mix(cyan, gray10, 0.8); // info / modified accent: gutter bar, F8 info border
+
+// Green / red / yellow / purple ramps — feedback surfaces and accents
+const green60 = "#2A5A3E";
+const green80 = "#2B7F4F"; // success / running accent
+const green100 = green; // success text, added files
+const red40 = "#512736"; // error surface
+const red60 = "#7A3343"; // error surface border
+const red70 = "#A33849";
+const red80 = "#C2455A"; // error accent / error border
+const red100 = brightRed; // error text
+const yellow40 = "#3F3F27"; // warning surface
+const yellow60 = "#5E5D2A"; // warning surface border
+const yellow70 = "#6A6512";
+const yellow80 = "#7D7716"; // warning accent / warning border
+const yellow100 = yellow; // warning text
+const yellow110 = yellow; // match text on the selected row
+const purple20 = "#2E2748"; // AI surface
+const purple50 = "#4A3C80"; // AI surface border
+const purple70 = "#6B52C2";
+const purple100 = purple;
+const purple140 = "#E6DCFF";
+const pink100 = pink;
+const cyan100 = cyan;
+const matchCyan = cyan; // matched characters in lists and type-to-find
+const shellTint = "#3B3470"; // gradient tint of the agents shell
+
+// Translucent washes, shadow and scrollbar thumbs
+const wash05 = "#FFFFFF0A"; // hovered terminal block
+const wash10 = "#FFFFFF0F"; // list / tree / editor hover
+const wash20 = "#FFFFFF17"; // toolbar / tab / status item hover
+const wash30 = "#FFFFFF21"; // separators on the frame
+const wash40 = "#FFFFFF29"; // pressed state, neutral badge
+const wash50 = "#FFFFFF3B"; // keybinding outline, sash grips
+const shadow = "#0000004D";
+// Outline drawn around every workbench area (panels, editor, bars). Translucent
+// so one value reads as the same soft edge on the panels and on the frame.
+const uiOutline = "#FFFFFF21";
+const dropTarget = "#7056CF4D"; // drag-and-drop target area
+const whiteMuted = "#FFFFFFCC"; // text on neutral translucent badges
+const scrollbarThumb = "#8B8FB04D";
+const scrollbarThumbHover = "#8B8FB080";
+const minimapThumb = "#8B8FB02E";
+const windowBorder = gray60;
+
+// Icon colors (status glyphs, symbol kinds, run / debug controls) — the
+// syntax hues. Types, callables, constants and keywords take the hue they have
+// in code; variables, fields and properties are plain text in code, so their
+// icons get lavender to stay distinguishable.
+const iconRed = red; // error, breakpoint, stop
+const iconYellow = yellow; // warning, failed test, light bulb, execution point
+const iconInfo = cyan; // info, running, unresolved comments
+const iconGreen = green; // success, run / debug / resume, functions / methods
+const iconCyan = cyan; // classes / types / interfaces
+const iconPurple = purple; // enums, constants, literals
+const iconPink = pink; // keywords, operators, events
+const iconLavender = lavender; // variables, fields, properties, AI
+const aiPurple = "#9A7CF2"; // AI working accent
+
+// Checkbox / radio glyphs
+const checkFill = gray30;
+const checkBorder = gray70;
+const checkSelected = accentVivid;
+const checkDisabledFill = gray40;
+const checkDisabledMark = "#646782";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Syntax colors
+// ─────────────────────────────────────────────────────────────────────────────
+
+const synForeground = foreground; // variables, properties, punctuation, default text
+const synComment = comment; // comments, doc comments
+const synKeyword = pink; // pink: keywords, storage, operators, tags, escapes
+const synFunction = green; // green: functions, methods, decorators, attribute names
+const synType = cyan; // cyan: types, classes, interfaces, keys in data files
+const synString = yellow; // yellow: strings
+const synConstant = purple; // purple: numbers, booleans, null, this / self
+const synParameter = orange; // orange: parameters, keyword arguments
+const synRegexp = red; // red: regular expressions
+const synInvalid = red; // red: invalid / illegal code
+const synTodo = cyan; // TODO / FIXME markers inside comments
+const synOperator = pink; // key / value and namespace separators, interpolation delimiters
+const synRegexpGroup = orange; // regexp groups
+const synRegexpClass = cyan; // regexp character classes and sets
+
+// Bracket pair colors, outermost first. Each level takes the next hue of the
+// syntax palette; the pair guides show the same hue, dimmed.
+const bracketLevels = [foreground, pink, cyan, green, purple, orange];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Editor palette
+// ─────────────────────────────────────────────────────────────────────────────
+
+const editorBackground = gray10;
+const editorForeground = synForeground;
+// Long-form text in panels (chat transcripts, side bar views, typed input)
+// is one step softer than code so the editor stays the brightest surface.
+const bodyText = "#E2E3EC";
+const caret = foreground;
+const caretRowBorder = "#474A5F"; // outline around the caret line (no fill)
+const lineNumber = gray70;
+const lineNumberActive = gray120;
+const indentGuide = "#353748"; // indent guides, rulers
+const indentGuideActive = "#5A5D7C"; // active indent guide, matched-bracket guide
+const whitespace = gray60;
+// Clearly visible on the editor, dark enough that every syntax hue except the
+// comment slate keeps 3:1 on top of it.
+const selection = currentLine;
+const selectionInactive = "#3F4155";
+const popupEditorBackground = "#2E3040"; // completion list and documentation popups
+const blockBackground = gray30; // markdown quotes, collapsed diff regions
+// Sticky scroll headers sit one step below the surface they pin over, so the
+// pinned lines read as a recessed band. Opaque: the terminal hands this color
+// to xterm, which flattens alpha to black unless image support is on.
+const editorStickyBackground = backgroundDark; // editor (gray10) minus one step
+const terminalStickyBackground = "#252632"; // terminal (gray20) minus one step
+const inlineCodeBackground = "#383A4C";
+const inlineCodeForeground = synForeground;
+const foldedForeground = gray100;
+const foldedBackground = gray40;
+const inlayBackground = "#333546";
+const inlayForeground = gray100;
+const inlayParameterForeground = gray100;
+const inlayTextForeground = gray80; // hints without background: code lens
+const ghostText = "#8287A1"; // inline completions
+const matchedBracket = selection;
+const matchedBracketBorder = "#7C7F99";
+const breadcrumbForeground = gray100;
+const breadcrumbActive = gray150;
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Highlights
 // ─────────────────────────────────────────────────────────────────────────────
 // Each kind keeps its own hue, and every highlight is a tinted block inside a
@@ -273,10 +305,10 @@ const hyperlink = cyan;
 
 // Diagnostics (underline color + scrollbar mark)
 const errorUnderline = red;
-const errorMark = "#E0566A";
+const errorMark = mix(red, editorBackground, 0.85);
 const warningUnderline = yellow;
-const warningMark = "#C7CE6E";
-const weakWarning = blue; // information-level diagnostics
+const warningMark = mix(yellow, editorBackground, 0.8);
+const weakWarning = cyan; // information-level diagnostics
 const errorHint = "#422837"; // inline test-failure line
 
 // Debugging
@@ -285,47 +317,47 @@ const otherFrameLine = mix(purple, editorBackground, 0.14);
 const inlineValue = synComment;
 const debugValue = synConstant;
 const debugType = synType;
-const debugChanged = blue;
+const debugChanged = cyan;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Version control
 // ─────────────────────────────────────────────────────────────────────────────
-// Added = green, removed = red, modified = blue. Changed lines carry a quiet
+// Added = green, removed = red, modified = cyan. Changed lines carry a quiet
 // tint; the words that actually changed inside them carry a clearly stronger
 // block of the same hue, so intra-line edits stand out without neon. The added
 // and removed fills share one OKLCH lightness and chroma and differ only in
 // hue, so neither side looks heavier than the other.
 
-const gutterAdded = "#50C878";
-const gutterModified = blue80;
-const gutterDeleted = "#E0566A";
+const gutterAdded = mix(green, editorBackground, 0.8);
+const gutterModified = cyan80;
+const gutterDeleted = mix(red, editorBackground, 0.85);
 const diffInserted = "#226742"; // added hue (OKLCH 0.46 / 0.092 / 156°)
 const diffInsertedMark = gutterAdded;
 const diffDeleted = "#824052"; // removed hue (OKLCH 0.46 / 0.092 / 4°)
 const diffDeletedMark = gutterDeleted;
 const diffBase = "#4A4D63"; // merge common ancestor
-const diffModified = "#34507A";
+const diffModified = mix(cyan, editorBackground, 0.3);
 const diffModifiedMark = gutterModified;
 const diffConflict = "#4A2A3E";
 const diffConflictMark = pink;
 const fileAdded = green100;
-const fileModified = blue;
-const fileDeleted = "#E06C7A";
+const fileModified = cyan;
+const fileDeleted = red;
 // File states (explorer, open editors, SCM, tabs). One hue per state; the
-// staged variant of a change is a lighter tint of its unstaged hue.
-const fileUntracked = "#4FD8C4"; // teal: new file, not yet added
-const fileStagedModified = "#B8CCFF"; // light blue: modified, staged
-const fileStateDeleted = "#E89A9A"; // dusty red: deleted (kept apart from error red)
-const fileStagedDeleted = "#FFC2C2"; // light red: deleted, staged
-const fileRenamed = "#D4A8FF"; // lilac: renamed / copied
+// staged variant of a change is the bright variant of its unstaged hue.
+const fileUntracked = green; // green: new file, not yet added
+const fileStagedModified = brightCyan; // bright cyan: modified, staged
+const fileStateDeleted = red; // red: deleted (struck through by VS Code)
+const fileStagedDeleted = brightRed; // bright red: deleted, staged
+const fileRenamed = purple; // purple: renamed / copied
 const fileConflict = pink; // pink: merge conflict
-const fileSubmodule = "#FFA97B"; // orange: submodule
-const fileIgnored = "#9396AE"; // gray: ignored
-const fileError = "#FF7575"; // red: has errors
+const fileSubmodule = orange; // orange: submodule
+const fileIgnored = comment; // slate: ignored
+const fileError = red; // red: has errors
 const fileWarning = yellow; // yellow: has warnings
-const fileInvalid = "#FFD27A"; // amber: invalid item (e.g. unresolvable path)
-const fileChatEdited = "#A396FF"; // violet: edited by chat
-const modifiedTab = blue;
+const fileInvalid = orange; // orange: invalid item (e.g. unresolvable path)
+const fileChatEdited = lavender; // lavender: edited by chat
+const modifiedTab = cyan;
 const blameText = gray80;
 const branchHead = yellow;
 const branchLocal = green;
@@ -352,27 +384,27 @@ const diffWord = (color: string): string =>
 // ─────────────────────────────────────────────────────────────────────────────
 // Terminal
 // ─────────────────────────────────────────────────────────────────────────────
-// Same hues as the syntax palette; the bright variants are only a small step
-// lighter, never neon. VS Code re-tints any ANSI color below
+// The palette's own ANSI set: the syntax hues, with purple standing in for
+// blue and lavender for bright blue. VS Code re-tints any ANSI color below
 // `terminal.integrated.minimumContrastRatio` (default 4.5), so black and bright
 // black text are lifted at render time.
 
 const terminalAnsi = {
-  black: "#21222C",
+  black: backgroundDark,
   red,
-  green: synFunction,
-  yellow: synString,
-  blue,
-  magenta: synKeyword,
-  cyan: synType,
-  white: gray130,
-  brightBlack: synComment,
-  brightRed: "#FF8C8C",
-  brightGreen: "#7FF9A7",
-  brightYellow: "#F5FBA8",
-  brightBlue: "#A0BFFF",
-  brightMagenta: "#FF96D3",
-  brightCyan: "#A9F0FD",
+  green,
+  yellow,
+  blue: purple,
+  magenta: pink,
+  cyan,
+  white: foreground,
+  brightBlack: comment,
+  brightRed,
+  brightGreen,
+  brightYellow,
+  brightBlue: lavender,
+  brightMagenta: brightPink,
+  brightCyan,
   brightWhite: white,
 };
 const terminalBlockSeparator = gray40;
@@ -736,29 +768,21 @@ const theme: ThemeDefinition = {
     "editorWhitespace.foreground": whitespace,
     "editorWordWrapIndicator.foreground": whitespace,
 
-    // Brackets — brackets keep the text color at every nesting level; the
-    // matching pair gets a block and its guide lights up.
+    // Brackets — each nesting level takes the next syntax hue (white, pink,
+    // cyan, green, purple, orange, then around again), so a closing bracket is
+    // matched to its opener by color. Pair guides show the level's hue dimmed,
+    // and brighten for the pair around the caret. The matching pair under the
+    // caret also gets a block.
     "editorBracketMatch.background": overlay(matchedBracket, 0.8),
     "editorBracketMatch.border": matchedBracketBorder,
-    "editorBracketHighlight.foreground1": editorForeground,
-    "editorBracketHighlight.foreground2": editorForeground,
-    "editorBracketHighlight.foreground3": editorForeground,
-    "editorBracketHighlight.foreground4": editorForeground,
-    "editorBracketHighlight.foreground5": editorForeground,
-    "editorBracketHighlight.foreground6": editorForeground,
+    ...Object.fromEntries(
+      bracketLevels.flatMap((color, i) => [
+        [`editorBracketHighlight.foreground${i + 1}`, color],
+        [`editorBracketPairGuide.background${i + 1}`, overlay(mix(color, editorBackground, 0.3), 0.6)],
+        [`editorBracketPairGuide.activeBackground${i + 1}`, overlay(mix(color, editorBackground, 0.7), 0.85)],
+      ]),
+    ),
     "editorBracketHighlight.unexpectedBracket.foreground": synInvalid,
-    "editorBracketPairGuide.background1": indentGuide,
-    "editorBracketPairGuide.background2": indentGuide,
-    "editorBracketPairGuide.background3": indentGuide,
-    "editorBracketPairGuide.background4": indentGuide,
-    "editorBracketPairGuide.background5": indentGuide,
-    "editorBracketPairGuide.background6": indentGuide,
-    "editorBracketPairGuide.activeBackground1": indentGuideActive,
-    "editorBracketPairGuide.activeBackground2": indentGuideActive,
-    "editorBracketPairGuide.activeBackground3": indentGuideActive,
-    "editorBracketPairGuide.activeBackground4": indentGuideActive,
-    "editorBracketPairGuide.activeBackground5": indentGuideActive,
-    "editorBracketPairGuide.activeBackground6": indentGuideActive,
 
     // Folding
     "editor.foldBackground": foldedBackground + "40",
@@ -800,7 +824,7 @@ const theme: ThemeDefinition = {
     "editorHint.border": transparent,
     "problemsErrorIcon.foreground": iconRed,
     "problemsWarningIcon.foreground": iconYellow,
-    "problemsInfoIcon.foreground": iconBlue,
+    "problemsInfoIcon.foreground": iconInfo,
 
     // Sticky scroll
     "editorStickyScroll.background": editorStickyBackground,
@@ -809,16 +833,16 @@ const theme: ThemeDefinition = {
     "editorStickyScrollGutter.background": editorStickyBackground,
     "editorStickyScrollHover.background": wash10,
 
-    // Gutter — change bars: added green, modified blue, deleted red.
+    // Gutter — change bars: added green, modified cyan, deleted red.
     "editorGutter.addedBackground": gutterAdded,
     "editorGutter.modifiedBackground": gutterModified,
     "editorGutter.deletedBackground": gutterDeleted,
     "editorGutter.addedSecondaryBackground": green60,
-    "editorGutter.modifiedSecondaryBackground": blue60,
+    "editorGutter.modifiedSecondaryBackground": cyan60,
     "editorGutter.deletedSecondaryBackground": gray60,
     "editorGutter.commentRangeForeground": gray50,
     "editorGutter.commentGlyphForeground": gray120,
-    "editorGutter.commentUnresolvedGlyphForeground": iconBlue,
+    "editorGutter.commentUnresolvedGlyphForeground": iconInfo,
     "editorGutter.commentDraftGlyphForeground": gray100,
     "editorGutter.itemBackground": gray40,
     "editorGutter.itemGlyphForeground": gray120,
@@ -843,11 +867,11 @@ const theme: ThemeDefinition = {
     "editorOverviewRuler.incomingContentForeground": diffInsertedMark,
     "editorOverviewRuler.commonContentForeground": gray80,
     "editorOverviewRuler.commentForeground": gray80,
-    "editorOverviewRuler.commentUnresolvedForeground": iconBlue,
+    "editorOverviewRuler.commentUnresolvedForeground": iconInfo,
     "editorOverviewRuler.commentDraftForeground": gray100,
     "editorOverviewRuler.inlineChatInserted": diffInsertedMark,
     "editorOverviewRuler.inlineChatRemoved": diffDeletedMark,
-    "editorOverviewRuler.agentFeedbackForeground": iconBlue,
+    "editorOverviewRuler.agentFeedbackForeground": iconInfo,
 
     // Minimap
     "minimap.background": editorBackground,
@@ -900,8 +924,8 @@ const theme: ThemeDefinition = {
     "editorMarkerNavigationError.headerBackground": red40,
     "editorMarkerNavigationWarning.background": yellow80,
     "editorMarkerNavigationWarning.headerBackground": yellow40,
-    "editorMarkerNavigationInfo.background": blue80,
-    "editorMarkerNavigationInfo.headerBackground": blue40,
+    "editorMarkerNavigationInfo.background": cyan80,
+    "editorMarkerNavigationInfo.headerBackground": cyan40,
 
     // Peek view — embedded editor on the inline surface, results on the popup
     // surface; usages are marked green.
@@ -948,7 +972,7 @@ const theme: ThemeDefinition = {
     "multiDiffEditor.border": gray30,
 
     // ── Merge conflicts ──
-    // Current (ours) = modified blue, incoming (theirs) = inserted green,
+    // Current (ours) = modified cyan, incoming (theirs) = inserted green,
     // common base = neutral gray; unresolved conflicts are outlined in pink.
     "merge.currentHeaderBackground": overlay(diffModified, 0.8),
     "merge.currentContentBackground": diffLine(diffModified),
@@ -972,9 +996,9 @@ const theme: ThemeDefinition = {
     "mergeEditor.conflict.handled.minimapOverViewRuler": gray80,
 
     // ── Source control ──
-    // One hue per state: added green, untracked teal, modified blue, renamed
-    // lilac, deleted dusty red, conflicts pink, submodules orange; staged
-    // changes are a lighter tint of their unstaged hue; ignored files recede.
+    // One hue per state: added / untracked green, modified cyan, renamed
+    // purple, deleted red, conflicts pink, submodules orange; staged changes
+    // take the bright variant of their unstaged hue; ignored files recede.
     "gitDecoration.addedResourceForeground": fileAdded,
     "gitDecoration.modifiedResourceForeground": fileModified,
     "gitDecoration.deletedResourceForeground": fileStateDeleted,
@@ -1076,8 +1100,8 @@ const theme: ThemeDefinition = {
     "inputValidation.warningBackground": yellow40,
     "inputValidation.warningBorder": yellow60,
     "inputValidation.warningForeground": gray130,
-    "inputValidation.infoBackground": blue40,
-    "inputValidation.infoBorder": blue60,
+    "inputValidation.infoBackground": cyan40,
+    "inputValidation.infoBorder": cyan60,
     "inputValidation.infoForeground": gray130,
     "dropdown.background": gray30,
     "dropdown.foreground": gray130,
@@ -1170,10 +1194,10 @@ const theme: ThemeDefinition = {
     "notificationToast.border": gray40,
     "notificationsErrorIcon.foreground": iconRed,
     "notificationsWarningIcon.foreground": iconYellow,
-    "notificationsInfoIcon.foreground": iconBlue,
-    "banner.background": blue40,
+    "notificationsInfoIcon.foreground": iconInfo,
+    "banner.background": cyan40,
     "banner.foreground": gray130,
-    "banner.iconForeground": iconBlue,
+    "banner.iconForeground": iconInfo,
 
     // ── Extensions ──
     "extensionButton.background": accent80,
@@ -1185,7 +1209,7 @@ const theme: ThemeDefinition = {
     "extensionButton.prominentForeground": white,
     "extensionButton.prominentHoverBackground": accent70,
     "extensionIcon.starForeground": iconYellow,
-    "extensionIcon.verifiedForeground": iconBlue,
+    "extensionIcon.verifiedForeground": iconInfo,
     "extensionIcon.preReleaseForeground": iconPink,
     "extensionIcon.sponsorForeground": red100,
     "extensionIcon.privateForeground": gray80,
@@ -1238,8 +1262,8 @@ const theme: ThemeDefinition = {
     "terminal.ansiBrightCyan": terminalAnsi.brightCyan,
     "terminal.ansiBrightWhite": terminalAnsi.brightWhite,
     // Terminal suggest widget icons — same families as the symbol icons.
-    "terminalSymbolIcon.aliasForeground": iconBlue,
-    "terminalSymbolIcon.argumentForeground": iconBlue,
+    "terminalSymbolIcon.aliasForeground": iconLavender,
+    "terminalSymbolIcon.argumentForeground": iconLavender,
     "terminalSymbolIcon.branchForeground": branchLocal,
     "terminalSymbolIcon.commitForeground": gray120,
     "terminalSymbolIcon.fileForeground": gray120,
@@ -1271,7 +1295,7 @@ const theme: ThemeDefinition = {
     "debugConsole.warningForeground": yellow100,
     "debugConsole.errorForeground": red100,
     "debugConsole.sourceForeground": hyperlink,
-    "debugConsoleInputIcon.foreground": iconBlue,
+    "debugConsoleInputIcon.foreground": iconInfo,
     "debugView.exceptionLabelBackground": red40,
     "debugView.exceptionLabelForeground": gray130,
     "debugView.stateLabelBackground": wash40,
@@ -1318,8 +1342,8 @@ const theme: ThemeDefinition = {
     "testing.runAction": iconGreen,
     "testing.peekBorder": iconRed,
     "testing.peekHeaderBackground": red40,
-    "testing.messagePeekBorder": iconBlue,
-    "testing.messagePeekHeaderBackground": blue40,
+    "testing.messagePeekBorder": iconInfo,
+    "testing.messagePeekHeaderBackground": cyan40,
     "testing.message.error.lineBackground": overlay(errorHint, 0.8),
     "testing.message.error.badgeBackground": red80,
     "testing.message.error.badgeBorder": red80,
@@ -1359,8 +1383,8 @@ const theme: ThemeDefinition = {
     "notebook.outputContainerBorderColor": gray30,
     "notebookStatusSuccessIcon.foreground": iconGreen,
     "notebookStatusErrorIcon.foreground": iconRed,
-    "notebookStatusRunningIcon.foreground": iconBlue,
-    "notebookEditorOverviewRuler.runningCellForeground": iconBlue,
+    "notebookStatusRunningIcon.foreground": iconInfo,
+    "notebookEditorOverviewRuler.runningCellForeground": iconInfo,
     "notebookScrollbarSlider.background": scrollbarThumb,
     "notebookScrollbarSlider.hoverBackground": scrollbarThumbHover,
     "notebookScrollbarSlider.activeBackground": scrollbarThumbHover,
@@ -1378,16 +1402,16 @@ const theme: ThemeDefinition = {
     "walkthrough.stepTitle.foreground": gray130,
 
     // ── Comments (code review) ──
-    "editorCommentsWidget.rangeBackground": iconBlue + "1A",
-    "editorCommentsWidget.rangeActiveBackground": iconBlue + "33",
+    "editorCommentsWidget.rangeBackground": iconInfo + "1A",
+    "editorCommentsWidget.rangeActiveBackground": iconInfo + "33",
     "editorCommentsWidget.resolvedBorder": gray80,
-    "editorCommentsWidget.unresolvedBorder": iconBlue,
+    "editorCommentsWidget.unresolvedBorder": iconInfo,
     "editorCommentsWidget.replyInputBackground": gray30,
     "commentsView.resolvedIcon": gray80,
-    "commentsView.unresolvedIcon": iconBlue,
+    "commentsView.unresolvedIcon": iconInfo,
 
     // ── Markdown alerts ──
-    "markdownAlert.note.foreground": iconBlue,
+    "markdownAlert.note.foreground": iconInfo,
     "markdownAlert.tip.foreground": iconGreen,
     "markdownAlert.important.foreground": iconLavender,
     "markdownAlert.warning.foreground": iconYellow,
@@ -1397,7 +1421,7 @@ const theme: ThemeDefinition = {
     "charts.foreground": gray130,
     "charts.lines": gray40,
     "charts.red": iconRed,
-    "charts.blue": iconBlue,
+    "charts.blue": iconCyan,
     "charts.yellow": iconYellow,
     "charts.orange": synParameter,
     "charts.green": iconGreen,
@@ -1415,9 +1439,8 @@ const theme: ThemeDefinition = {
     // ── Symbol icons (outline, breadcrumbs, suggest) ──
     // Kinds that are colored in code take that hue: types cyan, callables
     // green, constants and literals purple, keywords / operators / events pink,
-    // strings yellow. Fields / variables (blue) and properties / keys
-    // (lavender) are plain text in code, so their icons get hues of their own;
-    // containers and text stay neutral.
+    // strings yellow. Fields, variables, properties and keys are plain text
+    // in code, so their icons get lavender; containers and text stay neutral.
     "symbolIcon.classForeground": iconCyan,
     "symbolIcon.structForeground": iconCyan,
     "symbolIcon.objectForeground": iconCyan,
@@ -1428,9 +1451,9 @@ const theme: ThemeDefinition = {
     "symbolIcon.methodForeground": iconGreen,
     "symbolIcon.functionForeground": iconGreen,
     "symbolIcon.constructorForeground": iconGreen,
-    "symbolIcon.fieldForeground": iconBlue,
-    "symbolIcon.variableForeground": iconBlue,
-    "symbolIcon.arrayForeground": iconBlue,
+    "symbolIcon.fieldForeground": iconLavender,
+    "symbolIcon.variableForeground": iconLavender,
+    "symbolIcon.arrayForeground": iconLavender,
     "symbolIcon.propertyForeground": iconLavender,
     "symbolIcon.keyForeground": iconLavender,
     "symbolIcon.constantForeground": iconPurple,
@@ -1513,7 +1536,7 @@ const theme: ThemeDefinition = {
     "chat.sessionStateIndicator.needsInputBorder": iconRed,
     "chat.sessionStateIndicator.unvisitedBorder": iconGreen,
     "chat.mcpCompatibilityWarningForeground": yellow100,
-    "chat.workingProgressStableIconForeground": iconBlue,
+    "chat.workingProgressStableIconForeground": iconInfo,
     "chat.workingProgressInsidersIconForeground": iconGreen,
     "agentStatusIndicator.background": wash10,
 
@@ -1623,6 +1646,18 @@ const theme: ThemeDefinition = {
     parameter: synParameter,
     selfParameter: synConstant,
     clsParameter: synConstant,
+    builtinConstant: synConstant,
+    magicFunction: synFunction,
+    module: editorForeground,
+    field: editorForeground,
+    extensionMethod: synFunction,
+    delegate: synType,
+    keywordControl: synKeyword,
+    controlKeyword: synKeyword,
+    operatorOverloaded: synFunction,
+    stringVerbatim: synString,
+    stringEscapeCharacter: synKeyword,
+    excludedCode: synComment,
     enumMember: synConstant,
     event: editorForeground,
     label: editorForeground,
@@ -1721,6 +1756,7 @@ const theme: ThemeDefinition = {
     {
       name: "Number / language constant",
       scope: [
+        "constant",
         "constant.numeric",
         "constant.language",
         "constant.other.caps",
@@ -1730,6 +1766,9 @@ const theme: ThemeDefinition = {
         "keyword.operator.minus.exponent",
         "support.constant",
         "constant.other.symbol",
+        "constant.other.ellipsis",
+        "constant.other.date",
+        "constant.other.timestamp",
       ],
       settings: { foreground: synConstant, fontStyle: "" },
     },
@@ -1765,9 +1804,22 @@ const theme: ThemeDefinition = {
         "string",
         "punctuation.definition.string",
         "meta.embedded.assembly",
-        "storage.type.string.python",
       ],
       settings: { foreground: synString, fontStyle: "" },
+    },
+    {
+      // Docstrings, and bare string statements that act as block comments,
+      // read as comments end to end: quotes, prefix and escapes included.
+      name: "Docstring",
+      scope: [
+        "string.quoted.docstring",
+        "string.quoted.docstring punctuation.definition.string",
+        "string.quoted.docstring storage.type.string",
+        "string.quoted.docstring constant.character",
+        "string.quoted.docstring constant.character.escape",
+        "string.quoted.docstring constant.language",
+      ],
+      settings: { foreground: synComment, fontStyle: "" },
     },
     {
       name: "Regular expression",
@@ -1779,18 +1831,52 @@ const theme: ThemeDefinition = {
       settings: { foreground: synRegexp, fontStyle: "" },
     },
     {
-      name: "Regexp internals",
+      // Python scopes every r"…" string as a regexp, whatever it holds (paths,
+      // LaTeX, …), so the body keeps the string hue; regexp syntax inside it
+      // still takes the colors below.
+      name: "Python raw string",
       scope: [
-        "keyword.control.anchor.regexp",
-        "keyword.operator.quantifier.regexp",
-        "keyword.operator.or.regexp",
-        "keyword.operator.negation.regexp",
-        "keyword.other.back-reference.regexp",
-        "constant.other.character-class.regexp",
-        "constant.character.character-class.regexp",
-        "constant.other.character-class.set.regexp",
+        "source.python string.regexp",
+        "source.python string.regexp punctuation.definition.string",
+      ],
+      settings: { foreground: synString, fontStyle: "" },
+    },
+    {
+      // Anchors, quantifiers, alternation, back-references and escapes are
+      // keywords / escapes already; lookaround openers join them.
+      name: "Regexp operators",
+      scope: [
+        "punctuation.definition.group.assertion.regexp",
+        "keyword.operator.lookahead.regexp",
+        "keyword.operator.lookbehind.regexp",
+        "support.other.match.begin.regexp",
+        "support.other.match.end.regexp",
       ],
       settings: { foreground: synKeyword, fontStyle: "" },
+    },
+    {
+      name: "Regexp group",
+      scope: [
+        "string.regexp punctuation.definition.group",
+        "string.regexp punctuation.parenthesis",
+        "string.regexp support.other.parenthesis",
+        "entity.name.tag.named.group.regexp",
+      ],
+      settings: { foreground: synRegexpGroup, fontStyle: "" },
+    },
+    {
+      name: "Regexp character class / set",
+      scope: [
+        "constant.other.character-class",
+        "constant.character.character-class.regexp",
+        "constant.character.set.regexp",
+        "constant.other.set.regexp",
+        "support.other.match.any.regexp",
+        "support.other.escape.special.regexp",
+        "punctuation.definition.character-class.regexp",
+        "string.regexp punctuation.character.set",
+      ],
+      settings: { foreground: synRegexpClass, fontStyle: "" },
     },
     {
       name: "Template / interpolation delimiters",
@@ -1798,6 +1884,8 @@ const theme: ThemeDefinition = {
         "punctuation.definition.template-expression.begin",
         "punctuation.definition.template-expression.end",
         "punctuation.section.embedded",
+        "punctuation.definition.interpolation",
+        "punctuation.definition.variable.makefile",
         "constant.character.format.placeholder.other.python",
       ],
       settings: { foreground: synKeyword, fontStyle: "" },
@@ -1817,6 +1905,7 @@ const theme: ThemeDefinition = {
         "meta.function-call entity.name.function",
         "meta.method-call entity.name.function",
         "entity.name.function.call",
+        "meta.function-call.generic.python",
         "entity.name.method",
         "entity.name.function.macro",
         "entity.name.function.preprocessor",
@@ -1871,6 +1960,15 @@ const theme: ThemeDefinition = {
         "storage.type.rune.go",
         "storage.type.error.go",
         "storage.type.uintptr.go",
+        "storage.type.c",
+        "storage.type.objc",
+        "storage.type.php",
+        "storage.type.haskell",
+        "storage.type.ocaml",
+        "storage.type.core.rust",
+        "storage.class.std.rust",
+        "source.cs keyword.type",
+        "keyword.primitive-datatypes.swift",
         "support.type.exception.python",
         "support.variable.dom",
       ],
@@ -1926,6 +2024,41 @@ const theme: ThemeDefinition = {
       name: "Punctuation",
       scope: ["punctuation", "meta.brace"],
       settings: { foreground: editorForeground },
+    },
+    {
+      // Separators that relate two things (key and value, namespace and
+      // member, class and base, name and annotation) read as operators;
+      // commas, dots and terminators stay plain.
+      name: "Relating separator",
+      scope: [
+        "punctuation.separator.key-value",
+        "punctuation.separator.dictionary.key-value",
+        "punctuation.separator.dict.python",
+        "punctuation.separator.annotation",
+        "punctuation.separator.namespace",
+        "punctuation.separator.scope-resolution",
+        "punctuation.separator.inheritance",
+        "punctuation.separator.pointer-access",
+        "punctuation.separator.slice",
+        "punctuation.separator.hash",
+        "punctuation.definition.entity.other.inherited-class",
+        "punctuation.definition.block.sequence.item.yaml",
+        "punctuation.definition.block.scalar.folded.yaml",
+        "punctuation.definition.block.scalar.literal.yaml",
+        "support.other.chomping-indicator.yaml",
+      ],
+      settings: { foreground: synOperator, fontStyle: "" },
+    },
+    {
+      // Member access is plain punctuation, even where a grammar scopes the
+      // dot as an operator.
+      name: "Member access dot",
+      scope: [
+        "keyword.operator.dereference.java",
+        "keyword.operator.navigation.groovy",
+        "punctuation.separator.list.comma.css",
+      ],
+      settings: { foreground: editorForeground, fontStyle: "" },
     },
 
     // ── HTML / XML / JSX ──
@@ -1985,6 +2118,14 @@ const theme: ThemeDefinition = {
       settings: { foreground: synFunction, fontStyle: "" },
     },
     {
+      name: "CSS parent selector",
+      scope: [
+        "entity.other.attribute-name.parent-selector",
+        "entity.other.attribute-name.parent-selector-suffix",
+      ],
+      settings: { foreground: synKeyword, fontStyle: "" },
+    },
+    {
       name: "CSS property name",
       scope: [
         "support.type.property-name",
@@ -2030,7 +2171,7 @@ const theme: ThemeDefinition = {
       scope: [
         "support.type.property-name.json",
         "support.type.property-name.json.comments",
-        "punctuation.support.type.property-name.json",
+        "punctuation.support.type.property-name",
         "entity.name.tag.yaml",
         "support.type.property-name.toml",
         "support.type.property-name.table.toml",
@@ -2103,11 +2244,8 @@ const theme: ThemeDefinition = {
       settings: { foreground: synParameter, fontStyle: "" },
     },
     {
-      name: "Shell argument / option",
-      scope: [
-        "source.shell string.unquoted.argument",
-        "source.shell constant.other.option",
-      ],
+      name: "Shell argument",
+      scope: ["source.shell string.unquoted.argument"],
       settings: { foreground: editorForeground },
     },
 
@@ -2126,9 +2264,14 @@ const theme: ThemeDefinition = {
       settings: { foreground: synKeyword },
     },
     {
-      name: "Python magic name",
-      scope: ["support.function.magic.python", "support.variable.magic.python"],
+      name: "Python magic method",
+      scope: "support.function.magic.python",
       settings: { foreground: synFunction, fontStyle: "" },
+    },
+    {
+      name: "Python magic variable",
+      scope: "support.variable.magic.python",
+      settings: { foreground: synConstant, fontStyle: "" },
     },
     {
       name: "Ruby symbol / hash key",
@@ -2287,6 +2430,33 @@ const theme: ThemeDefinition = {
       name: "Git rebase SHA",
       scope: "constant.sha.git-rebase",
       settings: { foreground: synConstant },
+    },
+
+    // ── Log files and the Output panel ──
+    {
+      name: "Log error",
+      scope: ["log.error", "log.exceptiontype", "token.error-token"],
+      settings: { foreground: red, fontStyle: "" },
+    },
+    {
+      name: "Log warning",
+      scope: ["log.warning", "token.warn-token"],
+      settings: { foreground: yellow, fontStyle: "" },
+    },
+    {
+      name: "Log info",
+      scope: ["log.info", "token.info-token"],
+      settings: { foreground: cyan, fontStyle: "" },
+    },
+    {
+      name: "Log debug",
+      scope: ["log.debug", "token.debug-token"],
+      settings: { foreground: purple, fontStyle: "" },
+    },
+    {
+      name: "Log timestamp / verbose",
+      scope: ["log.date", "log.verbose"],
+      settings: { foreground: synComment, fontStyle: "" },
     },
 
     // ── Invalid ──
