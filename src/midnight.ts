@@ -276,14 +276,16 @@ const breadcrumbActive = gray150;
 // ─────────────────────────────────────────────────────────────────────────────
 // Highlights
 // ─────────────────────────────────────────────────────────────────────────────
-// Each kind keeps its own hue, and every highlight is a tinted block inside a
-// matching box, so it stays visible on the caret row, inside a selection and
-// on top of a diff tint. Fills are dark enough that syntax colors stay legible.
+// Each kind keeps its own hue. Find results and peek targets are tinted blocks
+// inside a matching box; occurrences are the box alone, so the selection is
+// the only fill on a selected occurrence. Every highlight stays visible on the
+// caret row, inside a selection and on top of a diff tint. Fills are dark
+// enough that syntax colors stay legible.
 //   yellow → the current find result (strong fill, solid box)
 //   cyan   → the other find results (soft fill, translucent box)
 //   purple → occurrences of the symbol under the caret (read access) and of
-//            the selected text
-//   pink   → write-access occurrences of the symbol under the caret
+//            the selected text (box only)
+//   pink   → write-access occurrences of the symbol under the caret (box only)
 //   green  → go-to-definition / peek targets
 
 const findCurrent = mix(yellow, editorBackground, 0.3);
@@ -291,13 +293,15 @@ const findCurrentBorder = yellow;
 const findOther = mix(cyan, editorBackground, 0.17);
 const findOtherBorder = cyan + "99";
 const findMark = yellow;
-const wordRead = mix(purple, editorBackground, 0.22);
 const wordReadBorder = purple + "99";
 const wordReadMark = purple;
-const wordWrite = mix(pink, editorBackground, 0.2);
 const wordWriteBorder = pink + "99";
 const wordWriteMark = pink;
 const usage = mix(green, editorBackground, 0.16);
+// Find-result fills are drawn above the selection, so they are mostly
+// see-through (same on-screen color via overlay): a selected match reads as a
+// lighter block than the unselected matches around it.
+const highlightAlpha = 0.25;
 const usageBorder = green + "80";
 const liveTemplate = purple; // snippet placeholders, linked editing
 const liveTemplateInactive = gray100;
@@ -704,19 +708,21 @@ const theme: ThemeDefinition = {
     "editor.compositionBorder": caret,
     "editor.placeholder.foreground": gray80,
 
-    // Selection — solid; selected code keeps its syntax colors.
-    "editor.selectionBackground": selection,
+    // Selection — translucent; selected code keeps its syntax colors.
+    "editor.selectionBackground": overlay(selection, 0.6),
     "editor.inactiveSelectionBackground": overlay(selectionInactive, 0.8),
-    // Occurrences of the symbol / selection under the caret — purple blocks in
-    // purple boxes (pink for write access). Every occurrence, including the one
-    // under the caret, is boxed, so the whole set reads at a glance.
-    "editor.selectionHighlightBackground": overlay(wordRead, 0.7),
+    // Occurrences of the symbol / selection under the caret — purple boxes with
+    // no fill (pink for write access). Every occurrence, including the one under
+    // the caret, is boxed, so the whole set reads at a glance; a selected
+    // occurrence (keyboard selection, Add Selection To Next Find Match) is the
+    // same box with the selection fill inside, so it stands apart from the rest.
+    "editor.selectionHighlightBackground": transparent,
     "editor.selectionHighlightBorder": wordReadBorder,
-    "editor.wordHighlightBackground": overlay(wordRead, 0.7),
+    "editor.wordHighlightBackground": transparent,
     "editor.wordHighlightBorder": wordReadBorder,
-    "editor.wordHighlightStrongBackground": overlay(wordWrite, 0.7),
+    "editor.wordHighlightStrongBackground": transparent,
     "editor.wordHighlightStrongBorder": wordWriteBorder,
-    "editor.wordHighlightTextBackground": overlay(wordRead, 0.7),
+    "editor.wordHighlightTextBackground": transparent,
     "editor.wordHighlightTextBorder": wordReadBorder,
 
     // Find — the current result is a strong yellow block in a solid yellow box;
@@ -726,11 +732,11 @@ const theme: ThemeDefinition = {
     "editor.findMatchBackground": overlay(findCurrent, 0.8),
     "editor.findMatchBorder": findCurrentBorder,
     "editor.findMatchForeground": white,
-    "editor.findMatchHighlightBackground": overlay(findOther, 0.7),
+    "editor.findMatchHighlightBackground": overlay(findOther, highlightAlpha),
     "editor.findMatchHighlightBorder": findOtherBorder,
     "editor.findRangeHighlightBackground": wash10,
     "editor.findRangeHighlightBorder": transparent,
-    "searchEditor.findMatchBackground": overlay(findOther, 0.7),
+    "searchEditor.findMatchBackground": overlay(findOther, highlightAlpha),
     "searchEditor.findMatchBorder": findOtherBorder,
     "searchEditor.textInputBorder": gray70,
     "search.resultsInfoForeground": gray100,
@@ -1231,7 +1237,7 @@ const theme: ThemeDefinition = {
     // yellow box, the others cyan blocks in cyan boxes. Fills sit under the text.
     "terminal.findMatchBackground": overlay(findCurrent, 0.8),
     "terminal.findMatchBorder": findCurrentBorder,
-    "terminal.findMatchHighlightBackground": overlay(findOther, 0.7),
+    "terminal.findMatchHighlightBackground": overlay(findOther, highlightAlpha),
     "terminal.findMatchHighlightBorder": findOtherBorder,
     "terminalCursor.foreground": caret,
     "terminalCursor.background": editorBackground,
@@ -1531,7 +1537,7 @@ const theme: ThemeDefinition = {
     "chat.linesAddedForeground": fileAdded,
     "chat.linesRemovedForeground": red100,
     "chat.findMatchBackground": overlay(findCurrent, 0.8),
-    "chat.findMatchHighlightBackground": overlay(findOther, 0.7),
+    "chat.findMatchHighlightBackground": overlay(findOther, highlightAlpha),
     "chat.sessionStateIndicator.inProgressBorder": iconYellow,
     "chat.sessionStateIndicator.needsInputBorder": iconRed,
     "chat.sessionStateIndicator.unvisitedBorder": iconGreen,

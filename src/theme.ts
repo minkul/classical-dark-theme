@@ -135,16 +135,16 @@ const breadcrumbActive = "#DFE1E5";
 //   teal  → find results (box border + scrollbar mark); the current result
 //           is the selection in a light box
 //   green → usages / navigation targets
-//   gray-green / rose → occurrences under the caret (read / write)
+//   gray-green / rose → occurrences under the caret (read / write): a box in
+//           the scrollbar-mark color with no fill, so the selection is the only
+//           fill on a selected occurrence
 const textSearch = "#114957";
 const textSearchBorder = "#165E70";
 const textSearchMark = "#72D6D6";
 const textSearchCurrentBorder = caret;
 const usage = "#2D543F";
 const usageMark = "#42BD77";
-const caretWord = "#373B39";
 const caretWordMark = "#5B786A";
-const caretWriteWord = "#402F33";
 const caretWriteWordMark = "#BA6387";
 const liveTemplate = "#467FF2"; // snippet placeholders, linked editing
 const liveTemplateInactive = "#9DA0A8";
@@ -332,6 +332,11 @@ function overlay(
     .toUpperCase();
   return toHex(t.map((v, i) => (v - (1 - alpha) * b[i]) / alpha)) + alphaHex;
 }
+
+// Find-result fills are drawn above the selection, so they are mostly
+// see-through (same on-screen color via overlay): a selected match reads as a
+// lighter block than the unselected matches around it.
+const highlightAlpha = 0.3;
 
 // Changed lines show 40% of the diff color over the editor background; changed
 // words inside them show the full diff color on top of that line tint. Diff
@@ -664,29 +669,33 @@ const theme: ThemeDefinition = {
     "editor.compositionBorder": caret,
     "editor.placeholder.foreground": gray80,
 
-    // Selection — solid; selected code keeps its syntax colors.
-    "editor.selectionBackground": selection,
+    // Selection — translucent; selected code keeps its syntax colors.
+    "editor.selectionBackground": overlay(selection, 0.6),
     "editor.inactiveSelectionBackground": overlay(selectionInactive, 0.8),
-    // Occurrences of the word / selection under the caret.
-    "editor.selectionHighlightBackground": overlay(caretWord, 0.8),
-    "editor.selectionHighlightBorder": transparent,
-    "editor.wordHighlightBackground": overlay(caretWord, 0.8),
-    "editor.wordHighlightBorder": transparent,
-    "editor.wordHighlightStrongBackground": overlay(caretWriteWord, 0.8),
-    "editor.wordHighlightStrongBorder": transparent,
-    "editor.wordHighlightTextBackground": overlay(caretWord, 0.8),
-    "editor.wordHighlightTextBorder": transparent,
+    // Occurrences of the word / selection under the caret — gray-green boxes
+    // with no fill (rose for write access). Every occurrence, including the one
+    // under the caret, is boxed; a selected occurrence (keyboard selection, Add
+    // Selection To Next Find Match) is the same box with the selection fill
+    // inside, so it stands apart from the rest.
+    "editor.selectionHighlightBackground": transparent,
+    "editor.selectionHighlightBorder": caretWordMark,
+    "editor.wordHighlightBackground": transparent,
+    "editor.wordHighlightBorder": caretWordMark,
+    "editor.wordHighlightStrongBackground": transparent,
+    "editor.wordHighlightStrongBorder": caretWriteWordMark,
+    "editor.wordHighlightTextBackground": transparent,
+    "editor.wordHighlightTextBorder": caretWordMark,
 
     // Find — every result gets a teal block with a teal box; the current one is
     // the selection inside a light box. Match foregrounds stay unset so matched
     // code keeps its syntax colors.
     "editor.findMatchBackground": selection,
     "editor.findMatchBorder": textSearchCurrentBorder,
-    "editor.findMatchHighlightBackground": overlay(textSearch, 0.8),
+    "editor.findMatchHighlightBackground": overlay(textSearch, highlightAlpha),
     "editor.findMatchHighlightBorder": textSearchBorder,
     "editor.findRangeHighlightBackground": wash10,
     "editor.findRangeHighlightBorder": transparent,
-    "searchEditor.findMatchBackground": overlay(textSearch, 0.8),
+    "searchEditor.findMatchBackground": overlay(textSearch, highlightAlpha),
     "searchEditor.findMatchBorder": textSearchBorder,
     "searchEditor.textInputBorder": gray50,
     "search.resultsInfoForeground": gray100,
@@ -1195,7 +1204,7 @@ const theme: ThemeDefinition = {
     // the selection inside a light box. Both fills sit under the text.
     "terminal.findMatchBackground": selection,
     "terminal.findMatchBorder": textSearchCurrentBorder,
-    "terminal.findMatchHighlightBackground": overlay(textSearch, 0.8),
+    "terminal.findMatchHighlightBackground": overlay(textSearch, highlightAlpha),
     "terminal.findMatchHighlightBorder": textSearchBorder,
     "terminalCursor.foreground": caret,
     "terminalCursor.background": editorBackground,
@@ -1488,7 +1497,7 @@ const theme: ThemeDefinition = {
     "chat.linesAddedForeground": fileAdded,
     "chat.linesRemovedForeground": red100,
     "chat.findMatchBackground": selection,
-    "chat.findMatchHighlightBackground": overlay(textSearch, 0.8),
+    "chat.findMatchHighlightBackground": overlay(textSearch, highlightAlpha),
     "chat.sessionStateIndicator.inProgressBorder": iconYellow,
     "chat.sessionStateIndicator.needsInputBorder": iconRed,
     "chat.sessionStateIndicator.unvisitedBorder": iconGreen,
