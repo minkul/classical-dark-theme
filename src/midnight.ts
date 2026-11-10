@@ -142,8 +142,8 @@ const focusRing = accentVivid;
 // Cyan ramp — information and "modified". Accent violet means selection and
 // action; cyan means "for your information", as on the info icons.
 const cyan40 = mix(cyan, gray10, 0.15); // info surface: banners, validation, info peek headers
-const cyan60 = mix(cyan, gray10, 0.35); // info surface border, secondary "modified" gutter bar
-const cyan80 = mix(cyan, gray10, 0.8); // info / modified accent: gutter bar, F8 info border
+const cyan60 = mix(cyan, gray10, 0.35); // info surface border
+const cyan80 = mix(cyan, gray10, 0.8); // info accent: F8 info border
 
 // Green / red / yellow / purple ramps — feedback surfaces and accents
 const green60 = "#2A5A3E";
@@ -326,24 +326,33 @@ const debugChanged = cyan;
 // ─────────────────────────────────────────────────────────────────────────────
 // Version control
 // ─────────────────────────────────────────────────────────────────────────────
-// Added = green, removed = red, modified = cyan. Changed lines carry a quiet
-// tint; the words that actually changed inside them carry a clearly stronger
-// block of the same hue, so intra-line edits stand out without neon. The added
-// and removed fills share one OKLCH lightness and chroma and differ only in
-// hue, so neither side looks heavier than the other.
+// Change bars and diff fills are shared with Classical Dark (same hues, same
+// intensities), the one deliberate exception to the palette rule above:
+// added = green, modified = blue, removed = gray. Deletions read as gray
+// throughout the diff editor, gutter and overview ruler; file decorations
+// keep the palette hues below.
 
-const gutterAdded = mix(green, editorBackground, 0.8);
-const gutterModified = cyan80;
-const gutterDeleted = mix(red, editorBackground, 0.85);
-const diffInserted = "#226742"; // added hue (OKLCH 0.46 / 0.092 / 156°)
-const diffInsertedMark = gutterAdded;
-const diffDeleted = "#824052"; // removed hue (OKLCH 0.46 / 0.092 / 4°)
-const diffDeletedMark = gutterDeleted;
-const diffBase = "#4A4D63"; // merge common ancestor
-const diffModified = mix(cyan, editorBackground, 0.3);
-const diffModifiedMark = gutterModified;
-const diffConflict = "#4A2A3E";
-const diffConflictMark = pink;
+const gutterAdded = "#549159";
+const gutterModified = "#375FAD";
+const gutterDeleted = "#868A91";
+const gutterAddedSecondary = "#29583C";
+const gutterModifiedSecondary = "#2E4D89";
+const gutterDeletedSecondary = "#4C4F56";
+const diffInserted = "#294436";
+const diffInsertedMark = "#447152";
+const diffDeleted = "#484A4A";
+const diffDeletedMark = "#656E76";
+const diffModified = "#385570";
+const diffModifiedMark = "#43698D";
+// Changed words: the mark hue pulled toward the surface, a clear ~1.7:1 step
+// above the line tint while every syntax hue keeps about 3:1 on top of it.
+// (Over this lighter, bluer surface the base diff colors alone barely rise
+// above the line tint.)
+const diffInsertedWord = mix(diffInsertedMark, editorBackground, 0.7);
+const diffDeletedWord = mix(diffDeletedMark, editorBackground, 0.65);
+const diffModifiedWord = mix(diffModifiedMark, editorBackground, 0.7);
+const diffConflict = "#45302B";
+const diffConflictMark = "#8F5247";
 const fileAdded = green100;
 const fileModified = cyan;
 const fileDeleted = red;
@@ -371,19 +380,14 @@ const coverageFull = green60;
 const coveragePartial = yellow60;
 const coverageNone = "#6A2A38";
 
-// Changed lines show 45% of the diff color over the editor background; changed
-// words inside them show 65%, with no outline — a clear step up from the line,
-// yet dark enough that syntax colors keep about 3:1 on it. Diff fills are
-// drawn above the selection, so they are kept translucent (same on-screen
-// color via overlay) to let a selection beneath show through.
+// Changed lines show 40% of the diff color over the editor background; changed
+// words inside them show their word color on top of that line tint. Diff
+// fills are drawn above the selection, so they are kept highly translucent
+// (same on-screen color via overlay) to let a selection beneath show through.
 const diffLine = (color: string): string =>
-  overlay(mix(color, editorBackground, 0.45), 0.25);
-const diffWord = (color: string): string =>
-  overlay(
-    mix(color, editorBackground, 0.65),
-    0.45,
-    mix(color, editorBackground, 0.45),
-  );
+  overlay(mix(color, editorBackground, 0.4), 0.2);
+const diffWord = (color: string, word: string): string =>
+  overlay(word, 0.3, mix(color, editorBackground, 0.4));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Terminal
@@ -839,13 +843,13 @@ const theme: ThemeDefinition = {
     "editorStickyScrollGutter.background": editorStickyBackground,
     "editorStickyScrollHover.background": wash10,
 
-    // Gutter — change bars: added green, modified cyan, deleted red.
+    // Gutter — change bars: added green, modified blue, deleted gray.
     "editorGutter.addedBackground": gutterAdded,
     "editorGutter.modifiedBackground": gutterModified,
     "editorGutter.deletedBackground": gutterDeleted,
-    "editorGutter.addedSecondaryBackground": green60,
-    "editorGutter.modifiedSecondaryBackground": cyan60,
-    "editorGutter.deletedSecondaryBackground": gray60,
+    "editorGutter.addedSecondaryBackground": gutterAddedSecondary,
+    "editorGutter.modifiedSecondaryBackground": gutterModifiedSecondary,
+    "editorGutter.deletedSecondaryBackground": gutterDeletedSecondary,
     "editorGutter.commentRangeForeground": gray50,
     "editorGutter.commentGlyphForeground": gray120,
     "editorGutter.commentUnresolvedGlyphForeground": iconInfo,
@@ -871,7 +875,7 @@ const theme: ThemeDefinition = {
     "editorOverviewRuler.bracketMatchForeground": gray80,
     "editorOverviewRuler.currentContentForeground": diffModifiedMark,
     "editorOverviewRuler.incomingContentForeground": diffInsertedMark,
-    "editorOverviewRuler.commonContentForeground": gray80,
+    "editorOverviewRuler.commonContentForeground": diffDeletedMark,
     "editorOverviewRuler.commentForeground": gray80,
     "editorOverviewRuler.commentUnresolvedForeground": iconInfo,
     "editorOverviewRuler.commentDraftForeground": gray100,
@@ -953,12 +957,12 @@ const theme: ThemeDefinition = {
     "peekViewTitleDescription.foreground": gray100,
 
     // ── Diff editor ──
-    // Inserted = green, removed = red. Changed lines get a quiet tint; changed
-    // words inside them get a clearly stronger block of the same hue.
+    // Inserted = green, removed = gray (deletions read as gray throughout,
+    // matching the gutter bar).
     "diffEditor.insertedLineBackground": diffLine(diffInserted),
     "diffEditor.removedLineBackground": diffLine(diffDeleted),
-    "diffEditor.insertedTextBackground": diffWord(diffInserted),
-    "diffEditor.removedTextBackground": diffWord(diffDeleted),
+    "diffEditor.insertedTextBackground": diffWord(diffInserted, diffInsertedWord),
+    "diffEditor.removedTextBackground": diffWord(diffDeleted, diffDeletedWord),
     "diffEditor.insertedTextBorder": transparent,
     "diffEditor.removedTextBorder": transparent,
     "diffEditorGutter.insertedLineBackground": diffLine(diffInserted),
@@ -978,19 +982,19 @@ const theme: ThemeDefinition = {
     "multiDiffEditor.border": gray30,
 
     // ── Merge conflicts ──
-    // Current (ours) = modified cyan, incoming (theirs) = inserted green,
-    // common base = neutral gray; unresolved conflicts are outlined in pink.
+    // Current (ours) = modified blue, incoming (theirs) = inserted green,
+    // common base = deleted gray; unresolved conflicts are outlined in rust.
     "merge.currentHeaderBackground": overlay(diffModified, 0.8),
     "merge.currentContentBackground": diffLine(diffModified),
     "merge.incomingHeaderBackground": overlay(diffInserted, 0.8),
     "merge.incomingContentBackground": diffLine(diffInserted),
-    "merge.commonHeaderBackground": overlay(diffBase, 0.8),
-    "merge.commonContentBackground": diffLine(diffBase),
+    "merge.commonHeaderBackground": overlay(diffDeleted, 0.8),
+    "merge.commonContentBackground": diffLine(diffDeleted),
     "merge.border": transparent,
     "mergeEditor.change.background": diffLine(diffModified),
-    "mergeEditor.change.word.background": diffWord(diffModified),
-    "mergeEditor.changeBase.background": diffLine(diffBase),
-    "mergeEditor.changeBase.word.background": diffWord(diffBase),
+    "mergeEditor.change.word.background": diffWord(diffModified, diffModifiedWord),
+    "mergeEditor.changeBase.background": diffLine(diffDeleted),
+    "mergeEditor.changeBase.word.background": diffWord(diffDeleted, diffDeletedWord),
     "mergeEditor.conflict.input1.background": diffLine(diffModified),
     "mergeEditor.conflict.input2.background": diffLine(diffInserted),
     "mergeEditor.conflictingLines.background": overlay(diffConflict, 0.8),
@@ -1508,11 +1512,11 @@ const theme: ThemeDefinition = {
     "inlineEdit.modifiedBackground": diffInserted + "4D",
     "inlineEdit.modifiedBorder": diffInsertedMark,
     "inlineEdit.modifiedChangedLineBackground": diffLine(diffInserted),
-    "inlineEdit.modifiedChangedTextBackground": diffWord(diffInserted),
+    "inlineEdit.modifiedChangedTextBackground": diffWord(diffInserted, diffInsertedWord),
     "inlineEdit.originalBackground": diffDeleted + "33",
     "inlineEdit.originalBorder": diffDeletedMark,
     "inlineEdit.originalChangedLineBackground": diffLine(diffDeleted),
-    "inlineEdit.originalChangedTextBackground": diffWord(diffDeleted),
+    "inlineEdit.originalChangedTextBackground": diffWord(diffDeleted, diffDeletedWord),
     "inlineEdit.tabWillAcceptModifiedBorder": diffInsertedMark,
     "inlineEdit.tabWillAcceptOriginalBorder": diffDeletedMark,
 
