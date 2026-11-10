@@ -1542,6 +1542,10 @@ const theme: ThemeDefinition = {
     "chat.thinkingShimmer": purple140,
     "chat.inputWorkingBorderColor1": aiPurple,
     "chat.voiceGlowBaseColor": aiPurple,
+    "chat.dictationActiveMicGlow": aiPurple,
+    // Model-comparison badge: a cyan-to-purple gradient.
+    "chat.fusionBadgeGradientStart": cyan,
+    "chat.fusionBadgeGradientEnd": purple,
     "chat.editedFileForeground": fileChatEdited,
     "chat.linesAddedForeground": fileAdded,
     "chat.linesRemovedForeground": red100,
@@ -1595,6 +1599,7 @@ const theme: ThemeDefinition = {
     "agentsMobileDiff.deletedForeground": fileDeleted,
     "agentsVoice.speakingForeground": iconLavender,
     "agentsVoice.speakingBackground": iconLavender + "14",
+    "agentsWindowGraphic.orange": orange, // welcome-page illustration accent
   },
 
   // ───────────────────────────────────────────────────────────────────────────
