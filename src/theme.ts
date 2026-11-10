@@ -347,6 +347,24 @@ const diffLine = (color: string): string =>
 const diffWord = (color: string): string =>
   overlay(color, 0.3, mix(color, editorBackground, 0.4));
 
+// File states (explorer, open editors, SCM, tabs). Every state gets its own
+// color, none of them red: red names belong to files with errors. The staged
+// variant of a change is the lighter variant of its unstaged hue. Every label
+// reaches 4.5:1 on the side bar and 3:1 on a selected row.
+const fileUntracked = synNumber; // cyan: new file, not yet added
+const fileStagedAdded = fileAdded; // green: new file, staged
+const fileStagedModified = mix(fileModified, white, 0.6); // light blue: modified, staged
+const fileStateDeleted = mix(fileDeleted, white, 0.8); // gray: deleted (struck through by VS Code)
+const fileStagedDeleted = mix(fileDeleted, white, 0.6); // light gray: deleted, staged
+const fileRenamed = purple100; // purple: renamed / copied
+const fileConflict = synKeyword; // keyword orange: merge conflict
+const fileSubmodule = goCall; // khaki: submodule
+const fileIgnored = rsType; // olive: ignored
+const fileError = errorUnderline; // red: has errors
+const fileWarning = warningUnderline; // yellow: has warnings
+const fileInvalid = debugValue; // peach: invalid item (e.g. unresolvable workspace root)
+const fileChatEdited = purple140; // pale lavender: edited by chat
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Theme definition type
 // ─────────────────────────────────────────────────────────────────────────────
@@ -971,19 +989,21 @@ const theme: ThemeDefinition = {
     "mergeEditor.conflict.handled.minimapOverViewRuler": gray80,
 
     // ── Source control ──
-    // One hue per file status, none of them red: red names belong to files
-    // with errors (list.errorForeground). Untracked borrows the number cyan,
-    // ignored files recede like comments, conflicts take the keyword orange.
-    "gitDecoration.addedResourceForeground": fileAdded,
+    // One color per file status, none of them red: red names belong to files
+    // with errors (list.errorForeground). Added green, untracked the number
+    // cyan, modified blue, renamed purple, deleted gray, conflicts the keyword
+    // orange, submodules khaki, ignored olive; staged changes take the lighter
+    // variant of their unstaged hue.
+    "gitDecoration.addedResourceForeground": fileStagedAdded,
     "gitDecoration.modifiedResourceForeground": fileModified,
-    "gitDecoration.deletedResourceForeground": fileDeleted,
-    "gitDecoration.renamedResourceForeground": fileModified,
-    "gitDecoration.untrackedResourceForeground": synNumber,
-    "gitDecoration.ignoredResourceForeground": synComment,
-    "gitDecoration.conflictingResourceForeground": synKeyword,
-    "gitDecoration.submoduleResourceForeground": gray100,
-    "gitDecoration.stageModifiedResourceForeground": fileModified,
-    "gitDecoration.stageDeletedResourceForeground": fileDeleted,
+    "gitDecoration.deletedResourceForeground": fileStateDeleted,
+    "gitDecoration.renamedResourceForeground": fileRenamed,
+    "gitDecoration.untrackedResourceForeground": fileUntracked,
+    "gitDecoration.ignoredResourceForeground": fileIgnored,
+    "gitDecoration.conflictingResourceForeground": fileConflict,
+    "gitDecoration.submoduleResourceForeground": fileSubmodule,
+    "gitDecoration.stageModifiedResourceForeground": fileStagedModified,
+    "gitDecoration.stageDeletedResourceForeground": fileStagedDeleted,
     "git.blame.editorDecorationForeground": blameText,
     // History graph — lanes on the accent ramp; refs: local branch green,
     // remote purple, base ref yellow.
@@ -1044,10 +1064,11 @@ const theme: ThemeDefinition = {
     "list.filterMatchBorder": matchGold,
     "list.dropBackground": blueVivid + "26",
     "list.dropBetweenBackground": blue80,
-    // Files with problems take their squiggle colors.
-    "list.errorForeground": errorUnderline,
-    "list.warningForeground": warningUnderline,
-    "list.invalidItemForeground": red100,
+    // Files with problems take their squiggle colors; unresolvable items are
+    // peach, so they don't look like errors.
+    "list.errorForeground": fileError,
+    "list.warningForeground": fileWarning,
+    "list.invalidItemForeground": fileInvalid,
     "list.deemphasizedForeground": gray80,
     "listFilterWidget.background": gray10,
     "listFilterWidget.outline": gray50,
@@ -1399,6 +1420,12 @@ const theme: ThemeDefinition = {
     "charts.orange": orange100,
     "charts.green": iconGreen,
     "charts.purple": iconPurple,
+    "confetti.color1": iconRed,
+    "confetti.color2": iconLavender,
+    "confetti.color3": iconYellow,
+    "confetti.color4": iconGreen,
+    "confetti.color5": iconBlue,
+    "confetti.color6": iconPurple,
     "chart.line": blueVivid,
     "chart.axis": gray80,
     "chart.guide": gray40,
@@ -1493,7 +1520,11 @@ const theme: ThemeDefinition = {
     "chat.thinkingShimmer": purple140,
     "chat.inputWorkingBorderColor1": aiPurple,
     "chat.voiceGlowBaseColor": aiPurple,
-    "chat.editedFileForeground": fileModified,
+    "chat.dictationActiveMicGlow": aiPurple,
+    // Model-comparison badge: a teal-to-purple gradient.
+    "chat.fusionBadgeGradientStart": teal100,
+    "chat.fusionBadgeGradientEnd": purple100,
+    "chat.editedFileForeground": fileChatEdited,
     "chat.linesAddedForeground": fileAdded,
     "chat.linesRemovedForeground": red100,
     "chat.findMatchBackground": selection,
@@ -1546,6 +1577,7 @@ const theme: ThemeDefinition = {
     "agentsMobileDiff.deletedForeground": fileDeleted,
     "agentsVoice.speakingForeground": iconLavender,
     "agentsVoice.speakingBackground": iconLavender + "14",
+    "agentsWindowGraphic.orange": iconOrange, // welcome-page illustration accent
   },
 
   // ───────────────────────────────────────────────────────────────────────────
