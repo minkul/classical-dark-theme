@@ -112,9 +112,13 @@ const brightCyan = "#A4FFFF";
 const gray10 = background; // editor surface: editor, inputs
 const gray20 = "#2B2C3A"; // panel surface: side bar, panel, output, chat; find widget, peek editor, alternating rows
 const gray30 = backgroundLight; // frame: title/activity/status bars, modern shell; popups; panel separators
-const gray40 = backgroundLighter; // popup borders, view section separators, inactive selection, current tab of an unfocused group, notifications
+const gray40 = backgroundLighter; // popup separators, view section separators, inactive selection, current tab of an unfocused group, notifications
 const gray50 = "#4B4E63"; // structural borders (notebook cells, merge regions), progress track
-const gray60 = "#5C5F77"; // disabled text
+const gray60 = "#5C5F77"; // disabled text, popup borders
+// One border around every floating popup (suggest, hover, parameter hints,
+// code actions, peek, quick pick, menus, notifications): ~2:1 against the
+// editor and popup surfaces — subtle, but the popup edge never melts into code.
+const popupBorder = gray60;
 // Control borders reach 3:1 against every surface (WCAG 1.4.11), so the edge
 // of an input, dropdown or checkbox is findable without its fill.
 const gray70 = "#7A7D94"; // control borders (inputs, dropdowns, checkboxes, secondary buttons), line numbers
@@ -445,7 +449,7 @@ const theme: ThemeDefinition = {
     "icon.foreground": gray120,
     "selection.background": accent50,
     "sash.hoverBorder": accent80,
-    "widget.border": gray40,
+    "widget.border": popupBorder,
     "widget.shadow": shadow,
     "window.activeBorder": windowBorder,
     "window.inactiveBorder": gray50,
@@ -910,16 +914,16 @@ const theme: ThemeDefinition = {
     // docs and completion use the editor-popup surface.
     "editorWidget.background": gray20,
     "editorWidget.foreground": gray130,
-    "editorWidget.border": gray30,
+    "editorWidget.border": popupBorder,
     "editorWidget.resizeBorder": accent80,
     "editorHoverWidget.background": popupEditorBackground,
     "editorHoverWidget.foreground": gray130,
-    "editorHoverWidget.border": gray40,
+    "editorHoverWidget.border": popupBorder,
     "editorHoverWidget.statusBarBackground": gray30,
     "editorHoverWidget.highlightForeground": white, // active parameter in signature help
     "editorSuggestWidget.background": popupEditorBackground,
     "editorSuggestWidget.foreground": editorForeground,
-    "editorSuggestWidget.border": gray40,
+    "editorSuggestWidget.border": popupBorder,
     "editorSuggestWidget.selectedBackground": accent50,
     "editorSuggestWidget.selectedForeground": gray130,
     "editorSuggestWidget.selectedIconForeground": gray120,
@@ -943,7 +947,7 @@ const theme: ThemeDefinition = {
 
     // Peek view — embedded editor on the inline surface, results on the popup
     // surface; usages are marked green.
-    "peekView.border": gray40,
+    "peekView.border": popupBorder,
     "peekViewEditor.background": gray20,
     "peekViewEditorGutter.background": gray20,
     "peekViewEditorStickyScroll.background": gray20,
@@ -1054,7 +1058,7 @@ const theme: ThemeDefinition = {
     // ── Menus ──
     "menu.background": gray30,
     "menu.foreground": gray130,
-    "menu.border": gray40,
+    "menu.border": popupBorder,
     "menu.selectionBackground": accent50,
     "menu.selectionForeground": gray130,
     "menu.selectionBorder": transparent,
@@ -1203,10 +1207,10 @@ const theme: ThemeDefinition = {
     "notifications.foreground": gray130,
     "notifications.border": gray40,
     "notificationLink.foreground": hyperlink,
-    "notificationCenter.border": gray40,
+    "notificationCenter.border": popupBorder,
     "notificationCenterHeader.background": gray40,
     "notificationCenterHeader.foreground": gray130,
-    "notificationToast.border": gray40,
+    "notificationToast.border": popupBorder,
     "notificationsErrorIcon.foreground": iconRed,
     "notificationsWarningIcon.foreground": iconYellow,
     "notificationsInfoIcon.foreground": iconInfo,
