@@ -356,19 +356,23 @@ const diffConflictMark = "#8F5247";
 const fileAdded = green100;
 const fileModified = cyan;
 const fileDeleted = red;
-// File states (explorer, open editors, SCM, tabs). One hue per state; the
-// staged variant of a change is the bright variant of its unstaged hue.
+// File states (explorer, open editors, SCM, tabs). Every state gets its own
+// color; the staged variant of a change is the lighter variant of its
+// unstaged hue. Saturated red is reserved for errors, so deleted files use
+// red tints. Every label reaches 4.5:1 on the side bar (ignored files, which
+// recede on purpose, reach 4:1) and 3:1 on a selected row.
 const fileUntracked = green; // green: new file, not yet added
+const fileStagedAdded = brightGreen; // bright green: new file, staged
 const fileStagedModified = brightCyan; // bright cyan: modified, staged
-const fileStateDeleted = red; // red: deleted (struck through by VS Code)
-const fileStagedDeleted = brightRed; // bright red: deleted, staged
+const fileStateDeleted = mix(red, foreground, 0.6); // rose: deleted (struck through by VS Code)
+const fileStagedDeleted = mix(red, foreground, 0.45); // light rose: deleted, staged
 const fileRenamed = purple; // purple: renamed / copied
 const fileConflict = pink; // pink: merge conflict
 const fileSubmodule = orange; // orange: submodule
-const fileIgnored = comment; // slate: ignored
-const fileError = red; // red: has errors
+const fileIgnored = mix(comment, foreground, 0.78); // slate: ignored
+const fileError = brightRed; // red: has errors (the error-text red)
 const fileWarning = yellow; // yellow: has warnings
-const fileInvalid = orange; // orange: invalid item (e.g. unresolvable path)
+const fileInvalid = mix(red, orange, 0.5); // coral: invalid item (e.g. unresolvable workspace root)
 const fileChatEdited = lavender; // lavender: edited by chat
 const modifiedTab = cyan;
 const blameText = gray80;
@@ -1006,10 +1010,10 @@ const theme: ThemeDefinition = {
     "mergeEditor.conflict.handled.minimapOverViewRuler": gray80,
 
     // ── Source control ──
-    // One hue per state: added / untracked green, modified cyan, renamed
-    // purple, deleted red, conflicts pink, submodules orange; staged changes
-    // take the bright variant of their unstaged hue; ignored files recede.
-    "gitDecoration.addedResourceForeground": fileAdded,
+    // One color per state: untracked green, modified cyan, renamed purple,
+    // deleted rose, conflicts pink, submodules orange; staged changes take
+    // the lighter variant of their unstaged hue; ignored files recede.
+    "gitDecoration.addedResourceForeground": fileStagedAdded,
     "gitDecoration.modifiedResourceForeground": fileModified,
     "gitDecoration.deletedResourceForeground": fileStateDeleted,
     "gitDecoration.renamedResourceForeground": fileRenamed,
@@ -1080,7 +1084,8 @@ const theme: ThemeDefinition = {
     "list.filterMatchBorder": matchCyan,
     "list.dropBackground": accentVivid + "26",
     "list.dropBetweenBackground": accent80,
-    // Files with problems take their squiggle colors.
+    // Files with problems take their problem colors: errors in the error-text
+    // red, warnings yellow, unresolvable items coral.
     "list.errorForeground": fileError,
     "list.warningForeground": fileWarning,
     "list.invalidItemForeground": fileInvalid,
