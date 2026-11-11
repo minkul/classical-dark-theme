@@ -132,9 +132,13 @@ const black = "#000000";
 const transparent = "#00000000";
 
 // Accent ramp (violet) — selection, focus, primary actions
-const accent40 = "#352F52"; // multi-selected tabs, keyboard focus row
-const accent50 = "#443B6E"; // current tab, list / menu / completion selection
-const accent60 = "#54498B"; // selected tab border, toggled options, secondary accent borders
+// The selection steps share one muted indigo-violet (hue 250°, ~30%
+// saturation) and differ only in lightness. The selection sits ~1.5:1 against
+// popups and ~1.7:1 against the side bar, so a selected row or menu item stands
+// out from its surface; toggled buttons sit one step brighter still.
+const accent40 = "#443B6E"; // multi-selected tabs, keyboard focus row
+const accent50 = "#524785"; // current tab, list / menu / completion selection
+const accent60 = "#60549C"; // toggled buttons and options, active tab hover
 const accent70 = "#6247BF"; // accent hover
 const accent80 = "#7056CF"; // accent: primary buttons, progress, drop targets, active panel title
 const accent90 = "#A48BF5"; // accent badge
