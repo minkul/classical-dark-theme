@@ -79,6 +79,26 @@ function overlay(
   return toHex(t.map((v, i) => (v - (1 - alpha) * b[i]) / alpha)) + alphaHex;
 }
 
+/**
+ * `overlay` at the lowest alpha that can still reach `target` from `base`
+ * (one channel ends up at 0 or 255). Whatever lies beneath the layer, such as
+ * the selection under a diff fill, keeps as much of its own color as
+ * possible.
+ */
+function layer(target: string, base: string = editorBackground): string {
+  const t = toRgb(target);
+  const b = toRgb(base);
+  const needed = Math.max(
+    ...t.map((v, i) =>
+      v > b[i] ? (v - b[i]) / (255 - b[i]) : v < b[i] ? (b[i] - v) / b[i] : 0,
+    ),
+  );
+  return overlay(target, Math.max(1, Math.ceil(needed * 255)) / 255, base);
+}
+
+/** A palette hue darkened toward black: deeper color at the same lightness once tinted. */
+const shade = (hue: string, weight: number): string => mix(hue, black, weight);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Palette
 // ─────────────────────────────────────────────────────────────────────────────
@@ -334,33 +354,63 @@ const debugChanged = cyan;
 // ─────────────────────────────────────────────────────────────────────────────
 // Version control
 // ─────────────────────────────────────────────────────────────────────────────
-// Change bars and diff fills are shared with Classical Dark (same hues, same
-// intensities), the one deliberate exception to the palette rule above:
-// added = green, modified = blue, removed = gray. Deletions read as gray
-// throughout the diff editor, gutter and overview ruler; file decorations
-// keep the palette hues below.
+// One hue per kind of change, the same in the gutter, diff editor, merge
+// editor, inline edits, scrollbar and minimap:
+//   green  → added; the incoming side of a merge
+//   red    → removed; a merge's base (the code both sides replace)
+//   cyan   → modified; the current side of a merge
+//   orange → unresolved merge conflicts
+//
+// Diff fills come in two strengths of each hue:
+//   line → a faint tint on every changed line
+//   word → a deeper shade on the changed words inside it. It stands apart
+//          from the line tint mostly by color, not lightness, so code on top
+//          keeps its contrast: VS Code also paints wholly added or removed
+//          blocks (and notebook cells) in the word shade.
+// The tints start from palette hues darkened toward black (`shade`), which
+// carry more color per step of lightness over this violet surface; plain
+// tints of green and red fade to near-gray here and look alike.
+// Fills are drawn above the selection, so each is a `layer`: the lowest alpha
+// that reaches its color. A selection keeps ~90% of its lift on a changed line
+// and ~70% on a changed word, so it reads on every diff tint.
 
-const gutterAdded = "#549159";
-const gutterModified = "#375FAD";
-const gutterDeleted = "#868A91";
-const gutterAddedSecondary = "#29583C";
-const gutterModifiedSecondary = "#2E4D89";
-const gutterDeletedSecondary = "#4C4F56";
-const diffInserted = "#294436";
-const diffInsertedMark = "#447152";
-const diffDeleted = "#484A4A";
-const diffDeletedMark = "#656E76";
-const diffModified = "#385570";
-const diffModifiedMark = "#43698D";
-// Changed words: the mark hue pulled toward the surface, a clear ~1.7:1 step
-// above the line tint while every syntax hue keeps about 3:1 on top of it.
-// (Over this lighter, bluer surface the base diff colors alone barely rise
-// above the line tint.)
-const diffInsertedWord = mix(diffInsertedMark, editorBackground, 0.7);
-const diffDeletedWord = mix(diffDeletedMark, editorBackground, 0.65);
-const diffModifiedWord = mix(diffModifiedMark, editorBackground, 0.7);
-const diffConflict = "#45302B";
-const diffConflictMark = "#8F5247";
+// Line tints: ~4 ΔE (OKLab ×100) above the editor surface, ~5.5 ΔE apart.
+// (Red reads stronger than green on this surface, so its tint is lighter.)
+const addedLine = mix(shade(green, 0.34), editorBackground, 0.27);
+const removedLine = mix(shade(red, 0.44), editorBackground, 0.26);
+// Word shades: ~9–10 ΔE above their line tint, ~14 ΔE apart, and 6–7 ΔE from
+// a selected line tint, so a selection is never mistaken for a changed word.
+// The main syntax hues keep 3.5:1 on them (regexp red ~3:1); comments ~2:1,
+// as on the selection.
+const addedWord = mix(shade(green, 0.38), editorBackground, 0.78);
+const removedWord = mix(shade(red, 0.66), editorBackground, 0.48);
+// Inline merge-conflict blocks: content tints a step stronger than diff lines
+// (the three sides sit back to back, ≥6 ΔE apart); the marker line above each
+// takes the word-strength shade.
+const currentBlock = mix(cyan, editorBackground, 0.11);
+const incomingBlock = mix(shade(green, 0.32), editorBackground, 0.51);
+const commonBlock = mix(shade(red, 0.4), editorBackground, 0.46);
+const currentMarker = mix(shade(cyan, 0.88), editorBackground, 0.27);
+const incomingMarker = addedWord;
+const commonMarker = removedWord;
+const conflictLabel = mix(orange, editorBackground, 0.22); // "Conflicting Lines" label in the merge result
+
+// Marks — gutter bars, scrollbar and minimap: softened hues at one shared
+// lightness (~4.5:1 on the editor), so no kind of change outshines another.
+// Secondary bars (a second quick-diff source, e.g. staged changes) are the
+// same hues at ~2:1.
+const markAdded = mix(mix(green, foreground, 0.75), editorBackground, 0.59);
+const markRemoved = mix(mix(red, foreground, 0.7), editorBackground, 0.79);
+const markModified = mix(cyan, editorBackground, 0.6);
+const markConflict = mix(orange, editorBackground, 0.67);
+const markAddedSecondary = mix(markAdded, editorBackground, 0.45);
+const markRemovedSecondary = mix(markRemoved, editorBackground, 0.45);
+const markModifiedSecondary = mix(markModified, editorBackground, 0.45);
+const markConflictUnfocused = mix(markConflict, editorBackground, 0.55);
+
+// Unchanged lines shown around collapsed regions recede to the sticky-scroll
+// shade, so the changes between them stand out.
+const unchangedCode = backgroundDark;
 const fileAdded = green100;
 const fileModified = cyan;
 const fileDeleted = red;
@@ -391,15 +441,6 @@ const branchTag = gray100;
 const coverageFull = green60;
 const coveragePartial = yellow60;
 const coverageNone = "#6A2A38";
-
-// Changed lines show 40% of the diff color over the editor background; changed
-// words inside them show their word color on top of that line tint. Diff
-// fills are drawn above the selection, so they are kept highly translucent
-// (same on-screen color via overlay) to let a selection beneath show through.
-const diffLine = (color: string): string =>
-  overlay(mix(color, editorBackground, 0.4), 0.2);
-const diffWord = (color: string, word: string): string =>
-  overlay(word, 0.3, mix(color, editorBackground, 0.4));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Terminal
@@ -855,13 +896,14 @@ const theme: ThemeDefinition = {
     "editorStickyScrollGutter.background": editorStickyBackground,
     "editorStickyScrollHover.background": wash10,
 
-    // Gutter — change bars: added green, modified blue, deleted gray.
-    "editorGutter.addedBackground": gutterAdded,
-    "editorGutter.modifiedBackground": gutterModified,
-    "editorGutter.deletedBackground": gutterDeleted,
-    "editorGutter.addedSecondaryBackground": gutterAddedSecondary,
-    "editorGutter.modifiedSecondaryBackground": gutterModifiedSecondary,
-    "editorGutter.deletedSecondaryBackground": gutterDeletedSecondary,
+    // Gutter — change bars: added green, modified cyan, deleted rose; the
+    // secondary quick-diff source (e.g. staged changes) in dimmer bars.
+    "editorGutter.addedBackground": markAdded,
+    "editorGutter.modifiedBackground": markModified,
+    "editorGutter.deletedBackground": markRemoved,
+    "editorGutter.addedSecondaryBackground": markAddedSecondary,
+    "editorGutter.modifiedSecondaryBackground": markModifiedSecondary,
+    "editorGutter.deletedSecondaryBackground": markRemovedSecondary,
     "editorGutter.commentRangeForeground": gray50,
     "editorGutter.commentGlyphForeground": gray120,
     "editorGutter.commentUnresolvedGlyphForeground": iconInfo,
@@ -878,21 +920,21 @@ const theme: ThemeDefinition = {
     "editorOverviewRuler.wordHighlightForeground": wordReadMark,
     "editorOverviewRuler.wordHighlightStrongForeground": wordWriteMark,
     "editorOverviewRuler.wordHighlightTextForeground": wordReadMark,
-    "editorOverviewRuler.modifiedForeground": gutterModified,
-    "editorOverviewRuler.addedForeground": gutterAdded,
-    "editorOverviewRuler.deletedForeground": gutterDeleted,
+    "editorOverviewRuler.modifiedForeground": markModified,
+    "editorOverviewRuler.addedForeground": markAdded,
+    "editorOverviewRuler.deletedForeground": markRemoved,
     "editorOverviewRuler.errorForeground": errorMark,
     "editorOverviewRuler.warningForeground": warningMark,
     "editorOverviewRuler.infoForeground": weakWarning,
     "editorOverviewRuler.bracketMatchForeground": gray80,
-    "editorOverviewRuler.currentContentForeground": diffModifiedMark,
-    "editorOverviewRuler.incomingContentForeground": diffInsertedMark,
-    "editorOverviewRuler.commonContentForeground": diffDeletedMark,
+    "editorOverviewRuler.currentContentForeground": markModified,
+    "editorOverviewRuler.incomingContentForeground": markAdded,
+    "editorOverviewRuler.commonContentForeground": markRemoved,
     "editorOverviewRuler.commentForeground": gray80,
     "editorOverviewRuler.commentUnresolvedForeground": iconInfo,
     "editorOverviewRuler.commentDraftForeground": gray100,
-    "editorOverviewRuler.inlineChatInserted": diffInsertedMark,
-    "editorOverviewRuler.inlineChatRemoved": diffDeletedMark,
+    "editorOverviewRuler.inlineChatInserted": markAdded,
+    "editorOverviewRuler.inlineChatRemoved": markRemoved,
     "editorOverviewRuler.agentFeedbackForeground": iconInfo,
 
     // Minimap
@@ -905,13 +947,13 @@ const theme: ThemeDefinition = {
     "minimap.warningHighlight": warningMark,
     "minimap.infoHighlight": weakWarning,
     "minimap.chatEditHighlight": aiPurple + "66",
-    "minimapGutter.addedBackground": gutterAdded,
-    "minimapGutter.modifiedBackground": gutterModified,
-    "minimapGutter.deletedBackground": gutterDeleted,
+    "minimapGutter.addedBackground": markAdded,
+    "minimapGutter.modifiedBackground": markModified,
+    "minimapGutter.deletedBackground": markRemoved,
     "minimapSlider.background": minimapThumb,
     "minimapSlider.hoverBackground": scrollbarThumb,
     "minimapSlider.activeBackground": scrollbarThumbHover,
-    "editorMinimap.inlineChatInserted": diffInsertedMark,
+    "editorMinimap.inlineChatInserted": markAdded,
 
     // ── Editor widgets ──
     // Find / replace and other in-editor widgets use the inline surface; hover
@@ -969,52 +1011,61 @@ const theme: ThemeDefinition = {
     "peekViewTitleDescription.foreground": gray100,
 
     // ── Diff editor ──
-    // Inserted = green, removed = gray (deletions read as gray throughout,
-    // matching the gutter bar).
-    "diffEditor.insertedLineBackground": diffLine(diffInserted),
-    "diffEditor.removedLineBackground": diffLine(diffDeleted),
-    "diffEditor.insertedTextBackground": diffWord(diffInserted, diffInsertedWord),
-    "diffEditor.removedTextBackground": diffWord(diffDeleted, diffDeletedWord),
+    // Inserted = green, removed = red: a faint tint on changed lines, a deeper
+    // shade on changed words (and on wholly added / removed blocks). The
+    // line-number margin of a changed line takes the word shade, so changed
+    // lines stay easy to scan under their faint tint.
+    "diffEditor.insertedLineBackground": layer(addedLine),
+    "diffEditor.removedLineBackground": layer(removedLine),
+    "diffEditor.insertedTextBackground": layer(addedWord, addedLine),
+    "diffEditor.removedTextBackground": layer(removedWord, removedLine),
     "diffEditor.insertedTextBorder": transparent,
     "diffEditor.removedTextBorder": transparent,
-    "diffEditorGutter.insertedLineBackground": diffLine(diffInserted),
-    "diffEditorGutter.removedLineBackground": diffLine(diffDeleted),
-    "diffEditorOverview.insertedForeground": diffInsertedMark,
-    "diffEditorOverview.removedForeground": diffDeletedMark,
+    "diffEditorGutter.insertedLineBackground": layer(addedWord),
+    "diffEditorGutter.removedLineBackground": layer(removedWord),
+    "diffEditorOverview.insertedForeground": markAdded,
+    "diffEditorOverview.removedForeground": markRemoved,
     "diffEditor.border": gray30,
     "diffEditor.diagonalFill": gray40 + "80",
     "diffEditor.unchangedRegionBackground": blockBackground,
     "diffEditor.unchangedRegionForeground": gray100,
     "diffEditor.unchangedRegionShadow": shadow,
-    "diffEditor.unchangedCodeBackground": transparent,
+    "diffEditor.unchangedCodeBackground": layer(unchangedCode),
+    // Moved code: neutral outline; the move under the caret in the modified
+    // hue.
     "diffEditor.move.border": gray80 + "9C",
-    "diffEditor.moveActive.border": gutterModified,
+    "diffEditor.moveActive.border": markModified,
     "multiDiffEditor.background": editorBackground,
     "multiDiffEditor.headerBackground": gray20,
     "multiDiffEditor.border": gray30,
 
     // ── Merge conflicts ──
-    // Current (ours) = modified blue, incoming (theirs) = inserted green,
-    // common base = deleted gray; unresolved conflicts are outlined in rust.
-    "merge.currentHeaderBackground": overlay(diffModified, 0.8),
-    "merge.currentContentBackground": diffLine(diffModified),
-    "merge.incomingHeaderBackground": overlay(diffInserted, 0.8),
-    "merge.incomingContentBackground": diffLine(diffInserted),
-    "merge.commonHeaderBackground": overlay(diffDeleted, 0.8),
-    "merge.commonContentBackground": diffLine(diffDeleted),
+    // Inline conflict blocks: current (ours) cyan, incoming (theirs) green,
+    // common ancestor red — a soft tint on the content, a deeper shade on the
+    // marker line.
+    "merge.currentHeaderBackground": layer(currentMarker),
+    "merge.currentContentBackground": layer(currentBlock),
+    "merge.incomingHeaderBackground": layer(incomingMarker),
+    "merge.incomingContentBackground": layer(incomingBlock),
+    "merge.commonHeaderBackground": layer(commonMarker),
+    "merge.commonContentBackground": layer(commonBlock),
     "merge.border": transparent,
-    "mergeEditor.change.background": diffLine(diffModified),
-    "mergeEditor.change.word.background": diffWord(diffModified, diffModifiedWord),
-    "mergeEditor.changeBase.background": diffLine(diffDeleted),
-    "mergeEditor.changeBase.word.background": diffWord(diffDeleted, diffDeletedWord),
-    "mergeEditor.conflict.input1.background": diffLine(diffModified),
-    "mergeEditor.conflict.input2.background": diffLine(diffInserted),
-    "mergeEditor.conflictingLines.background": overlay(diffConflict, 0.8),
-    "mergeEditor.conflict.unhandledUnfocused.border": diffConflictMark + "B3",
-    "mergeEditor.conflict.unhandledFocused.border": diffConflictMark,
+    // Merge editor: each input is a diff against the base — the changes in an
+    // input (and in the result) are green, the replaced base code red.
+    // Unresolved conflicts are outlined in orange, resolved ones in gray.
+    "mergeEditor.change.background": layer(addedLine),
+    "mergeEditor.change.word.background": layer(addedWord, addedLine),
+    "mergeEditor.changeBase.background": layer(removedLine),
+    "mergeEditor.changeBase.word.background": layer(removedWord, removedLine),
+    // Input 1 is "Incoming" and input 2 "Current" in a git merge.
+    "mergeEditor.conflict.input1.background": layer(incomingBlock),
+    "mergeEditor.conflict.input2.background": layer(currentBlock),
+    "mergeEditor.conflictingLines.background": layer(conflictLabel),
+    "mergeEditor.conflict.unhandledUnfocused.border": markConflictUnfocused,
+    "mergeEditor.conflict.unhandledFocused.border": markConflict,
     "mergeEditor.conflict.handledUnfocused.border": gray50,
     "mergeEditor.conflict.handledFocused.border": gray80,
-    "mergeEditor.conflict.unhandled.minimapOverViewRuler": diffConflictMark,
+    "mergeEditor.conflict.unhandled.minimapOverViewRuler": markConflict,
     "mergeEditor.conflict.handled.minimapOverViewRuler": gray80,
 
     // ── Source control ──
@@ -1508,8 +1559,8 @@ const theme: ThemeDefinition = {
     "inlineChatInput.border": purple50,
     "inlineChatInput.focusBorder": aiPurple,
     "inlineChatInput.placeholderForeground": gray80,
-    "inlineChatDiff.inserted": diffLine(diffInserted),
-    "inlineChatDiff.removed": diffLine(diffDeleted),
+    "inlineChatDiff.inserted": layer(addedLine),
+    "inlineChatDiff.removed": layer(removedLine),
 
     // ── Inline edits (next edit suggestions) ──
     "inlineEdit.gutterIndicator.background": gray30,
@@ -1522,16 +1573,19 @@ const theme: ThemeDefinition = {
     "inlineEdit.gutterIndicator.successfulBackground": green80,
     "inlineEdit.gutterIndicator.successfulBorder": green80,
     "inlineEdit.gutterIndicator.successfulForeground": white,
-    "inlineEdit.modifiedBackground": diffInserted + "4D",
-    "inlineEdit.modifiedBorder": diffInsertedMark,
-    "inlineEdit.modifiedChangedLineBackground": diffLine(diffInserted),
-    "inlineEdit.modifiedChangedTextBackground": diffWord(diffInserted, diffInsertedWord),
-    "inlineEdit.originalBackground": diffDeleted + "33",
-    "inlineEdit.originalBorder": diffDeletedMark,
-    "inlineEdit.originalChangedLineBackground": diffLine(diffDeleted),
-    "inlineEdit.originalChangedTextBackground": diffWord(diffDeleted, diffDeletedWord),
-    "inlineEdit.tabWillAcceptModifiedBorder": diffInsertedMark,
-    "inlineEdit.tabWillAcceptOriginalBorder": diffDeletedMark,
+    // Suggested code is green, the code it replaces red — the diff editor's
+    // line tints and word shades. The preview boxes take half a line tint
+    // (changed lines inside them add the rest) and a bar-colored outline.
+    "inlineEdit.modifiedBackground": layer(mix(addedLine, editorBackground, 0.5)),
+    "inlineEdit.modifiedBorder": markAdded,
+    "inlineEdit.modifiedChangedLineBackground": layer(addedLine),
+    "inlineEdit.modifiedChangedTextBackground": layer(addedWord, addedLine),
+    "inlineEdit.originalBackground": layer(mix(removedLine, editorBackground, 0.5)),
+    "inlineEdit.originalBorder": markRemoved,
+    "inlineEdit.originalChangedLineBackground": layer(removedLine),
+    "inlineEdit.originalChangedTextBackground": layer(removedWord, removedLine),
+    "inlineEdit.tabWillAcceptModifiedBorder": markAdded,
+    "inlineEdit.tabWillAcceptOriginalBorder": markRemoved,
 
     // ── Chat ──
     // User requests sit in a gray bubble; AI progress and slash commands use
