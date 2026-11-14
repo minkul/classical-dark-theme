@@ -17,11 +17,11 @@ import type { ThemeDefinition } from "./types";
 const gray10 = "#191A1C"; // editor surface: editor, editor-area terminals, inputs
 const gray20 = "#212326"; // panel surface: side bar, panel, output, chat; find widget, peek editor, alternating rows
 const gray30 = "#26282C"; // frame: title/activity/status bars, modern shell; popups; panel separators
-const gray40 = "#33353B"; // popup borders, view section separators, inactive selection, current tab of an unfocused group, notifications
-const gray50 = "#40434A"; // control borders (inputs, dropdowns, secondary buttons), progress track
-const gray60 = "#4C4F56"; // disabled text
+const gray40 = "#33353B"; // popup separators, view section separators, inactive selection, current tab of an unfocused group, notifications
+const gray50 = "#40434A"; // structural borders (notebook cells, merge regions), progress track
+const gray60 = "#4C4F56"; // disabled text, popup borders
 const gray70 = "#5F6269"; // disabled icons, raised control borders
-const gray80 = "#73767C"; // tertiary text: placeholders, group labels; neutral counter badges
+const gray80 = "#73767C"; // tertiary text: placeholders, group labels; neutral counter badges; control borders
 const gray100 = "#9FA2A8"; // muted text: status bar, descriptions, inactive titles
 const gray120 = "#C3C5CB"; // icons
 const gray130 = "#D1D3D9"; // primary UI text
@@ -29,6 +29,14 @@ const gray150 = "#E9EAEE"; // emphasized text
 const white = "#FFFFFF";
 const black = "#000000";
 const transparent = "#00000000";
+// One border around every floating popup (suggest, hover, parameter hints,
+// code actions, peek, quick pick, menus, notifications): ~2:1 against the
+// editor surface — subtle, but the popup edge never melts into code.
+const popupBorder = gray60;
+// Control borders reach 3:1 against the editor, panel and frame surfaces
+// (WCAG 1.4.11), so the edge of an input, dropdown or checkbox is findable
+// without its fill.
+const controlBorder = gray80;
 
 // Blue ramp — accent, selection, focus
 const blue40 = "#233558"; // multi-selected tabs, info banners / validation, keyboard focus row
@@ -95,7 +103,7 @@ const aiPurple = "#955AE0"; // AI working accent
 
 // Checkbox / radio glyphs
 const checkFill = "#2B2D30";
-const checkBorder = "#5A5D63";
+const checkBorder = controlBorder;
 const checkSelected = blueVivid;
 const checkDisabledFill = "#393B40";
 const checkDisabledMark = "#6F737A";
@@ -132,6 +140,7 @@ const inlayParameterForeground = "#858A94";
 const inlayTextForeground = "#727782"; // hints without background: code lens
 const ghostText = "#808080"; // inline completions
 const matchedBracket = "#43454A";
+const matchedBracketBorder = gray80;
 const breadcrumbForeground = "#9DA0A8";
 const breadcrumbActive = "#DFE1E5";
 
@@ -148,6 +157,7 @@ const textSearchMark = "#72D6D6";
 const textSearchCurrentBorder = caret;
 const usage = "#2D543F";
 const usageMark = "#42BD77";
+const usageBorder = usageMark + "80"; // box around go-to-definition / peek targets
 const caretWordMark = "#5B786A";
 const caretWriteWordMark = "#BA6387";
 const liveTemplate = "#467FF2"; // snippet placeholders, linked editing
@@ -221,6 +231,11 @@ const synInvalid = "#F75464"; // bad characters, unmatched brackets, unresolved 
 const synTodo = "#8BB33D";
 const synRegexpClass = "#B2AE60";
 const synSeparator = "#808080"; // key-value separators in properties files
+
+// Bracket pair colors, outermost first. Each level takes the next hue of the
+// syntax palette (red stays reserved for unmatched brackets); the pair guides
+// show the same hue, dimmed.
+const bracketLevels = [editorForeground, synKeyword, synFunction, synString, synMember, synTag];
 
 // Language-specific colors
 const jsLocalVariable = "#A9B7C6";
@@ -344,7 +359,7 @@ const theme: ThemeDefinition = {
     "icon.foreground": gray120,
     "selection.background": blue50,
     "sash.hoverBorder": blue80,
-    "widget.border": gray40,
+    "widget.border": popupBorder,
     "widget.shadow": shadow,
     "window.activeBorder": windowBorder,
     "window.inactiveBorder": gray50,
@@ -494,7 +509,7 @@ const theme: ThemeDefinition = {
     "panelSectionHeader.background": gray20,
     "panelSectionHeader.foreground": gray130,
     "panelSectionHeader.border": gray40,
-    "panelInput.border": gray50,
+    "panelInput.border": controlBorder,
     "panelStickyScroll.background": gray20,
     "panelStickyScroll.border": gray30,
     "panelStickyScroll.shadow": shadow,
@@ -642,14 +657,14 @@ const theme: ThemeDefinition = {
     "editor.findRangeHighlightBorder": transparent,
     "searchEditor.findMatchBackground": overlay(textSearch, highlightAlpha),
     "searchEditor.findMatchBorder": textSearchBorder,
-    "searchEditor.textInputBorder": gray50,
+    "searchEditor.textInputBorder": controlBorder,
     "search.resultsInfoForeground": gray100,
 
     "editor.hoverHighlightBackground": wash10,
     "editor.rangeHighlightBackground": wash10,
     "editor.rangeHighlightBorder": transparent,
     "editor.symbolHighlightBackground": overlay(usage, 0.8),
-    "editor.symbolHighlightBorder": transparent,
+    "editor.symbolHighlightBorder": usageBorder,
     "editor.linkedEditingBackground": liveTemplate + "26",
     "editorLink.activeForeground": hyperlink,
     "editorUnicodeHighlight.background": transparent,
@@ -678,29 +693,21 @@ const theme: ThemeDefinition = {
     "editorWhitespace.foreground": whitespace,
     "editorWordWrapIndicator.foreground": whitespace,
 
-    // Brackets — brackets keep the text color at every nesting level; the
-    // matching pair gets a block and its guide lights up.
+    // Brackets — each nesting level takes the next syntax hue (text, orange,
+    // blue, green, orchid, gold, then around again), so a closing bracket is
+    // matched to its opener by color. Pair guides show the level's hue dimmed,
+    // and brighten for the pair around the caret. The matching pair under the
+    // caret also gets a block in a light box.
     "editorBracketMatch.background": overlay(matchedBracket, 0.8),
-    "editorBracketMatch.border": transparent,
-    "editorBracketHighlight.foreground1": editorForeground,
-    "editorBracketHighlight.foreground2": editorForeground,
-    "editorBracketHighlight.foreground3": editorForeground,
-    "editorBracketHighlight.foreground4": editorForeground,
-    "editorBracketHighlight.foreground5": editorForeground,
-    "editorBracketHighlight.foreground6": editorForeground,
+    "editorBracketMatch.border": matchedBracketBorder,
+    ...Object.fromEntries(
+      bracketLevels.flatMap((color, i) => [
+        [`editorBracketHighlight.foreground${i + 1}`, color],
+        [`editorBracketPairGuide.background${i + 1}`, overlay(mix(color, editorBackground, 0.3), 0.6)],
+        [`editorBracketPairGuide.activeBackground${i + 1}`, overlay(mix(color, editorBackground, 0.7), 0.85)],
+      ]),
+    ),
     "editorBracketHighlight.unexpectedBracket.foreground": synInvalid,
-    "editorBracketPairGuide.background1": indentGuide,
-    "editorBracketPairGuide.background2": indentGuide,
-    "editorBracketPairGuide.background3": indentGuide,
-    "editorBracketPairGuide.background4": indentGuide,
-    "editorBracketPairGuide.background5": indentGuide,
-    "editorBracketPairGuide.background6": indentGuide,
-    "editorBracketPairGuide.activeBackground1": indentGuideActive,
-    "editorBracketPairGuide.activeBackground2": indentGuideActive,
-    "editorBracketPairGuide.activeBackground3": indentGuideActive,
-    "editorBracketPairGuide.activeBackground4": indentGuideActive,
-    "editorBracketPairGuide.activeBackground5": indentGuideActive,
-    "editorBracketPairGuide.activeBackground6": indentGuideActive,
 
     // Folding
     "editor.foldBackground": foldedBackground + "40",
@@ -815,16 +822,16 @@ const theme: ThemeDefinition = {
     // docs and completion use the editor-popup surface.
     "editorWidget.background": gray20,
     "editorWidget.foreground": gray130,
-    "editorWidget.border": gray30,
+    "editorWidget.border": popupBorder,
     "editorWidget.resizeBorder": blue80,
     "editorHoverWidget.background": popupEditorBackground,
     "editorHoverWidget.foreground": gray130,
-    "editorHoverWidget.border": gray40,
+    "editorHoverWidget.border": popupBorder,
     "editorHoverWidget.statusBarBackground": gray30,
     "editorHoverWidget.highlightForeground": white, // active parameter in signature help
     "editorSuggestWidget.background": popupEditorBackground,
     "editorSuggestWidget.foreground": editorForeground,
-    "editorSuggestWidget.border": gray40,
+    "editorSuggestWidget.border": popupBorder,
     "editorSuggestWidget.selectedBackground": blue50,
     "editorSuggestWidget.selectedForeground": gray130,
     "editorSuggestWidget.selectedIconForeground": gray120,
@@ -848,7 +855,7 @@ const theme: ThemeDefinition = {
 
     // Peek view — embedded editor on the inline surface, results on the popup
     // surface; usages are marked green.
-    "peekView.border": gray40,
+    "peekView.border": popupBorder,
     "peekViewEditor.background": gray20,
     "peekViewEditorGutter.background": gray20,
     "peekViewEditorStickyScroll.background": gray20,
@@ -883,7 +890,9 @@ const theme: ThemeDefinition = {
     "diffEditor.unchangedRegionBackground": blockBackground,
     "diffEditor.unchangedRegionForeground": gray100,
     "diffEditor.unchangedRegionShadow": shadow,
-    "diffEditor.unchangedCodeBackground": transparent,
+    // Unchanged lines shown around collapsed regions recede under a light
+    // shadow, so the changes between them stand out.
+    "diffEditor.unchangedCodeBackground": shadow,
     "diffEditor.move.border": gray80 + "9C",
     "diffEditor.moveActive.border": gutterModified,
     "multiDiffEditor.background": editorBackground,
@@ -905,8 +914,9 @@ const theme: ThemeDefinition = {
     "mergeEditor.change.word.background": diffWord(diffModified),
     "mergeEditor.changeBase.background": diffLine(diffDeleted),
     "mergeEditor.changeBase.word.background": diffWord(diffDeleted),
-    "mergeEditor.conflict.input1.background": diffLine(diffModified),
-    "mergeEditor.conflict.input2.background": diffLine(diffInserted),
+    // Input 1 is "Incoming" and input 2 "Current" in a git merge.
+    "mergeEditor.conflict.input1.background": diffLine(diffInserted),
+    "mergeEditor.conflict.input2.background": diffLine(diffModified),
     "mergeEditor.conflictingLines.background": overlay(diffConflict, 0.8),
     "mergeEditor.conflict.unhandledUnfocused.border": diffConflictMark + "B3",
     "mergeEditor.conflict.unhandledFocused.border": diffConflictMark,
@@ -962,7 +972,7 @@ const theme: ThemeDefinition = {
     // ── Menus ──
     "menu.background": gray30,
     "menu.foreground": gray130,
-    "menu.border": gray40,
+    "menu.border": popupBorder,
     "menu.selectionBackground": blue50,
     "menu.selectionForeground": gray130,
     "menu.selectionBorder": transparent,
@@ -998,7 +1008,7 @@ const theme: ThemeDefinition = {
     "list.invalidItemForeground": fileInvalid,
     "list.deemphasizedForeground": gray80,
     "listFilterWidget.background": gray10,
-    "listFilterWidget.outline": gray50,
+    "listFilterWidget.outline": controlBorder,
     "listFilterWidget.noMatchesOutline": red80,
     "listFilterWidget.shadow": shadow,
     "tree.indentGuidesStroke": gray50,
@@ -1010,7 +1020,7 @@ const theme: ThemeDefinition = {
     // Outlined fields on the surface they sit on.
     "input.background": gray10,
     "input.foreground": bodyText,
-    "input.border": gray50,
+    "input.border": controlBorder,
     "input.placeholderForeground": gray80,
     "inputOption.activeBackground": blue60,
     "inputOption.activeBorder": blue60,
@@ -1027,7 +1037,7 @@ const theme: ThemeDefinition = {
     "inputValidation.infoForeground": gray130,
     "dropdown.background": gray30,
     "dropdown.foreground": gray130,
-    "dropdown.border": gray50,
+    "dropdown.border": controlBorder,
     "dropdown.listBackground": gray30,
 
     // ── Buttons and toggles ──
@@ -1038,7 +1048,7 @@ const theme: ThemeDefinition = {
     "button.separator": wash50,
     "button.secondaryBackground": transparent,
     "button.secondaryForeground": gray130,
-    "button.secondaryBorder": gray50,
+    "button.secondaryBorder": controlBorder,
     "button.secondaryHoverBackground": wash20,
     "checkbox.background": checkFill,
     "checkbox.foreground": gray130,
@@ -1052,7 +1062,7 @@ const theme: ThemeDefinition = {
     "radio.activeBorder": blue60,
     "radio.inactiveBackground": transparent,
     "radio.inactiveForeground": gray130,
-    "radio.inactiveBorder": gray50,
+    "radio.inactiveBorder": controlBorder,
     "radio.inactiveHoverBackground": wash20,
 
     // ── Badges ──
@@ -1081,17 +1091,17 @@ const theme: ThemeDefinition = {
     "settings.sashBorder": gray30,
     "settings.dropdownBackground": gray30,
     "settings.dropdownForeground": gray130,
-    "settings.dropdownBorder": gray50,
+    "settings.dropdownBorder": controlBorder,
     "settings.dropdownListBorder": gray40,
     "settings.checkboxBackground": checkFill,
     "settings.checkboxForeground": gray130,
     "settings.checkboxBorder": checkBorder,
     "settings.textInputBackground": gray10,
     "settings.textInputForeground": bodyText,
-    "settings.textInputBorder": gray50,
+    "settings.textInputBorder": controlBorder,
     "settings.numberInputBackground": gray10,
     "settings.numberInputForeground": bodyText,
-    "settings.numberInputBorder": gray50,
+    "settings.numberInputBorder": controlBorder,
     "settings.focusedRowBackground": wash20,
     "settings.focusedRowBorder": blue80,
     "settings.rowHoverBackground": wash10,
@@ -1110,10 +1120,10 @@ const theme: ThemeDefinition = {
     "notifications.foreground": gray130,
     "notifications.border": gray40,
     "notificationLink.foreground": blue100,
-    "notificationCenter.border": gray40,
+    "notificationCenter.border": popupBorder,
     "notificationCenterHeader.background": gray40,
     "notificationCenterHeader.foreground": gray130,
-    "notificationToast.border": gray40,
+    "notificationToast.border": popupBorder,
     "notificationsErrorIcon.foreground": iconRed,
     "notificationsWarningIcon.foreground": iconYellow,
     "notificationsInfoIcon.foreground": iconBlue,
@@ -1480,12 +1490,12 @@ const theme: ThemeDefinition = {
     "agentsGradient.tintColor": shellTint,
     "agentsChatInput.background": gray10,
     "agentsChatInput.foreground": bodyText,
-    "agentsChatInput.border": gray50,
+    "agentsChatInput.border": controlBorder,
     "agentsChatInput.focusBorder": blue80,
     "agentsChatInput.placeholderForeground": gray80,
     "agentsNewSessionButton.background": transparent,
     "agentsNewSessionButton.foreground": gray130,
-    "agentsNewSessionButton.border": gray50,
+    "agentsNewSessionButton.border": controlBorder,
     "agentsNewSessionButton.hoverBackground": wash20,
     "agentsBadge.background": blue90,
     "agentsBadge.foreground": gray10,
@@ -1516,25 +1526,36 @@ const theme: ThemeDefinition = {
   semanticTokenColors: {
     // Literals and operators
     keyword: synKeyword,
+    controlKeyword: synKeyword,
+    keywordControl: synKeyword,
     newOperator: synKeyword,
-    "builtinType:rust": synKeyword,
-    "boolean:rust": synKeyword,
+    builtinType: synKeyword,
+    boolean: synKeyword,
+    builtinConstant: synKeyword,
     string: synString,
     stringLiteral: synString,
+    stringVerbatim: synString,
     number: synNumber,
     numberLiteral: synNumber,
     customLiteral: synNumber,
     regexp: jsRegexp,
     escapeSequence: synKeyword,
+    stringEscapeCharacter: synKeyword,
     formatSpecifier: synKeyword,
     operator: editorForeground,
+    operatorOverloaded: editorForeground,
     "operator.controlFlow:rust": rsQuestion,
     comment: synComment,
     "comment.documentation": synDocComment,
+    excludedCode: synComment, // inactive #if / #else branches
 
     // Types — declarations and references read as plain text.
     namespace: editorForeground,
+    module: editorForeground,
     type: editorForeground,
+    typeAlias: editorForeground,
+    union: editorForeground,
+    delegate: editorForeground,
     class: editorForeground,
     interface: editorForeground,
     enum: editorForeground,
@@ -1549,6 +1570,7 @@ const theme: ThemeDefinition = {
     variable: editorForeground,
     parameter: editorForeground,
     property: synMember,
+    field: synMember,
     recordComponent: synMember,
     enumMember: synMember,
     event: synMember,
@@ -1559,6 +1581,7 @@ const theme: ThemeDefinition = {
     // Functions — declarations blue, calls plain.
     function: editorForeground,
     method: editorForeground,
+    extensionMethod: editorForeground,
     "function.declaration": synFunction,
     "method.declaration": synFunction,
     "function.definition": synFunction,
@@ -1567,6 +1590,8 @@ const theme: ThemeDefinition = {
     // Metadata
     decorator: synMetadata,
     annotation: synMetadata,
+    attribute: synMetadata,
+    builtinAttribute: synMetadata,
     macro: synMetadata,
     modifier: synKeyword,
     label: editorForeground,
@@ -1598,6 +1623,7 @@ const theme: ThemeDefinition = {
     selfParameter: pySelf,
     clsParameter: pySelf,
     "*.builtin:python": pyBuiltin,
+    magicFunction: pyMagic,
     "property:python": editorForeground,
 
     // Kotlin
@@ -1631,8 +1657,6 @@ const theme: ThemeDefinition = {
     "selfTypeKeyword:rust": rsSelf,
     "static:rust": rsStatic,
     "const:rust": synMember,
-    "attribute:rust": synMetadata,
-    "builtinAttribute:rust": synMetadata,
     "unresolvedReference:rust": synInvalid,
   },
 
@@ -1778,8 +1802,14 @@ const theme: ThemeDefinition = {
         "variable.other.enummember",
         "constant.other.enum",
         "constant.other.caps",
+        "support.constant",
       ],
       settings: { foreground: synMember },
+    },
+    {
+      name: "Symbol / atom",
+      scope: "constant.other.symbol",
+      settings: { foreground: rbSymbol },
     },
 
     // ── Strings ──
@@ -2122,6 +2152,16 @@ const theme: ThemeDefinition = {
       settings: { foreground: yamlAnchor },
     },
     {
+      name: "YAML block scalar / sequence indicator",
+      scope: [
+        "punctuation.definition.block.scalar.folded.yaml",
+        "punctuation.definition.block.scalar.literal.yaml",
+        "support.other.chomping-indicator.yaml",
+        "punctuation.definition.block.sequence.item.yaml",
+      ],
+      settings: { foreground: synKeyword },
+    },
+    {
       name: "YAML comment",
       scope: "comment.line.number-sign.yaml",
       settings: { foreground: synDocComment },
@@ -2152,13 +2192,15 @@ const theme: ThemeDefinition = {
       settings: { foreground: synString },
     },
     {
-      name: "TOML boolean / date",
+      name: "TOML boolean / date, YAML timestamp",
       scope: [
         "constant.language.boolean.toml",
         "constant.other.time.datetime.offset.toml",
         "constant.other.time.datetime.local.toml",
         "constant.other.time.date.toml",
         "constant.other.time.time.toml",
+        "constant.other.date",
+        "constant.other.timestamp",
       ],
       settings: { foreground: editorForeground },
     },
@@ -2187,6 +2229,7 @@ const theme: ThemeDefinition = {
         "punctuation.definition.raw.markdown",
         "punctuation.definition.markdown",
         "punctuation.definition.list.begin.markdown",
+        "beginning.punctuation.definition.list.markdown",
         "meta.separator.markdown",
         "punctuation.separator.table.markdown",
         "constant.other.reference.link.markdown",
@@ -2204,6 +2247,11 @@ const theme: ThemeDefinition = {
       settings: { fontStyle: "italic" },
     },
     {
+      name: "Markdown bold italic",
+      scope: ["markup.bold markup.italic", "markup.italic markup.bold"],
+      settings: { fontStyle: "bold italic" },
+    },
+    {
       name: "Markdown code",
       scope: [
         "markup.inline.raw",
@@ -2218,9 +2266,9 @@ const theme: ThemeDefinition = {
       settings: { foreground: synMember },
     },
     {
-      name: "Markdown quote marker",
-      scope: "punctuation.definition.quote.begin.markdown",
-      settings: { foreground: synComment },
+      name: "Markdown quote",
+      scope: ["markup.quote", "punctuation.definition.quote.begin.markdown"],
+      settings: { foreground: synComment, fontStyle: "italic" },
     },
     {
       name: "Markdown link text",
@@ -2266,6 +2314,35 @@ const theme: ThemeDefinition = {
       name: "Git rebase SHA",
       scope: "constant.sha.git-rebase",
       settings: { foreground: synNumber },
+    },
+
+    // ── Log files / output channels ──
+    // Levels take their diagnostic colors: errors red, warnings yellow, info
+    // blue; debug purple; timestamps and verbose lines recede like comments.
+    {
+      name: "Log error",
+      scope: ["log.error", "log.exceptiontype", "token.error-token"],
+      settings: { foreground: errorUnderline },
+    },
+    {
+      name: "Log warning",
+      scope: ["log.warning", "token.warn-token"],
+      settings: { foreground: warningUnderline },
+    },
+    {
+      name: "Log info",
+      scope: ["log.info", "token.info-token"],
+      settings: { foreground: iconBlue },
+    },
+    {
+      name: "Log debug",
+      scope: ["log.debug", "token.debug-token"],
+      settings: { foreground: purple100 },
+    },
+    {
+      name: "Log timestamp / verbose",
+      scope: ["log.date", "log.verbose"],
+      settings: { foreground: synComment },
     },
 
     // ── Regular expression internals ──
