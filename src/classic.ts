@@ -208,8 +208,23 @@ const coverageNone = "#5E3838";
 // ─────────────────────────────────────────────────────────────────────────────
 // Syntax colors
 // ─────────────────────────────────────────────────────────────────────────────
-// Language defaults. Calls, classes, types, parameters and local variables are
-// deliberately plain text; color marks declarations, members and literals.
+// One palette for every language: each kind of token takes the same color
+// whatever the language, and no language gets colors of its own. Calls,
+// classes, types, parameters and variables are deliberately plain text; color
+// marks keywords, declarations, members and literals.
+//   orange  → keywords, storage, primitive / built-in types, language
+//             constants, this / self, escapes, interpolation delimiters,
+//             markup markers, YAML indicators
+//   green   → strings, unquoted values in data files
+//   cyan    → numbers, dates and times
+//   blue    → function / method declarations
+//   pink    → fields, properties, object keys (data-file keys included),
+//             enum members, named constants, symbols
+//   olive   → annotations, decorators, attributes, macros
+//   teal    → type parameters, lifetimes
+//   gold    → markup tags, CSS selectors; teal-green for custom elements and
+//             components
+//   gray    → comments (doc comments green-gray)
 
 const synKeyword = "#CF8E6D"; // keywords, primitive types, escapes, markup markers
 const synString = "#6AAB73";
@@ -219,64 +234,22 @@ const synDocComment = "#5F826B"; // doc comments, docstrings
 const synDocTag = "#67A37C"; // @param, @return …
 const synDocTagValue = "#ABADB3"; // doc tag arguments
 const synFunction = "#56A8F5"; // function / method declarations
-const synMethod = "#57AAF7"; // static / instance member functions
 const synMember = "#C77DBB"; // fields, properties, object keys, constants
-const synMetadata = "#B3AE60"; // annotations, decorators, attributes
-const synTypeParameter = "#16BAAC";
+const synMetadata = "#B3AE60"; // annotations, decorators, attributes, macros
+const synTypeParameter = "#16BAAC"; // type parameters, lifetimes
 const synTag = "#D5B778"; // HTML / XML tags, CSS selectors and functions
-const synCustomTag = "#2FBAA3";
-const synAttribute = "#BABABA"; // HTML attribute names, CSS property names
+const synCustomTag = "#2FBAA3"; // custom elements, JSX / TSX components
+const synAttribute = "#BABABA"; // HTML / XML attribute names, CSS property names
 const synEntity = "#56A8F5"; // HTML entities, CSS colors
+const synRegexp = "#42C3D4"; // regular expressions
 const synInvalid = "#F75464"; // bad characters, unmatched brackets, unresolved references
 const synTodo = "#8BB33D";
 const synRegexpClass = "#B2AE60";
-const synSeparator = "#808080"; // key-value separators in properties files
 
 // Bracket pair colors, outermost first. Each level takes the next hue of the
 // syntax palette (red stays reserved for unmatched brackets); the pair guides
 // show the same hue, dimmed.
 const bracketLevels = [editorForeground, synKeyword, synFunction, synString, synMember, synTag];
-
-// Language-specific colors
-const jsLocalVariable = "#A9B7C6";
-const jsGlobalVariable = "#C77DBA";
-const jsComponent = "#9C9CFF"; // JSX / TSX components
-const jsRegexp = "#42C3D4";
-const tsTypeParameter = "#507874";
-const cssUrl = "#5C92FF";
-const yamlAnchor = "#E8BF6A";
-const kotlinLabel = "#32B8AF";
-const pySelf = "#94558D";
-const pyBuiltin = "#8888C6";
-const pyKeywordArgument = "#AA4926";
-const pyMagic = "#B200B2";
-const pyBytes = "#A5C261";
-const goBuiltin = "#CC7832";
-const goCall = "#B09D79";
-const goPackage = "#AFBF7E";
-const goType = "#6FAFBD";
-const rsType = "#86985D"; // structs, enums, unions, type aliases
-const rsVariant = "#6DA1AB";
-const rsTrait = "#8D91DC"; // traits, crates
-const rsLifetime = "#20999D"; // lifetimes, type parameters
-const rsMacro = "#4EADE5";
-const rsSelf = "#D98EB3";
-const rsStatic = "#9876AA";
-const rsQuestion = "#CC7832";
-const phpVariable = "#9876AA";
-const phpNamedArgument = "#467CDA";
-const rbMethod = "#FFC66D";
-const rbSymbol = "#89A6AF";
-const rbGlobal = "#D0D0FF";
-const rbEscape = "#CC7832";
-const lessVariable = "#D0D0FF";
-const rbRegexp = "#979E5A";
-const rbComment = "#808080";
-const rbNumber = "#74A4C8";
-const rbLocal = "#D4B01D";
-const rbConstant = "#FEFFF9";
-const rbSpecialCall = "#FC9800";
-const shCommand = "#C57633";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Terminal
@@ -331,8 +304,8 @@ const fileStateDeleted = mix(fileDeleted, white, 0.8); // gray: deleted (struck 
 const fileStagedDeleted = mix(fileDeleted, white, 0.6); // light gray: deleted, staged
 const fileRenamed = purple100; // purple: renamed / copied
 const fileConflict = synKeyword; // keyword orange: merge conflict
-const fileSubmodule = goCall; // khaki: submodule
-const fileIgnored = rsType; // olive: ignored
+const fileSubmodule = "#B09D79"; // khaki: submodule
+const fileIgnored = "#86985D"; // olive: ignored
 const fileError = errorUnderline; // red: has errors
 const fileWarning = warningUnderline; // yellow: has warnings
 const fileInvalid = debugValue; // peach: invalid item (e.g. unresolvable workspace root)
@@ -1524,32 +1497,42 @@ const theme: ThemeDefinition = {
   // (e.g. `*.static`) combine with the color of the base token type.
   semanticHighlighting: true,
   semanticTokenColors: {
-    // Literals and operators
+    // Every rule applies to every language; there are no per-language rules.
+
+    // Keywords, literals and operators
     keyword: synKeyword,
     controlKeyword: synKeyword,
     keywordControl: synKeyword,
+    modifier: synKeyword,
     newOperator: synKeyword,
+    "operator.controlFlow": synKeyword, // e.g. Rust's ?
     builtinType: synKeyword,
+    "type.defaultLibrary": synKeyword, // built-in types (Go int, error…)
     boolean: synKeyword,
     builtinConstant: synKeyword,
+    "variable.readonly.defaultLibrary": synKeyword, // built-in constants (Go nil, true…)
+    selfKeyword: synKeyword,
+    selfTypeKeyword: synKeyword,
+    selfParameter: synKeyword,
+    clsParameter: synKeyword,
     string: synString,
     stringLiteral: synString,
     stringVerbatim: synString,
     number: synNumber,
     numberLiteral: synNumber,
     customLiteral: synNumber,
-    regexp: jsRegexp,
+    regexp: synRegexp,
     escapeSequence: synKeyword,
     stringEscapeCharacter: synKeyword,
     formatSpecifier: synKeyword,
     operator: editorForeground,
     operatorOverloaded: editorForeground,
-    "operator.controlFlow:rust": rsQuestion,
     comment: synComment,
     "comment.documentation": synDocComment,
     excludedCode: synComment, // inactive #if / #else branches
 
-    // Types — declarations and references read as plain text.
+    // Types — declarations and references read as plain text, built-in ones
+    // included; type parameters and lifetimes are teal.
     namespace: editorForeground,
     module: editorForeground,
     type: editorForeground,
@@ -1562,11 +1545,10 @@ const theme: ThemeDefinition = {
     struct: editorForeground,
     record: editorForeground,
     typeParameter: synTypeParameter,
-    "typeParameter:typescript": tsTypeParameter,
-    "typeParameter:typescriptreact": tsTypeParameter,
-    "typeParameter:python": editorForeground,
+    lifetime: synTypeParameter,
 
-    // Variables, parameters and members
+    // Variables, parameters and members — variables and parameters plain;
+    // fields, properties, enum members and named constants pink.
     variable: editorForeground,
     parameter: editorForeground,
     property: synMember,
@@ -1574,7 +1556,9 @@ const theme: ThemeDefinition = {
     recordComponent: synMember,
     enumMember: synMember,
     event: synMember,
+    "variable.constant": synMember,
     annotationMember: editorForeground,
+    label: editorForeground,
     "*.mutable": { fontStyle: "underline" },
     "*.deprecated": { fontStyle: "strikethrough" },
 
@@ -1582,10 +1566,12 @@ const theme: ThemeDefinition = {
     function: editorForeground,
     method: editorForeground,
     extensionMethod: editorForeground,
+    magicFunction: editorForeground,
     "function.declaration": synFunction,
     "method.declaration": synFunction,
     "function.definition": synFunction,
     "method.definition": synFunction,
+    "magicFunction.declaration": synFunction,
 
     // Metadata
     decorator: synMetadata,
@@ -1593,77 +1579,17 @@ const theme: ThemeDefinition = {
     attribute: synMetadata,
     builtinAttribute: synMetadata,
     macro: synMetadata,
-    modifier: synKeyword,
-    label: editorForeground,
 
-    // JavaScript / TypeScript — calls blue, locals gray-blue, platform
-    // globals (console, window, document…) purple.
-    "function:javascript": synFunction,
-    "function:javascriptreact": synFunction,
-    "function:typescript": synFunction,
-    "function:typescriptreact": synFunction,
-    "method:javascript": synFunction,
-    "method:javascriptreact": synFunction,
-    "method:typescript": synFunction,
-    "method:typescriptreact": synFunction,
-    "method.static:javascript": synMethod,
-    "method.static:javascriptreact": synMethod,
-    "method.static:typescript": synMethod,
-    "method.static:typescriptreact": synMethod,
-    "variable.local:javascript": jsLocalVariable,
-    "variable.local:javascriptreact": jsLocalVariable,
-    "variable.local:typescript": jsLocalVariable,
-    "variable.local:typescriptreact": jsLocalVariable,
-    "variable.defaultLibrary:javascript": jsGlobalVariable,
-    "variable.defaultLibrary:javascriptreact": jsGlobalVariable,
-    "variable.defaultLibrary:typescript": jsGlobalVariable,
-    "variable.defaultLibrary:typescriptreact": jsGlobalVariable,
-
-    // Python — self / cls, builtins, plain attributes.
-    selfParameter: pySelf,
-    clsParameter: pySelf,
-    "*.builtin:python": pyBuiltin,
-    magicFunction: pyMagic,
-    "property:python": editorForeground,
-
-    // Kotlin
-    "label:kotlin": kotlinLabel,
-
-    // Go — calls khaki, builtins orange, packages green, types teal.
-    "function:go": goCall,
-    "method:go": goCall,
-    "function.defaultLibrary:go": goBuiltin,
-    "type.defaultLibrary:go": goBuiltin,
-    "variable.defaultLibrary:go": goBuiltin,
-    "variable.readonly:go": synMember,
-    "namespace:go": goPackage,
-    "type:go": goType,
-    "property:go": editorForeground,
-
-    // Rust — calls blue, structs / enums olive, traits periwinkle.
-    "function:rust": synFunction,
-    "method:rust": synFunction,
-    "struct:rust": rsType,
-    "union:rust": rsType,
-    "enum:rust": rsType,
-    "typeAlias:rust": rsType,
-    "enumMember:rust": rsVariant,
-    "interface:rust": rsTrait,
-    "namespace.crateRoot:rust": rsTrait,
-    "typeParameter:rust": rsLifetime,
-    "lifetime:rust": rsLifetime,
-    "macro:rust": rsMacro,
-    "selfKeyword:rust": rsSelf,
-    "selfTypeKeyword:rust": rsSelf,
-    "static:rust": rsStatic,
-    "const:rust": synMember,
-    "unresolvedReference:rust": synInvalid,
+    unresolvedReference: synInvalid,
   },
 
   // ───────────────────────────────────────────────────────────────────────────
   // TextMate token colors
   // ───────────────────────────────────────────────────────────────────────────
   tokenColors: [
+    // Every rule is a kind of token, not a language: where a grammar scopes a
+    // token unusually, its scope is listed under the kind it belongs to.
+
     // ── Base / embedded ──
     {
       scope: [
@@ -1686,7 +1612,7 @@ const theme: ThemeDefinition = {
     // ── Comments ──
     {
       name: "Comment",
-      scope: "comment",
+      scope: ["comment", "meta.shebang", "punctuation.definition.comment.shebang"],
       settings: { foreground: synComment },
     },
     {
@@ -1732,7 +1658,7 @@ const theme: ThemeDefinition = {
       settings: { foreground: synKeyword },
     },
     {
-      name: "Word-like operators",
+      name: "Word-like / control-flow operators",
       scope: [
         "keyword.operator.new",
         "keyword.operator.expression",
@@ -1746,6 +1672,7 @@ const theme: ThemeDefinition = {
         "keyword.operator.noexcept",
         "keyword.operator.logical.python",
         "keyword.operator.wordlike",
+        "keyword.operator.question.rust",
       ],
       settings: { foreground: synKeyword },
     },
@@ -1755,13 +1682,16 @@ const theme: ThemeDefinition = {
       settings: { foreground: editorForeground },
     },
     {
-      name: "Primitive types",
+      name: "Primitive / built-in types",
       scope: [
         "support.type.primitive",
         "support.type.builtin",
         "storage.type.primitive",
         "storage.type.built-in",
         "entity.name.type.primitive",
+        "entity.name.type.numeric.rust",
+        "entity.name.type.any.go",
+        "entity.name.type.comparable.go",
       ],
       settings: { foreground: synKeyword },
     },
@@ -1783,6 +1713,18 @@ const theme: ThemeDefinition = {
       settings: { foreground: synNumber },
     },
     {
+      name: "Date / time",
+      scope: [
+        "constant.other.time.datetime.offset.toml",
+        "constant.other.time.datetime.local.toml",
+        "constant.other.time.date.toml",
+        "constant.other.time.time.toml",
+        "constant.other.date",
+        "constant.other.timestamp",
+      ],
+      settings: { foreground: synNumber },
+    },
+    {
       name: "Character literal",
       scope: "constant.character",
       settings: { foreground: synString },
@@ -1797,25 +1739,34 @@ const theme: ThemeDefinition = {
       settings: { foreground: synKeyword },
     },
     {
-      name: "Enum member / constant",
+      name: "Enum member / named constant",
       scope: [
         "variable.other.enummember",
         "constant.other.enum",
         "constant.other.caps",
         "support.constant",
+        "constant.other.php",
+        "constant.other.class.php",
+        "entity.name.type.option.rust",
+        "entity.name.type.result.rust",
       ],
       settings: { foreground: synMember },
     },
     {
       name: "Symbol / atom",
-      scope: "constant.other.symbol",
-      settings: { foreground: rbSymbol },
+      scope: [
+        "constant.other.symbol",
+        "constant.language.symbol",
+        "punctuation.definition.constant.ruby",
+        "punctuation.definition.constant.hashkey.ruby",
+      ],
+      settings: { foreground: synMember },
     },
 
     // ── Strings ──
     {
-      name: "String",
-      scope: ["string", "meta.embedded.assembly"],
+      name: "String / string prefix",
+      scope: ["string", "meta.embedded.assembly", "storage.type.string.python"],
       settings: { foreground: synString },
     },
     {
@@ -1825,24 +1776,16 @@ const theme: ThemeDefinition = {
         "constant.regexp",
         "string.regexp keyword.other",
       ],
-      settings: { foreground: jsRegexp },
+      settings: { foreground: synRegexp },
     },
     {
-      name: "Template / interpolation delimiters",
+      name: "Template / interpolation / embedded code delimiters",
       scope: [
         "punctuation.definition.template-expression.begin",
         "punctuation.definition.template-expression.end",
         "punctuation.section.embedded",
       ],
       settings: { foreground: synKeyword },
-    },
-    {
-      name: "JSX expression braces",
-      scope: [
-        "source.js.jsx punctuation.section.embedded",
-        "source.tsx punctuation.section.embedded",
-      ],
-      settings: { foreground: editorForeground },
     },
     {
       name: "Template expression content",
@@ -1852,44 +1795,36 @@ const theme: ThemeDefinition = {
 
     // ── Functions ──
     {
-      name: "Function declaration",
+      name: "Function / method declaration",
       scope: [
         "entity.name.function",
+        "entity.name.function support.function", // Python __init__ and co.
         "support.function.git-rebase",
         "entity.name.operator.custom-literal",
       ],
       settings: { foreground: synFunction },
     },
     {
-      name: "Function / method call",
+      name: "Function / method call, command",
       scope: [
         "support.function",
+        "meta.function-call entity.name.function",
         "meta.method-call entity.name.function",
-        "meta.function-call.php entity.name.function",
-        "meta.method-call.php entity.name.function",
+        "meta.function-call.generic",
         "entity.name.function.call",
+        "entity.name.function.support",
         "entity.name.function.member.cpp",
         "entity.name.function.member.c",
-        "meta.function-call.cpp entity.name.function",
-        "meta.function-call.c entity.name.function",
+        "entity.name.command",
       ],
       settings: { foreground: editorForeground },
     },
     {
-      name: "Function / method call (JavaScript, TypeScript)",
-      scope: [
-        "source.js support.function",
-        "source.ts support.function",
-        "source.tsx support.function",
-        "source.jsx support.function",
-      ],
-      settings: { foreground: synFunction },
-    },
-    {
-      name: "Preprocessor macro",
+      name: "Macro",
       scope: [
         "entity.name.function.preprocessor",
         "meta.preprocessor.macro entity.name.function",
+        "entity.name.function.macro",
       ],
       settings: { foreground: synMetadata },
     },
@@ -1924,6 +1859,16 @@ const theme: ThemeDefinition = {
       ],
       settings: { foreground: editorForeground },
     },
+    {
+      name: "Type parameter / lifetime",
+      scope: [
+        "entity.name.type.parameter",
+        "entity.name.type.type-parameter",
+        "entity.name.type.lifetime",
+        "punctuation.definition.lifetime",
+      ],
+      settings: { foreground: synTypeParameter },
+    },
 
     // ── Variables and members ──
     {
@@ -1938,12 +1883,14 @@ const theme: ThemeDefinition = {
       settings: { foreground: editorForeground },
     },
     {
-      name: "Field / property / object key",
+      name: "Field / property / instance variable",
       scope: [
         "variable.other.property",
         "variable.other.object.property",
         "variable.other.member",
         "variable.other.field",
+        "variable.other.readwrite.instance",
+        "variable.other.readwrite.class",
         "entity.name.variable.field",
         "support.variable.property",
         "meta.object-literal.key",
@@ -1951,8 +1898,12 @@ const theme: ThemeDefinition = {
       settings: { foreground: synMember },
     },
     {
-      name: "this / super",
-      scope: "variable.language",
+      name: "this / self / super",
+      scope: [
+        "variable.language",
+        "variable.parameter.function.language.special.self.python",
+        "variable.parameter.function.language.special.cls.python",
+      ],
       settings: { foreground: synKeyword },
     },
 
@@ -1981,7 +1932,7 @@ const theme: ThemeDefinition = {
       settings: { foreground: editorForeground },
     },
 
-    // ── HTML / XML ──
+    // ── Markup tags (HTML / XML / JSX) ──
     {
       name: "Tag",
       scope: [
@@ -1992,8 +1943,12 @@ const theme: ThemeDefinition = {
       settings: { foreground: synTag },
     },
     {
-      name: "Custom element",
-      scope: "entity.name.tag.custom",
+      name: "Custom element / component",
+      scope: [
+        "entity.name.tag.custom",
+        "support.class.component",
+        "entity.name.tag.component",
+      ],
       settings: { foreground: synCustomTag },
     },
     {
@@ -2002,12 +1957,7 @@ const theme: ThemeDefinition = {
       settings: { foreground: synAttribute },
     },
     {
-      name: "XML attribute name",
-      scope: "text.xml entity.other.attribute-name",
-      settings: { foreground: editorForeground },
-    },
-    {
-      name: "XML namespace prefix",
+      name: "Namespace prefix",
       scope: [
         "entity.name.tag.namespace",
         "entity.other.attribute-name.namespace",
@@ -2023,13 +1973,8 @@ const theme: ThemeDefinition = {
       ],
       settings: { foreground: synEntity },
     },
-    {
-      name: "JSX / TSX component",
-      scope: ["support.class.component", "entity.name.tag.component"],
-      settings: { foreground: jsComponent },
-    },
 
-    // ── CSS / SCSS / Less ──
+    // ── Stylesheets (CSS / SCSS / Less) ──
     {
       name: "Selectors",
       scope: [
@@ -2053,13 +1998,22 @@ const theme: ThemeDefinition = {
         "support.type.property-name",
         "support.type.vendored.property-name",
         "meta.property-name",
-        "source.css variable",
-        "source.css.scss variable.css",
       ],
       settings: { foreground: synAttribute },
     },
     {
-      name: "CSS property value / unit",
+      name: "Stylesheet variable (custom property, $scss, @less)",
+      scope: [
+        "variable.css",
+        "variable.scss",
+        "variable.other.less",
+        "source.css variable",
+        "source.css.less variable",
+      ],
+      settings: { foreground: editorForeground },
+    },
+    {
+      name: "CSS property value / unit / url",
       scope: [
         "support.constant.property-value",
         "support.constant.vendored.property-value",
@@ -2069,6 +2023,8 @@ const theme: ThemeDefinition = {
         "source.css keyword.other.unit",
         "source.css.scss keyword.other.unit",
         "source.css.less keyword.other.unit",
+        "variable.parameter.url",
+        "string.unquoted.url",
       ],
       settings: { foreground: synString },
     },
@@ -2095,82 +2051,21 @@ const theme: ThemeDefinition = {
       settings: { foreground: synTag },
     },
     {
-      name: "CSS url",
-      scope: ["variable.parameter.url", "string.unquoted.url"],
-      settings: { foreground: cssUrl },
-    },
-    {
       name: "CSS !important",
       scope: "keyword.other.important",
       settings: { foreground: synKeyword },
     },
-    {
-      name: "Less variable",
-      scope: ["variable.other.less", "source.css.less variable"],
-      settings: { foreground: lessVariable },
-    },
 
-    // ── JSON ──
+    // ── Data files (JSON / YAML / TOML / INI / properties / dotenv) ──
+    // Keys are object keys and take the member color; unquoted values are
+    // strings; YAML's structural indicators are markers.
     {
-      name: "JSON key",
+      name: "Key",
       scope: [
         "support.type.property-name.json",
         "support.type.property-name.json.comments",
         "punctuation.support.type.property-name.json",
-      ],
-      settings: { foreground: synMember },
-    },
-
-    // ── YAML ──
-    {
-      name: "YAML key",
-      scope: "entity.name.tag.yaml",
-      settings: { foreground: synKeyword },
-    },
-    {
-      name: "YAML plain scalar",
-      scope: [
-        "string.unquoted.plain.out.yaml",
-        "string.unquoted.plain.in.yaml",
-        "string.unquoted.block.yaml",
-        "source.yaml constant.numeric",
-        "source.yaml constant.language",
-        "entity.other.document.begin.yaml",
-        "entity.other.document.end.yaml",
-      ],
-      settings: { foreground: editorForeground },
-    },
-    {
-      name: "YAML anchor / alias",
-      scope: [
-        "entity.name.type.anchor.yaml",
-        "variable.other.anchor.yaml",
-        "variable.other.alias.yaml",
-        "punctuation.definition.anchor.yaml",
-        "punctuation.definition.alias.yaml",
-      ],
-      settings: { foreground: yamlAnchor },
-    },
-    {
-      name: "YAML block scalar / sequence indicator",
-      scope: [
-        "punctuation.definition.block.scalar.folded.yaml",
-        "punctuation.definition.block.scalar.literal.yaml",
-        "support.other.chomping-indicator.yaml",
-        "punctuation.definition.block.sequence.item.yaml",
-      ],
-      settings: { foreground: synKeyword },
-    },
-    {
-      name: "YAML comment",
-      scope: "comment.line.number-sign.yaml",
-      settings: { foreground: synDocComment },
-    },
-
-    // ── TOML / INI / properties / dotenv ──
-    {
-      name: "Config file key / section",
-      scope: [
+        "entity.name.tag.yaml",
         "support.type.property-name.toml",
         "support.type.property-name.table.toml",
         "support.type.property-name.array.toml",
@@ -2184,33 +2079,47 @@ const theme: ThemeDefinition = {
         "variable.other.key.env",
         "variable.other.env",
       ],
-      settings: { foreground: synKeyword },
+      settings: { foreground: synMember },
     },
     {
-      name: "Config file value",
-      scope: ["string.unquoted.value.properties", "string.unquoted.env"],
+      name: "Unquoted value",
+      scope: [
+        "string.unquoted.plain.out.yaml",
+        "string.unquoted.plain.in.yaml",
+        "string.unquoted.block.yaml",
+        "string.unquoted.value.properties",
+        "string.unquoted.env",
+      ],
       settings: { foreground: synString },
     },
     {
-      name: "TOML boolean / date, YAML timestamp",
+      name: "YAML indicator / anchor / alias / document marker",
       scope: [
-        "constant.language.boolean.toml",
-        "constant.other.time.datetime.offset.toml",
-        "constant.other.time.datetime.local.toml",
-        "constant.other.time.date.toml",
-        "constant.other.time.time.toml",
-        "constant.other.date",
-        "constant.other.timestamp",
+        "punctuation.definition.block.scalar.folded.yaml",
+        "punctuation.definition.block.scalar.literal.yaml",
+        "support.other.chomping-indicator.yaml",
+        "punctuation.definition.block.sequence.item.yaml",
+        "entity.name.type.anchor.yaml",
+        "variable.other.anchor.yaml",
+        "variable.other.alias.yaml",
+        "punctuation.definition.anchor.yaml",
+        "punctuation.definition.alias.yaml",
+        "entity.other.document.begin.yaml",
+        "entity.other.document.end.yaml",
+      ],
+      settings: { foreground: synKeyword },
+    },
+
+    // ── Command lines ──
+    {
+      // Shell grammars scope bare arguments as unquoted strings; they are
+      // words, not string literals.
+      name: "Command argument / option",
+      scope: [
+        "source.shell string.unquoted.argument",
+        "source.shell constant.other.option",
       ],
       settings: { foreground: editorForeground },
-    },
-    {
-      name: "Key-value separator",
-      scope: [
-        "punctuation.separator.key-value.ini",
-        "punctuation.separator.key-value.properties",
-      ],
-      settings: { foreground: synSeparator },
     },
 
     // ── Markdown ──
@@ -2286,7 +2195,7 @@ const theme: ThemeDefinition = {
         "markup.underline.link.markdown",
         "markup.underline.link.image.markdown",
       ],
-      settings: { foreground: synMethod },
+      settings: { foreground: synFunction },
     },
 
     // ── Diff / patch files ──
@@ -2382,341 +2291,6 @@ const theme: ThemeDefinition = {
         "support.other.parenthesis.regexp",
       ],
       settings: { foreground: editorForeground },
-    },
-
-    // ─────────────────────────────────────────────────────────────────────
-    // Language-specific colors
-    // ─────────────────────────────────────────────────────────────────────
-
-    // JavaScript / TypeScript — locals gray-blue, platform globals purple.
-    {
-      name: "JS/TS local variable",
-      scope: [
-        "source.js variable.other.readwrite",
-        "source.js variable.other.constant",
-        "source.js variable.other.object",
-        "source.jsx variable.other.readwrite",
-        "source.jsx variable.other.constant",
-        "source.jsx variable.other.object",
-        "source.ts variable.other.readwrite",
-        "source.ts variable.other.constant",
-        "source.ts variable.other.object",
-        "source.tsx variable.other.readwrite",
-        "source.tsx variable.other.constant",
-        "source.tsx variable.other.object",
-      ],
-      settings: { foreground: jsLocalVariable },
-    },
-    {
-      name: "JS/TS global object",
-      scope: [
-        "support.variable.dom",
-        "support.class.console",
-        "support.variable.object.process",
-        "support.variable.object.node",
-        "support.constant.math",
-        "support.constant.json",
-      ],
-      settings: { foreground: jsGlobalVariable },
-    },
-
-    // Python
-    {
-      name: "Python self / cls",
-      scope: [
-        "variable.parameter.function.language.special.self.python",
-        "variable.language.special.self.python",
-        "variable.parameter.function.language.special.cls.python",
-        "variable.language.special.cls.python",
-      ],
-      settings: { foreground: pySelf },
-    },
-    {
-      name: "Python builtin",
-      scope: [
-        "support.function.builtin.python",
-        "support.type.python",
-        "support.type.exception.python",
-      ],
-      settings: { foreground: pyBuiltin },
-    },
-    {
-      name: "Python magic name",
-      scope: ["support.function.magic.python", "support.variable.magic.python"],
-      settings: { foreground: pyMagic },
-    },
-    {
-      name: "Python keyword argument",
-      scope: "variable.parameter.function-call.python",
-      settings: { foreground: pyKeywordArgument },
-    },
-    {
-      name: "Python bytes",
-      scope: [
-        "string.quoted.binary.single.python",
-        "string.quoted.binary.multi.python",
-        "string.quoted.binary.single.python storage.type.string.python",
-        "string.quoted.binary.multi.python storage.type.string.python",
-      ],
-      settings: { foreground: pyBytes },
-    },
-    {
-      name: "Python string prefix",
-      scope: "storage.type.string.python",
-      settings: { foreground: synString },
-    },
-    {
-      name: "Python f-string braces / format spec",
-      scope: [
-        "constant.character.format.placeholder.other.python",
-        "storage.type.format.python",
-      ],
-      settings: { foreground: synKeyword },
-    },
-
-    // Go
-    {
-      name: "Go builtin",
-      scope: [
-        "entity.name.function.support.builtin.go",
-        "storage.type.numeric.go",
-        "storage.type.string.go",
-        "storage.type.byte.go",
-        "storage.type.boolean.go",
-        "storage.type.rune.go",
-        "storage.type.error.go",
-        "storage.type.uintptr.go",
-        "entity.name.type.any.go",
-        "entity.name.type.comparable.go",
-        "constant.language.boolean.go",
-        "constant.language.null.go",
-        "constant.language.iota.go",
-      ],
-      settings: { foreground: goBuiltin },
-    },
-    {
-      name: "Go call",
-      scope: "entity.name.function.support.go",
-      settings: { foreground: goCall },
-    },
-    {
-      name: "Go package",
-      scope: "entity.name.type.package.go",
-      settings: { foreground: goPackage },
-    },
-    {
-      name: "Go type",
-      scope: "entity.name.type.go",
-      settings: { foreground: goType },
-    },
-    {
-      name: "Go constant",
-      scope: "variable.other.constant.go",
-      settings: { foreground: synMember },
-    },
-    {
-      name: "Go field",
-      scope: "variable.other.property.go",
-      settings: { foreground: editorForeground },
-    },
-
-    // Rust
-    {
-      name: "Rust type",
-      scope: ["source.rust entity.name.type", "entity.name.type.struct.rust"],
-      settings: { foreground: rsType },
-    },
-    {
-      name: "Rust enum",
-      scope: "entity.name.type.enum.rust",
-      settings: { foreground: rsType },
-    },
-    {
-      name: "Rust enum variant (Some / None / Ok / Err)",
-      scope: ["entity.name.type.option.rust", "entity.name.type.result.rust"],
-      settings: { foreground: rsVariant },
-    },
-    {
-      name: "Rust trait",
-      scope: "entity.name.type.trait.rust",
-      settings: { foreground: rsTrait },
-    },
-    {
-      name: "Rust primitive type",
-      scope: [
-        "entity.name.type.primitive.rust",
-        "entity.name.type.numeric.rust",
-      ],
-      settings: { foreground: synKeyword },
-    },
-    {
-      name: "Rust lifetime",
-      scope: [
-        "entity.name.type.lifetime.rust",
-        "punctuation.definition.lifetime.rust",
-      ],
-      settings: { foreground: rsLifetime },
-    },
-    {
-      name: "Rust macro",
-      scope: [
-        "entity.name.function.macro.rust",
-        "entity.name.function.macro.rules.rust",
-      ],
-      settings: { foreground: rsMacro },
-    },
-    {
-      name: "Rust self",
-      scope: "variable.language.self.rust",
-      settings: { foreground: rsSelf },
-    },
-    {
-      name: "Rust ? operator",
-      scope: "keyword.operator.question.rust",
-      settings: { foreground: rsQuestion },
-    },
-
-    // PHP
-    {
-      name: "PHP variable / $this",
-      scope: [
-        "variable.other.php",
-        "punctuation.definition.variable.php",
-        "variable.language.this.php",
-      ],
-      settings: { foreground: phpVariable },
-    },
-    {
-      name: "PHP constant",
-      scope: ["constant.other.php", "constant.other.class.php"],
-      settings: { foreground: phpVariable },
-    },
-    {
-      name: "PHP named argument",
-      scope: "entity.name.variable.parameter.php",
-      settings: { foreground: phpNamedArgument },
-    },
-    {
-      name: "PHP tags",
-      scope: [
-        "punctuation.section.embedded.begin.php",
-        "punctuation.section.embedded.end.php",
-      ],
-      settings: { foreground: synKeyword },
-    },
-
-    // Ruby
-    {
-      name: "Ruby method declaration",
-      scope: "source.ruby entity.name.function",
-      settings: { foreground: rbMethod },
-    },
-    {
-      name: "Ruby symbol / hash key",
-      scope: [
-        "constant.language.symbol.ruby",
-        "constant.language.symbol.hashkey.ruby",
-        "constant.other.symbol.ruby",
-        "constant.other.symbol.hashkey.ruby",
-        "punctuation.definition.constant.ruby",
-        "punctuation.definition.constant.hashkey.ruby",
-      ],
-      settings: { foreground: rbSymbol },
-    },
-    {
-      name: "Ruby instance variable",
-      scope: "variable.other.readwrite.instance.ruby",
-      settings: { foreground: synMember },
-    },
-    {
-      name: "Ruby class variable",
-      scope: "variable.other.readwrite.class.ruby",
-      settings: { foreground: synMember },
-    },
-    {
-      name: "Ruby global variable",
-      scope: "variable.other.readwrite.global.ruby",
-      settings: { foreground: rbGlobal },
-    },
-    {
-      name: "Ruby local variable / parameter",
-      scope: ["source.ruby variable.other", "variable.parameter.function.ruby"],
-      settings: { foreground: rbLocal },
-    },
-    {
-      name: "Ruby constant",
-      scope: "variable.other.constant.ruby",
-      settings: { foreground: rbConstant },
-    },
-    {
-      name: "Ruby regexp / heredoc",
-      scope: [
-        "string.regexp.classic.ruby",
-        "string.regexp.mod-r.ruby",
-        "string.regexp.interpolated.ruby",
-        "string.unquoted.heredoc.ruby",
-      ],
-      settings: { foreground: rbRegexp },
-    },
-    {
-      name: "Ruby comment",
-      scope: ["source.ruby comment"],
-      settings: { foreground: rbComment },
-    },
-    {
-      name: "Ruby number",
-      scope: "source.ruby constant.numeric",
-      settings: { foreground: rbNumber },
-    },
-    {
-      name: "Ruby escape",
-      scope: "source.ruby constant.character.escape",
-      settings: { foreground: rbEscape },
-    },
-    {
-      name: "Ruby special method",
-      scope: [
-        "keyword.other.special-method.ruby",
-        "support.function.kernel.ruby",
-      ],
-      settings: { foreground: rbSpecialCall },
-    },
-
-    // Shell
-    {
-      name: "Shell command / function",
-      scope: [
-        "entity.name.command.shell",
-        "support.function.builtin.shell",
-        "entity.name.function.shell",
-        "entity.name.function.call.shell",
-      ],
-      settings: { foreground: shCommand },
-    },
-    {
-      name: "Shell variable",
-      scope: [
-        "variable.other.normal.shell",
-        "variable.other.special.shell",
-        "variable.other.positional.shell",
-        "variable.other.bracket.shell",
-        "punctuation.definition.variable.shell",
-      ],
-      settings: { foreground: editorForeground },
-    },
-    {
-      name: "Shell argument / option / heredoc body",
-      scope: [
-        "source.shell string.unquoted.argument",
-        "source.shell constant.other.option",
-        "string.unquoted.heredoc.shell",
-      ],
-      settings: { foreground: editorForeground },
-    },
-    {
-      name: "Shell shebang",
-      scope: ["meta.shebang", "punctuation.definition.comment.shebang"],
-      settings: { foreground: synComment },
     },
 
     // ── Invalid ──
