@@ -81,9 +81,10 @@ const gray60 = "#5C5F77"; // disabled text, popup borders
 // code actions, peek, quick pick, menus, notifications): ~2:1 against the
 // editor and popup surfaces — subtle, but the popup edge never melts into code.
 const popupBorder = gray60;
-// Control borders reach 3:1 against every surface (WCAG 1.4.11), so the edge
-// of an input, dropdown or checkbox is findable without its fill.
-const gray70 = "#7A7D94"; // control borders (inputs, dropdowns, checkboxes, secondary buttons), line numbers
+// Control borders reach 3:1 against the editor, panel, popup and frame
+// surfaces (WCAG 1.4.11), so the edge of an input, dropdown or checkbox is
+// findable without its fill. The frame (gray30) is the tightest at ~3.05:1.
+const gray70 = "#7D8097"; // control borders (inputs, dropdowns, checkboxes, secondary buttons), line numbers
 const gray80 = "#8E91A8"; // tertiary text on the editor: placeholders, code lens, blame; neutral counter badges
 const gray100 = "#A0A3BC"; // muted text: status bar, descriptions, inactive titles
 const gray120 = "#C4C6D8"; // icons
