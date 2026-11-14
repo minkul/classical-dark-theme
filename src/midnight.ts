@@ -10,7 +10,9 @@
 // between floating panels in the modern layout.
 //
 // Syntax model: seven hues plus the comment slate, each with a single job, and
-// no bold or italic on code tokens (prose emphasis in markdown keeps its style).
+// no bold or italic anywhere in the editor — markdown source included (previews
+// render the real emphasis). Strikethrough (deprecated) and underline (links)
+// are kept.
 //   pink   → keywords, storage, operators, tags, escapes; key / value and
 //            namespace separators; interpolation delimiters; string prefixes
 //   green  → functions and methods (declarations and calls), decorators,
@@ -1611,7 +1613,8 @@ const theme: ThemeDefinition = {
   // ───────────────────────────────────────────────────────────────────────────
   // Semantic token colors
   // ───────────────────────────────────────────────────────────────────────────
-  // Every rule sets a color only; code is never bold or italic.
+  // Every rule sets a color only (deprecated symbols are struck through); code
+  // is never bold or italic.
   semanticHighlighting: true,
   semanticTokenColors: {
     // Keywords and operators
@@ -2333,7 +2336,10 @@ const theme: ThemeDefinition = {
       settings: { foreground: synConstant },
     },
 
-    // ── Markdown (prose: emphasis styles are kept) ──
+    // ── Markdown ──
+    // The source stays upright and regular like code: headings, bold and
+    // italic are told apart by color. Previews render the real emphasis.
+    // Strikethrough and underline are kept, since they never distort glyphs.
     {
       name: "Markdown heading",
       scope: [
@@ -2341,7 +2347,7 @@ const theme: ThemeDefinition = {
         "markup.heading entity.name",
         "entity.name.section.markdown",
       ],
-      settings: { foreground: synConstant, fontStyle: "bold" },
+      settings: { foreground: synConstant, fontStyle: "" },
     },
     {
       name: "Markdown heading marker",
@@ -2351,17 +2357,12 @@ const theme: ThemeDefinition = {
     {
       name: "Markdown bold",
       scope: ["markup.bold", "punctuation.definition.bold.markdown"],
-      settings: { foreground: synParameter, fontStyle: "bold" },
+      settings: { foreground: synParameter, fontStyle: "" },
     },
     {
       name: "Markdown italic",
       scope: ["markup.italic", "punctuation.definition.italic.markdown"],
-      settings: { foreground: synString, fontStyle: "italic" },
-    },
-    {
-      name: "Markdown bold italic",
-      scope: ["markup.bold markup.italic", "markup.italic markup.bold"],
-      settings: { fontStyle: "bold italic" },
+      settings: { foreground: synString, fontStyle: "" },
     },
     {
       name: "Markdown strikethrough",
@@ -2403,7 +2404,7 @@ const theme: ThemeDefinition = {
     {
       name: "Markdown quote",
       scope: ["markup.quote", "punctuation.definition.quote.begin.markdown"],
-      settings: { foreground: synComment, fontStyle: "italic" },
+      settings: { foreground: synComment, fontStyle: "" },
     },
     {
       name: "Markdown link text",

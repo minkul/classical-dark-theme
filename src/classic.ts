@@ -1602,10 +1602,9 @@ const theme: ThemeDefinition = {
     },
 
     // ── Typography ──
-    // Code tokens are never bold or italic; prose emphasis keeps its style
-    // because the author wrote it.
-    { scope: "emphasis", settings: { fontStyle: "italic" } },
-    { scope: "strong", settings: { fontStyle: "bold" } },
+    // Nothing in the editor is bold or italic, markdown source included
+    // (previews render the real emphasis). Strikethrough and underline are
+    // kept: deprecated code is struck through, links are underlined.
     { scope: "markup.underline", settings: { fontStyle: "underline" } },
     { scope: "markup.strikethrough", settings: { fontStyle: "strikethrough" } },
 
@@ -2146,21 +2145,6 @@ const theme: ThemeDefinition = {
       settings: { foreground: synKeyword },
     },
     {
-      name: "Markdown bold",
-      scope: "markup.bold",
-      settings: { fontStyle: "bold" },
-    },
-    {
-      name: "Markdown italic",
-      scope: "markup.italic",
-      settings: { fontStyle: "italic" },
-    },
-    {
-      name: "Markdown bold italic",
-      scope: ["markup.bold markup.italic", "markup.italic markup.bold"],
-      settings: { fontStyle: "bold italic" },
-    },
-    {
       name: "Markdown code",
       scope: [
         "markup.inline.raw",
@@ -2177,7 +2161,7 @@ const theme: ThemeDefinition = {
     {
       name: "Markdown quote",
       scope: ["markup.quote", "punctuation.definition.quote.begin.markdown"],
-      settings: { foreground: synComment, fontStyle: "italic" },
+      settings: { foreground: synComment },
     },
     {
       name: "Markdown link text",
