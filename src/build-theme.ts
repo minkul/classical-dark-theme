@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
-import classicalDark from "./theme";
+import classicalDark from "./classic";
 import classicalDarkMidnight from "./midnight";
-import type { ThemeDefinition } from "./theme";
+import type { ThemeDefinition } from "./classic";
 
 const outputDir = path.resolve(__dirname, "..", "themes");
 

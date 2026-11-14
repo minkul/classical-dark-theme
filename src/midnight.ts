@@ -31,7 +31,7 @@
 // ANSI blue is purple and bright blue lavender. In the UI, "modified" and
 // "information" are cyan.
 
-import type { ThemeDefinition } from "./theme";
+import type { ThemeDefinition } from "./classic";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Color helpers
