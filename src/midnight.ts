@@ -450,6 +450,15 @@ const theme: ThemeDefinition = {
     "scrollbarSlider.hoverBackground": scrollbarThumbHover,
     "scrollbarSlider.activeBackground": scrollbarThumbHover,
     "progressBar.background": accent80,
+    // Gauges (usage meters, e.g. chat quota): an accent fill on the progress
+    // track; warning and error levels on their feedback ramps.
+    "gauge.background": gray50,
+    "gauge.foreground": accent80,
+    "gauge.border": transparent,
+    "gauge.warningBackground": yellow40,
+    "gauge.warningForeground": yellow80,
+    "gauge.errorBackground": red40,
+    "gauge.errorForeground": red80,
 
     // ── Text ──
     "textLink.foreground": hyperlink,
@@ -761,12 +770,14 @@ const theme: ThemeDefinition = {
     "editor.snippetFinalTabstopHighlightBorder": liveTemplate,
 
     // Guides, rulers, whitespace
+    "editorIndentGuide.background": indentGuide, // pre-1.67 key, still read
     "editorIndentGuide.background1": indentGuide,
     "editorIndentGuide.background2": indentGuide,
     "editorIndentGuide.background3": indentGuide,
     "editorIndentGuide.background4": indentGuide,
     "editorIndentGuide.background5": indentGuide,
     "editorIndentGuide.background6": indentGuide,
+    "editorIndentGuide.activeBackground": indentGuideActive, // pre-1.67 key, still read
     "editorIndentGuide.activeBackground1": indentGuideActive,
     "editorIndentGuide.activeBackground2": indentGuideActive,
     "editorIndentGuide.activeBackground3": indentGuideActive,
@@ -787,8 +798,14 @@ const theme: ThemeDefinition = {
     ...Object.fromEntries(
       bracketLevels.flatMap((color, i) => [
         [`editorBracketHighlight.foreground${i + 1}`, color],
-        [`editorBracketPairGuide.background${i + 1}`, overlay(mix(color, editorBackground, 0.3), 0.6)],
-        [`editorBracketPairGuide.activeBackground${i + 1}`, overlay(mix(color, editorBackground, 0.7), 0.85)],
+        [
+          `editorBracketPairGuide.background${i + 1}`,
+          overlay(mix(color, editorBackground, 0.3), 0.6),
+        ],
+        [
+          `editorBracketPairGuide.activeBackground${i + 1}`,
+          overlay(mix(color, editorBackground, 0.7), 0.85),
+        ],
       ]),
     ),
     "editorBracketHighlight.unexpectedBracket.foreground": synInvalid,
@@ -1177,6 +1194,8 @@ const theme: ThemeDefinition = {
     "settings.modifiedItemIndicator": accent100,
     "settings.headerBorder": gray30,
     "settings.sashBorder": gray30,
+    "chatManagement.sashBorder": gray30,
+    "aiCustomizationManagement.sashBorder": gray30,
     "settings.dropdownBackground": gray30,
     "settings.dropdownForeground": gray130,
     "settings.dropdownBorder": gray70,
@@ -1522,11 +1541,15 @@ const theme: ThemeDefinition = {
     // Suggested code is green, the code it replaces red — the diff editor's
     // line tints and word shades. The preview boxes take half a line tint
     // (changed lines inside them add the rest) and a bar-colored outline.
-    "inlineEdit.modifiedBackground": layer(mix(addedLine, editorBackground, 0.5)),
+    "inlineEdit.modifiedBackground": layer(
+      mix(addedLine, editorBackground, 0.5),
+    ),
     "inlineEdit.modifiedBorder": markAdded,
     "inlineEdit.modifiedChangedLineBackground": layer(addedLine),
     "inlineEdit.modifiedChangedTextBackground": layer(addedWord, addedLine),
-    "inlineEdit.originalBackground": layer(mix(removedLine, editorBackground, 0.5)),
+    "inlineEdit.originalBackground": layer(
+      mix(removedLine, editorBackground, 0.5),
+    ),
     "inlineEdit.originalBorder": markRemoved,
     "inlineEdit.originalChangedLineBackground": layer(removedLine),
     "inlineEdit.originalChangedTextBackground": layer(removedWord, removedLine),
@@ -1617,15 +1640,17 @@ const theme: ThemeDefinition = {
   // is never bold or italic.
   semanticHighlighting: true,
   semanticTokenColors: {
+    // Every rule applies to every language; there are no per-language rules.
+
     // Keywords and operators
     keyword: synKeyword,
     modifier: synKeyword,
     newOperator: synKeyword,
     operator: synKeyword,
-    "operator.controlFlow:rust": synKeyword,
-    "selfKeyword:rust": synConstant,
-    "selfTypeKeyword:rust": synType,
-    "lifetime:rust": synKeyword,
+    "operator.controlFlow": synKeyword, // e.g. Rust's ?
+    selfKeyword: synConstant,
+    selfTypeKeyword: synType,
+    lifetime: synKeyword,
 
     // Literals
     string: synString,
@@ -1637,7 +1662,6 @@ const theme: ThemeDefinition = {
     numberLiteral: synConstant,
     customLiteral: synConstant,
     boolean: synConstant,
-    "boolean:rust": synConstant,
     comment: synComment,
     "comment.documentation": synComment,
 
@@ -1655,6 +1679,8 @@ const theme: ThemeDefinition = {
     typeParameter: synType,
     "class.defaultLibrary": synType,
     "type.defaultLibrary": synType,
+    // Library globals (console, window, document…) read as types.
+    "variable.defaultLibrary": synType,
 
     // Functions — declarations and calls alike
     function: synFunction,
@@ -1692,12 +1718,7 @@ const theme: ThemeDefinition = {
     label: editorForeground,
     "*.deprecated": { fontStyle: "strikethrough" },
 
-    // Language specifics
-    "unresolvedReference:rust": synInvalid,
-    "variable.defaultLibrary:javascript": synType,
-    "variable.defaultLibrary:javascriptreact": synType,
-    "variable.defaultLibrary:typescript": synType,
-    "variable.defaultLibrary:typescriptreact": synType,
+    unresolvedReference: synInvalid,
   },
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -1711,6 +1732,7 @@ const theme: ThemeDefinition = {
       scope: [
         "meta.embedded",
         "source.groovy.embedded",
+        "source.coffee.embedded",
         "string meta.image.inline.markdown",
         "variable.legacy.builtin.python",
       ],
@@ -1728,6 +1750,7 @@ const theme: ThemeDefinition = {
         "string.quoted.docstring",
         "meta.shebang",
         "punctuation.definition.comment.shebang",
+        "comment constant",
       ],
       settings: { foreground: synComment, fontStyle: "" },
     },
@@ -1777,6 +1800,7 @@ const theme: ThemeDefinition = {
         "storage.modifier",
         "storage.type.function.arrow",
         "punctuation.accessor.optional",
+        "entity.other.attribute",
       ],
       settings: { foreground: synKeyword, fontStyle: "" },
     },
@@ -1798,6 +1822,9 @@ const theme: ThemeDefinition = {
         "constant.other.ellipsis",
         "constant.other.date",
         "constant.other.timestamp",
+        "entity.name.constant",
+        "constant.other.unicode-range",
+        "support.unicode-range",
       ],
       settings: { foreground: synConstant, fontStyle: "" },
     },
@@ -1833,6 +1860,8 @@ const theme: ThemeDefinition = {
         "string",
         "punctuation.definition.string",
         "meta.embedded.assembly",
+        "entity.other.attribute-value",
+        "markup.raw.inline.less",
       ],
       settings: { foreground: synString, fontStyle: "" },
     },
@@ -1890,6 +1919,7 @@ const theme: ThemeDefinition = {
         "string.regexp punctuation.parenthesis",
         "string.regexp support.other.parenthesis",
         "entity.name.tag.named.group.regexp",
+        "support.other.parenthesis.regexp",
       ],
       settings: { foreground: synRegexpGroup, fontStyle: "" },
     },
@@ -1940,6 +1970,7 @@ const theme: ThemeDefinition = {
         "entity.name.function.preprocessor",
         "entity.name.operator.custom-literal",
         "support.function.git-rebase",
+        "entity.name.other.preprocessor.macro",
       ],
       settings: { foreground: synFunction, fontStyle: "" },
     },
@@ -1957,6 +1988,9 @@ const theme: ThemeDefinition = {
         "entity.name.type.annotation",
         "meta.attribute.rust",
         "meta.attribute.php",
+        "support.other.attribute",
+        "support.attribute",
+        "meta.attribute.php support.other.namespace",
       ],
       settings: { foreground: synFunction, fontStyle: "" },
     },
@@ -2000,6 +2034,8 @@ const theme: ThemeDefinition = {
         "keyword.primitive-datatypes.swift",
         "support.type.exception.python",
         "support.variable.dom",
+        "support.other.protocol",
+        "entity.other.alias",
       ],
       settings: { foreground: synType, fontStyle: "" },
     },
@@ -2012,6 +2048,11 @@ const theme: ThemeDefinition = {
         "entity.name.type.module",
         "storage.modifier.import.java",
         "storage.modifier.package.java",
+        "entity.name.module",
+        "entity.name.import",
+        "support.namespace",
+        "support.other.namespace",
+        "entity.name.section.fsharp",
       ],
       settings: { foreground: editorForeground, fontStyle: "" },
     },
@@ -2030,6 +2071,7 @@ const theme: ThemeDefinition = {
         "entity.name.variable",
         "support.variable",
         "meta.object-literal.key",
+        "entity.global",
       ],
       settings: { foreground: editorForeground, fontStyle: "" },
     },
@@ -2046,7 +2088,12 @@ const theme: ThemeDefinition = {
     },
     {
       name: "Label",
-      scope: ["entity.name.label", "punctuation.definition.label"],
+      scope: [
+        "entity.name.label",
+        "punctuation.definition.label",
+        "entity.name.goto-label",
+        "support.other.php",
+      ],
       settings: { foreground: editorForeground },
     },
     {
@@ -2098,6 +2145,8 @@ const theme: ThemeDefinition = {
         "meta.tag.sgml.doctype",
         "support.class.component",
         "entity.name.tag.component",
+        "entity.other.namespace-prefix",
+        "entity.name.namespace-prefix",
       ],
       settings: { foreground: synKeyword, fontStyle: "" },
     },
@@ -2174,6 +2223,7 @@ const theme: ThemeDefinition = {
         "constant.other.color.rgb-value",
         "constant.other.rgb-value",
         "support.constant.color",
+        "support.keyword.repetitions",
       ],
       settings: { foreground: synConstant, fontStyle: "" },
     },
@@ -2185,6 +2235,9 @@ const theme: ThemeDefinition = {
         "variable.other.less",
         "source.css variable",
         "source.css.less variable",
+        "support.other.variable",
+        "entity.other.counter-name",
+        "entity.other.counter-style-name",
       ],
       settings: { foreground: editorForeground, fontStyle: "" },
     },
@@ -2346,6 +2399,7 @@ const theme: ThemeDefinition = {
         "markup.heading",
         "markup.heading entity.name",
         "entity.name.section.markdown",
+        "entity.name.section",
       ],
       settings: { foreground: synConstant, fontStyle: "" },
     },
@@ -2382,6 +2436,7 @@ const theme: ThemeDefinition = {
         "markup.fenced_code.block.markdown",
         "markup.raw.block.markdown",
         "punctuation.definition.raw.markdown",
+        "markup.raw",
       ],
       settings: { foreground: synFunction },
     },
@@ -2423,6 +2478,7 @@ const theme: ThemeDefinition = {
         "markup.underline.link.image.markdown",
         "meta.link.inet markup.underline.link.markdown",
         "meta.link.email markup.underline.link.markdown",
+        "markup.underline.link",
       ],
       settings: { foreground: hyperlink, fontStyle: "underline" },
     },
@@ -2450,6 +2506,8 @@ const theme: ThemeDefinition = {
         "meta.diff.range",
         "meta.diff.header.from-file",
         "meta.diff.header.to-file",
+        "meta.separator.diff",
+        "punctuation.definition.separator.diff",
       ],
       settings: { foreground: synType },
     },

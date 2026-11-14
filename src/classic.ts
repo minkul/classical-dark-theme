@@ -249,7 +249,14 @@ const synRegexpClass = "#B2AE60";
 // Bracket pair colors, outermost first. Each level takes the next hue of the
 // syntax palette (red stays reserved for unmatched brackets); the pair guides
 // show the same hue, dimmed.
-const bracketLevels = [editorForeground, synKeyword, synFunction, synString, synMember, synTag];
+const bracketLevels = [
+  editorForeground,
+  synKeyword,
+  synFunction,
+  synString,
+  synMember,
+  synTag,
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Terminal
@@ -342,6 +349,15 @@ const theme: ThemeDefinition = {
     "scrollbarSlider.hoverBackground": scrollbarThumbHover,
     "scrollbarSlider.activeBackground": scrollbarThumbHover,
     "progressBar.background": blue80,
+    // Gauges (usage meters, e.g. chat quota): an accent fill on the progress
+    // track; warning and error levels on their feedback ramps.
+    "gauge.background": gray50,
+    "gauge.foreground": blue80,
+    "gauge.border": transparent,
+    "gauge.warningBackground": yellow40,
+    "gauge.warningForeground": yellow80,
+    "gauge.errorBackground": red40,
+    "gauge.errorForeground": red80,
 
     // ── Text ──
     "textLink.foreground": blue100,
@@ -650,12 +666,14 @@ const theme: ThemeDefinition = {
     "editor.snippetFinalTabstopHighlightBorder": liveTemplate,
 
     // Guides, rulers, whitespace
+    "editorIndentGuide.background": indentGuide, // pre-1.67 key, still read
     "editorIndentGuide.background1": indentGuide,
     "editorIndentGuide.background2": indentGuide,
     "editorIndentGuide.background3": indentGuide,
     "editorIndentGuide.background4": indentGuide,
     "editorIndentGuide.background5": indentGuide,
     "editorIndentGuide.background6": indentGuide,
+    "editorIndentGuide.activeBackground": indentGuideActive, // pre-1.67 key, still read
     "editorIndentGuide.activeBackground1": indentGuideActive,
     "editorIndentGuide.activeBackground2": indentGuideActive,
     "editorIndentGuide.activeBackground3": indentGuideActive,
@@ -676,8 +694,14 @@ const theme: ThemeDefinition = {
     ...Object.fromEntries(
       bracketLevels.flatMap((color, i) => [
         [`editorBracketHighlight.foreground${i + 1}`, color],
-        [`editorBracketPairGuide.background${i + 1}`, overlay(mix(color, editorBackground, 0.3), 0.6)],
-        [`editorBracketPairGuide.activeBackground${i + 1}`, overlay(mix(color, editorBackground, 0.7), 0.85)],
+        [
+          `editorBracketPairGuide.background${i + 1}`,
+          overlay(mix(color, editorBackground, 0.3), 0.6),
+        ],
+        [
+          `editorBracketPairGuide.activeBackground${i + 1}`,
+          overlay(mix(color, editorBackground, 0.7), 0.85),
+        ],
       ]),
     ),
     "editorBracketHighlight.unexpectedBracket.foreground": synInvalid,
@@ -1062,6 +1086,8 @@ const theme: ThemeDefinition = {
     "settings.modifiedItemIndicator": blue100,
     "settings.headerBorder": gray30,
     "settings.sashBorder": gray30,
+    "chatManagement.sashBorder": gray30,
+    "aiCustomizationManagement.sashBorder": gray30,
     "settings.dropdownBackground": gray30,
     "settings.dropdownForeground": gray130,
     "settings.dropdownBorder": controlBorder,
@@ -1135,7 +1161,10 @@ const theme: ThemeDefinition = {
     // the selection inside a light box. Both fills sit under the text.
     "terminal.findMatchBackground": selection,
     "terminal.findMatchBorder": textSearchCurrentBorder,
-    "terminal.findMatchHighlightBackground": overlay(textSearch, highlightAlpha),
+    "terminal.findMatchHighlightBackground": overlay(
+      textSearch,
+      highlightAlpha,
+    ),
     "terminal.findMatchHighlightBorder": textSearchBorder,
     "terminalCursor.foreground": caret,
     "terminalCursor.background": editorBackground,
@@ -1595,6 +1624,7 @@ const theme: ThemeDefinition = {
       scope: [
         "meta.embedded",
         "source.groovy.embedded",
+        "source.coffee.embedded",
         "string meta.image.inline.markdown",
         "variable.legacy.builtin.python",
       ],
@@ -1611,7 +1641,13 @@ const theme: ThemeDefinition = {
     // ── Comments ──
     {
       name: "Comment",
-      scope: ["comment", "meta.shebang", "punctuation.definition.comment.shebang"],
+      scope: [
+        "comment",
+        "meta.shebang",
+        "punctuation.definition.comment.shebang",
+        "punctuation.definition.comment",
+        "comment constant",
+      ],
       settings: { foreground: synComment },
     },
     {
@@ -1621,6 +1657,12 @@ const theme: ThemeDefinition = {
         "comment.line.documentation",
         "comment.block.javadoc",
         "string.quoted.docstring",
+        "comment.block.documentation punctuation.definition.comment",
+        "comment.line.documentation punctuation.definition.comment",
+        "comment.block.javadoc punctuation.definition.comment",
+        "comment.block.documentation constant",
+        "comment.line.documentation constant",
+        "comment.block.javadoc constant",
       ],
       settings: { foreground: synDocComment },
     },
@@ -1653,7 +1695,13 @@ const theme: ThemeDefinition = {
     // One color for every keyword, control flow included.
     {
       name: "Keyword / storage",
-      scope: ["keyword", "storage", "storage.type", "storage.modifier"],
+      scope: [
+        "keyword",
+        "storage",
+        "storage.type",
+        "storage.modifier",
+        "entity.other.attribute",
+      ],
       settings: { foreground: synKeyword },
     },
     {
@@ -1698,7 +1746,7 @@ const theme: ThemeDefinition = {
     // ── Constants ──
     {
       name: "Language constant (true, false, null…)",
-      scope: "constant.language",
+      scope: ["constant.language", "constant.other.ellipsis"],
       settings: { foreground: synKeyword },
     },
     {
@@ -1708,6 +1756,9 @@ const theme: ThemeDefinition = {
         "keyword.operator.plus.exponent",
         "keyword.operator.minus.exponent",
         "keyword.other.unit",
+        "constant.other.unicode-range",
+        "support.unicode-range",
+        "constant.codepoint-range",
       ],
       settings: { foreground: synNumber },
     },
@@ -1725,7 +1776,7 @@ const theme: ThemeDefinition = {
     },
     {
       name: "Character literal",
-      scope: "constant.character",
+      scope: ["constant.character", "constant.other.rune"],
       settings: { foreground: synString },
     },
     {
@@ -1748,6 +1799,8 @@ const theme: ThemeDefinition = {
         "constant.other.class.php",
         "entity.name.type.option.rust",
         "entity.name.type.result.rust",
+        "entity.name.constant",
+        "constant",
       ],
       settings: { foreground: synMember },
     },
@@ -1765,7 +1818,13 @@ const theme: ThemeDefinition = {
     // ── Strings ──
     {
       name: "String / string prefix",
-      scope: ["string", "meta.embedded.assembly", "storage.type.string.python"],
+      scope: [
+        "string",
+        "meta.embedded.assembly",
+        "storage.type.string.python",
+        "entity.other.attribute-value",
+        "markup.raw.inline.less",
+      ],
       settings: { foreground: synString },
     },
     {
@@ -1824,6 +1883,7 @@ const theme: ThemeDefinition = {
         "entity.name.function.preprocessor",
         "meta.preprocessor.macro entity.name.function",
         "entity.name.function.macro",
+        "entity.name.other.preprocessor.macro",
       ],
       settings: { foreground: synMetadata },
     },
@@ -1855,6 +1915,14 @@ const theme: ThemeDefinition = {
         "storage.modifier.import.java",
         "storage.modifier.package.java",
         "variable.language.wildcard.java",
+        "entity.name.module",
+        "entity.name.import",
+        "support.namespace",
+        "support.other.namespace",
+        "support.other.protocol",
+        "entity.other.alias",
+        "entity.scope",
+        "entity.name.section.fsharp",
       ],
       settings: { foreground: editorForeground },
     },
@@ -1878,6 +1946,7 @@ const theme: ThemeDefinition = {
         "meta.definition.variable.name",
         "support.variable",
         "entity.name.variable",
+        "entity.global",
       ],
       settings: { foreground: editorForeground },
     },
@@ -1920,6 +1989,9 @@ const theme: ThemeDefinition = {
         "punctuation.definition.decorator",
         "meta.attribute.rust",
         "meta.attribute.php",
+        "support.other.attribute",
+        "support.attribute",
+        "meta.attribute.php support.other.namespace",
       ],
       settings: { foreground: synMetadata },
     },
@@ -1927,7 +1999,12 @@ const theme: ThemeDefinition = {
     // ── Labels ──
     {
       name: "Label",
-      scope: ["entity.name.label", "punctuation.definition.label"],
+      scope: [
+        "entity.name.label",
+        "punctuation.definition.label",
+        "entity.name.goto-label",
+        "support.other.php",
+      ],
       settings: { foreground: editorForeground },
     },
 
@@ -1960,6 +2037,8 @@ const theme: ThemeDefinition = {
       scope: [
         "entity.name.tag.namespace",
         "entity.other.attribute-name.namespace",
+        "entity.other.namespace-prefix",
+        "entity.name.namespace-prefix",
       ],
       settings: { foreground: synMember },
     },
@@ -2008,6 +2087,9 @@ const theme: ThemeDefinition = {
         "variable.other.less",
         "source.css variable",
         "source.css.less variable",
+        "support.other.variable",
+        "entity.other.counter-name",
+        "entity.other.counter-style-name",
       ],
       settings: { foreground: editorForeground },
     },
@@ -2024,6 +2106,7 @@ const theme: ThemeDefinition = {
         "source.css.less keyword.other.unit",
         "variable.parameter.url",
         "string.unquoted.url",
+        "support.keyword.repetitions",
       ],
       settings: { foreground: synString },
     },
@@ -2124,7 +2207,11 @@ const theme: ThemeDefinition = {
     // ── Markdown ──
     {
       name: "Markdown heading",
-      scope: ["markup.heading", "entity.name.section.markdown"],
+      scope: [
+        "markup.heading",
+        "entity.name.section.markdown",
+        "entity.name.section",
+      ],
       settings: { foreground: synMember },
     },
     {
@@ -2145,11 +2232,23 @@ const theme: ThemeDefinition = {
       settings: { foreground: synKeyword },
     },
     {
+      // Emphasis is told apart by color, never by weight or slant.
+      name: "Markdown bold",
+      scope: "markup.bold",
+      settings: { foreground: synTag },
+    },
+    {
+      name: "Markdown italic",
+      scope: "markup.italic",
+      settings: { foreground: synString },
+    },
+    {
       name: "Markdown code",
       scope: [
         "markup.inline.raw",
         "markup.fenced_code.block.markdown",
         "markup.raw.block.markdown",
+        "markup.raw",
       ],
       settings: { foreground: editorForeground },
     },
@@ -2178,6 +2277,7 @@ const theme: ThemeDefinition = {
       scope: [
         "markup.underline.link.markdown",
         "markup.underline.link.image.markdown",
+        "markup.underline.link",
       ],
       settings: { foreground: synFunction },
     },
@@ -2200,7 +2300,12 @@ const theme: ThemeDefinition = {
     },
     {
       name: "Diff header",
-      scope: ["meta.diff.header", "meta.diff.range"],
+      scope: [
+        "meta.diff.header",
+        "meta.diff.range",
+        "meta.separator.diff",
+        "punctuation.definition.separator.diff",
+      ],
       settings: { foreground: synKeyword },
     },
     {
@@ -2246,6 +2351,10 @@ const theme: ThemeDefinition = {
         "constant.character.character-class.regexp",
         "constant.other.character-class.regexp",
         "constant.character.set.regexp",
+        "constant.other.set.regexp",
+        "support.other.match.any.regexp",
+        "support.other.escape.special.regexp",
+        "constant.other.character-class",
       ],
       settings: { foreground: synRegexpClass },
     },
@@ -2256,6 +2365,10 @@ const theme: ThemeDefinition = {
         "keyword.operator.or.regexp",
         "keyword.operator.negation.regexp",
         "keyword.other.back-reference.regexp",
+        "support.other.match.begin.regexp",
+        "support.other.match.end.regexp",
+        "keyword.operator.lookahead.regexp",
+        "keyword.operator.lookbehind.regexp",
       ],
       settings: { foreground: synKeyword },
     },
