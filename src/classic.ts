@@ -10,6 +10,9 @@
 // panels in the modern layout. Panels draw no border of their own; in the
 // classic layout a 1px frame-colored separator stands in for the gap.
 
+import { compositingOver, mix } from "./color";
+import type { ThemeDefinition } from "./types";
+
 // Neutral ramp — surfaces, borders and text
 const gray10 = "#191A1C"; // editor surface: editor, editor-area terminals, inputs
 const gray20 = "#212326"; // panel surface: side bar, panel, output, chat; find widget, peek editor, alternating rows
@@ -102,6 +105,7 @@ const checkDisabledMark = "#6F737A";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const editorBackground = gray10;
+const { overlay } = compositingOver(editorBackground);
 const editorForeground = "#BCBEC4";
 // Long-form text in panels (chat transcripts, side bar views, typed input)
 // uses the editor text tone; titles, menus, tabs and selections keep the
@@ -287,52 +291,6 @@ const terminalBlock = "#2B2D30"; // command block / pinned command
 const terminalBlockSeparator = "#393B40";
 const terminalSelectedBlock = blueVivid;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Color helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-type Rgb = [number, number, number];
-
-const toRgb = (hex: string): Rgb =>
-  [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)) as Rgb;
-
-const toHex = (channels: number[]): string =>
-  "#" +
-  channels
-    .map((v) =>
-      Math.max(0, Math.min(255, Math.round(v)))
-        .toString(16)
-        .padStart(2, "0"),
-    )
-    .join("")
-    .toUpperCase();
-
-/** Opaque blend of `weight` parts `fg` over `bg`. */
-function mix(fg: string, bg: string, weight: number): string {
-  const f = toRgb(fg);
-  const b = toRgb(bg);
-  return toHex(f.map((v, i) => v * weight + b[i] * (1 - weight)));
-}
-
-/**
- * Translucent color that, drawn at `alpha` over `base`, composites back to
- * exactly `target`. VS Code requires most editor decorations to be
- * non-opaque; this keeps their on-screen color identical to the palette.
- */
-function overlay(
-  target: string,
-  alpha: number,
-  base: string = editorBackground,
-): string {
-  const t = toRgb(target);
-  const b = toRgb(base);
-  const alphaHex = Math.round(alpha * 255)
-    .toString(16)
-    .padStart(2, "0")
-    .toUpperCase();
-  return toHex(t.map((v, i) => (v - (1 - alpha) * b[i]) / alpha)) + alphaHex;
-}
-
 // Find-result fills are drawn above the selection, so they are mostly
 // see-through (same on-screen color via overlay): a selected match reads as a
 // lighter block than the unselected matches around it.
@@ -365,37 +323,6 @@ const fileWarning = warningUnderline; // yellow: has warnings
 const fileInvalid = debugValue; // peach: invalid item (e.g. unresolvable workspace root)
 const fileChatEdited = purple140; // pale lavender: edited by chat
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Theme definition type
-// ─────────────────────────────────────────────────────────────────────────────
-
-export interface TokenColor {
-  name?: string;
-  scope: string | string[];
-  settings: {
-    foreground?: string;
-    background?: string;
-    fontStyle?: string;
-  };
-}
-
-export interface SemanticTokenStyle {
-  foreground?: string;
-  fontStyle?: string;
-}
-
-export interface ThemeDefinition {
-  $schema: string;
-  name: string;
-  type: string;
-  colors: Record<string, string>;
-  tokenColors: TokenColor[];
-  semanticHighlighting: boolean;
-  semanticTokenColors: Record<string, string | SemanticTokenStyle>;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Theme export
 // ─────────────────────────────────────────────────────────────────────────────
 
 const theme: ThemeDefinition = {

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import classicalDark from "./classic";
 import classicalDarkMidnight from "./midnight";
-import type { ThemeDefinition } from "./classic";
+import type { ThemeDefinition } from "./types";
 
 const outputDir = path.resolve(__dirname, "..", "themes");
 
