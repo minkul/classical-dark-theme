@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Build output
+out/
+themes/
+*.vsix
+
+# Lock files
+package-lock.json
+npm-shrinkwrap.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+bun.lock
+*.lock
+
+# Editor / OS
+.idea/
+.DS_Store

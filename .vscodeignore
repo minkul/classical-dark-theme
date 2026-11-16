@@ -1,0 +1,32 @@
+# Version control
+.git/**
+.gitignore
+
+# Dependencies
+node_modules/**
+
+# Source and build config
+src/**
+out/**
+tsconfig.json
+
+# Lock files
+package-lock.json
+npm-shrinkwrap.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+bun.lock
+
+# Packaged extensions
+*.vsix
+
+# Development assets
+assets/**
+previews/**
+snippets/**
+icon_large.png
+
+# Editor / OS
+.idea/**
+.DS_Store

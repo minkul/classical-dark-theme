@@ -1,0 +1,167 @@
+/* Sample stylesheet covering CSS language tokens. */
+
+@charset "UTF-8";
+@import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
+@import "reset.css" screen;
+
+/* ── Custom properties ── */
+:root {
+  --color-primary: #4ec9b0;
+  --color-text: rgb(212 212 212 / 90%);
+  --spacing: 8px;
+  --radius: 0.5rem;
+  --font-stack: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+@font-face {
+  font-family: "CustomFont";
+  src: url("fonts/custom.woff2") format("woff2");
+  font-weight: 400 700;
+  unicode-range: U+0000-00FF;
+}
+
+/* ── Element, class, id and attribute selectors ── */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-stack);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: #1e1e1e;
+}
+
+#main-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid hsl(0deg 0% 30%);
+}
+
+.card {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: calc(var(--spacing) * 2);
+  padding: var(--spacing) calc(var(--spacing) * 2);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease-in-out, opacity 300ms;
+}
+
+.card > h2 + p ~ span {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+a[href^="https"],
+input[type="text" i] {
+  color: var(--color-primary) !important;
+  text-decoration: underline dotted;
+}
+
+/* ── Pseudo-classes and pseudo-elements ── */
+a:hover,
+a:focus-visible {
+  color: #fff;
+  outline: 2px solid currentColor;
+}
+
+li:nth-child(2n + 1):not(.active) {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+}
+
+.quote::before {
+  content: "\201C";
+  font-size: 2em;
+}
+
+.card:has(> img) {
+  padding: 0;
+}
+
+/* ── Nesting ── */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(1.2);
+  }
+
+  &.primary {
+    background: var(--color-primary);
+  }
+}
+
+/* ── Media, supports, container queries, layers ── */
+@media screen and (max-width: 768px) and (prefers-color-scheme: dark) {
+  .card {
+    grid-template-columns: 1fr;
+    width: min(100%, 40ch);
+    height: clamp(10vh, 50vh, 100vh);
+  }
+}
+
+@supports (display: grid) and (not (display: inline-grid)) {
+  .layout {
+    display: grid;
+  }
+}
+
+@container sidebar (min-width: 400px) {
+  .widget {
+    flex-direction: row;
+  }
+}
+
+@layer base, components;
+
+@layer components {
+  .badge {
+    aspect-ratio: 16 / 9;
+    inset: 0 auto auto 0;
+  }
+}
+
+/* ── Animations ── */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95) rotate(-5deg);
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animated {
+  animation: fade-in 1s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+  will-change: opacity, transform;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+/* ── Counters and misc ── */
+ol.numbered {
+  counter-reset: section;
+  list-style: none;
+}
+
+ol.numbered > li::before {
+  counter-increment: section;
+  content: counter(section) ". ";
+}
+
+@page :first {
+  margin: 1in;
+}

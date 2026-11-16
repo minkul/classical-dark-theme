@@ -1,0 +1,82 @@
+# Sample YAML covering language tokens.
+%YAML 1.2
+---
+name: classical-dark-theme
+version: 1.0.0
+description: Unquoted string value
+quoted: "Double quoted with escape \n and \t tab"
+single: 'Single quoted'
+count: 42
+price: 19.99
+hex: 0xFF
+octal: 0o17
+scientific: 1.5e-3
+infinity: .inf
+not_a_number: .nan
+enabled: true
+disabled: false
+nothing: null
+tilde: ~
+date: 2026-11-15
+timestamp: 2026-11-15T10:30:00Z
+
+# Sequences
+tags:
+  - theme
+  - dark
+  - classical
+inline_list: [one, two, three]
+inline_map: { key: value, other: 42 }
+
+# Nested mappings and sequences of mappings
+author:
+  name: Sample Author
+  email: author@example.com
+  roles:
+    - id: 1
+      title: maintainer
+    - id: 2
+      title: contributor
+
+# Block scalars
+literal: |
+  Line one
+  Line two keeps newlines
+folded: >-
+  This long text
+  is folded into one line.
+
+# Anchors, aliases and merge keys
+defaults: &defaults
+  adapter: postgres
+  host: localhost
+  port: 5432
+
+development:
+  <<: *defaults
+  database: dev_db
+
+production:
+  <<: *defaults
+  host: db.example.com
+  database: !!str prod_db
+
+# Complex key
+? complex key
+: complex value
+
+# CI workflow
+on:
+  push:
+    branches: [master]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: npm run build
+        env:
+          NODE_ENV: production
+          TOKEN: ${{ secrets.TOKEN }}
+...

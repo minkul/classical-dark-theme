@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE catalog [
+  <!ENTITY company "Example Corp">
+]>
+<!-- Sample XML covering language tokens. -->
+<catalog xmlns="http://example.com/catalog"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://example.com/catalog catalog.xsd"
+         version="1.0">
+  <publisher>&company;</publisher>
+  <book id="bk101" available="true">
+    <title lang="en">XML Developer&apos;s Guide</title>
+    <author>Gambardella, Matthew</author>
+    <price currency="USD">44.95</price>
+    <published>2000-10-01</published>
+    <description><![CDATA[Contains <markup> & special characters that are not parsed.]]></description>
+    <tags>
+      <tag>xml</tag>
+      <tag>guide</tag>
+    </tags>
+  </book>
+  <book id="bk102" available="false">
+    <title lang="en">Midnight Rain &amp; Shadows &#169;</title>
+    <empty-element />
+  </book>
+  <?processing-instruction data="value"?>
+</catalog>

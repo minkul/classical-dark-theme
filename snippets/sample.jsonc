@@ -1,0 +1,17 @@
+// Sample JSON with comments (like VS Code settings.json).
+{
+  /* Block comment */
+  "editor.fontSize": 14,
+  "editor.fontFamily": "'Fira Code', monospace",
+  "editor.formatOnSave": true,
+  "editor.rulers": [80, 120],
+  "workbench.colorTheme": "Classical Dark",
+  "files.exclude": {
+    "**/.git": true,
+    "**/node_modules": true // trailing comment
+  },
+  "[python]": {
+    "editor.tabSize": 4
+  },
+  "terminal.integrated.env.osx": null,
+}

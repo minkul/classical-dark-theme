@@ -1,0 +1,59 @@
+# Sample TOML covering language tokens.
+
+title = "Classical Dark Theme"
+version = "1.0.0"
+literal = 'C:\path\to\file'
+escaped = "Tab:\t Quote:\" Unicode:\u00e9"
+multiline = """
+Line one
+Line two"""
+multiline_literal = '''
+Raw \n text'''
+
+integer = 42
+negative = -17
+big = 1_000_000
+hex = 0xDEADBEEF
+octal = 0o755
+binary = 0b1101
+float = 3.14159
+exponent = 5e+22
+infinity = inf
+not_a_number = nan
+enabled = true
+disabled = false
+
+offset_datetime = 1979-05-27T07:32:00Z
+local_datetime = 1979-05-27T07:32:00
+local_date = 1979-05-27
+local_time = 07:32:00
+
+array = [1, 2, 3]
+mixed = ["a", 'b', """c"""]
+nested_array = [[1, 2], ["a", "b"]]
+inline_table = { name = "Tom", age = 30 }
+dotted.key.name = "dotted keys"
+"quoted key" = "value"
+
+[package]
+name = "sample"
+authors = ["Sample Author <author@example.com>"]
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1", optional = true }
+
+[server.database]
+host = "localhost"
+ports = [8000, 8001, 8002]
+connection_max = 5000
+
+[[products]]
+name = "Hammer"
+sku = 738594937
+
+[[products]]
+name = "Nail"
+sku = 284758393
+color = "gray"

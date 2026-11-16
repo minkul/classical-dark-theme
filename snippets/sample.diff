@@ -1,0 +1,19 @@
+diff --git a/src/greet.js b/src/greet.js
+index 3b18e51..a1d2f6c 100644
+--- a/src/greet.js
++++ b/src/greet.js
+@@ -1,8 +1,10 @@
+ // Greeting helpers
+-const DEFAULT_NAME = 'World';
++const DEFAULT_NAME = 'Theme';
++const PUNCTUATION = '!';
+ 
+ function greet(name) {
+-  return 'Hello, ' + name;
++  return `Hello, ${name ?? DEFAULT_NAME}${PUNCTUATION}`;
+ }
+ 
+-module.exports = greet;
++export default greet;
++export { DEFAULT_NAME };
+\ No newline at end of file

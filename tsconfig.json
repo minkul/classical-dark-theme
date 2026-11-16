@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    // Language and environment
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "types": ["node"],
+
+    // Modules
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+
+    // Emit
+    "rootDir": "./src",
+    "outDir": "./out",
+
+    // Type checking
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

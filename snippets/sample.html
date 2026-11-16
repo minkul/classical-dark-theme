@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<!-- Sample page covering HTML language tokens. -->
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Theme Sample &mdash; HTML</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <style>
+    :root {
+      --accent: #4ec9b0;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      color: var(--accent);
+    }
+
+    .card > h2::before {
+      content: "\2022";
+    }
+  </style>
+  <script type="module">
+    import { add } from './sample.js';
+
+    const greeting = `Sum is ${add(1, 2)}`;
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelector('#output').textContent = greeting;
+    });
+  </script>
+</head>
+<body class="theme-dark" data-theme="classical">
+  <header id="top" class="site-header">
+    <nav aria-label="Main navigation">
+      <ul>
+        <li><a href="#about" title="About">About</a></li>
+        <li><a href="https://example.com" target="_blank" rel="noopener noreferrer">External</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="about" class="card">
+      <h1>Heading <small>with small text</small></h1>
+      <h2>Entities &amp; symbols: &lt;tag&gt; &copy; &#169; &#x00A9; &nbsp;</h2>
+      <p>
+        Paragraph with <strong>strong</strong>, <em>emphasis</em>, <code>inline code</code>,
+        <mark>marked</mark>, <del>deleted</del>, <ins>inserted</ins> and <abbr title="HyperText Markup Language">HTML</abbr>.
+        <br>
+        Line break above, and a <span style="color: red; font-weight: bold;">styled span</span>.
+      </p>
+      <blockquote cite="https://example.com">A quotation.</blockquote>
+      <pre><code class="language-js">const x = 1;</code></pre>
+      <img src="image.png" alt="Sample image" width="200" height="100" loading="lazy">
+      <hr>
+    </section>
+
+    <section>
+      <h2>Lists and tables</h2>
+      <ol start="3" reversed>
+        <li>Third</li>
+        <li>Second</li>
+      </ol>
+      <dl>
+        <dt>Term</dt>
+        <dd>Definition</dd>
+      </dl>
+      <table>
+        <caption>Scores</caption>
+        <thead>
+          <tr><th scope="col">Name</th><th scope="col">Score</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Alice</td><td>90</td></tr>
+          <tr><td colspan="2">Total: 90</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Form</h2>
+      <form action="/submit" method="post" novalidate>
+        <fieldset>
+          <legend>Sign up</legend>
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" required>
+          <input type="number" name="age" min="0" max="120" step="1" value="18">
+          <input type="checkbox" id="agree" name="agree" checked disabled>
+          <select name="color">
+            <option value="red" selected>Red</option>
+            <optgroup label="Cool">
+              <option value="blue">Blue</option>
+            </optgroup>
+          </select>
+          <textarea name="bio" rows="4" cols="40">Bio text</textarea>
+          <button type="submit" class="btn btn-primary" onclick="console.log('clicked')">Submit</button>
+        </fieldset>
+      </form>
+    </section>
+
+    <custom-element some-prop="value"></custom-element>
+    <template id="row-template">
+      <div class="row"><slot name="content"></slot></div>
+    </template>
+    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" />
+    </svg>
+    <video controls autoplay muted><source src="movie.mp4" type="video/mp4"></video>
+    <iframe src="https://example.com" sandbox></iframe>
+    <output id="output"></output>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Sample. <time datetime="2026-11-15">November 15</time></p>
+  </footer>
+  <script src="app.js" defer></script>
+</body>
+</html>

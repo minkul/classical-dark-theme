@@ -1,0 +1,100 @@
+// Sample stylesheet covering SCSS language tokens.
+
+@use "sass:math";
+@use "sass:color";
+@import "variables";
+
+/* ── Variables and maps ── */
+$primary: #4ec9b0;
+$secondary: darken($primary, 10%);
+$spacing: 8px !default;
+$font-stack: "Inter", sans-serif;
+$breakpoints: (
+  "small": 576px,
+  "medium": 768px,
+  "large": 1024px,
+);
+$enabled: true;
+$nothing: null;
+
+// ── Mixins and functions ──
+@mixin respond-to($breakpoint) {
+  $value: map-get($breakpoints, $breakpoint);
+
+  @if $value != null {
+    @media (min-width: $value) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoint: #{$breakpoint}";
+  }
+}
+
+@mixin flex-center($direction: row) {
+  display: flex;
+  flex-direction: $direction;
+  align-items: center;
+  justify-content: center;
+}
+
+@function rem($px, $base: 16px) {
+  @return math.div($px, $base) * 1rem;
+}
+
+%card-base {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(#000, 0.25);
+}
+
+// ── Rules and nesting ──
+.card {
+  @extend %card-base;
+  @include flex-center(column);
+  padding: rem(24px) $spacing * 2;
+  color: color.adjust($primary, $lightness: 20%);
+  font-family: $font-stack;
+
+  &__title {
+    font-size: rem(20px);
+    font-weight: bold;
+  }
+
+  &--active {
+    border: 1px solid $primary;
+  }
+
+  &:hover:not(.disabled) {
+    background: lighten($secondary, 5%);
+  }
+
+  > .icon + .label {
+    margin-left: $spacing;
+  }
+
+  @include respond-to("medium") {
+    flex-direction: row;
+  }
+}
+
+// ── Control flow ──
+@each $name, $size in $breakpoints {
+  .container-#{$name} {
+    max-width: $size;
+  }
+}
+
+@for $i from 1 through 3 {
+  .mt-#{$i} {
+    margin-top: $spacing * $i;
+  }
+}
+
+$counter: 3;
+@while $counter > 0 {
+  .level-#{$counter} {
+    z-index: $counter * 10;
+  }
+  $counter: $counter - 1;
+}
+
+@debug "Primary color is #{$primary}";

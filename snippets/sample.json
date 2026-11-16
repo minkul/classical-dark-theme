@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "classical-dark-theme-sample",
+  "version": "1.0.0",
+  "description": "Sample JSON covering all value types. Escapes: \"quoted\" \\ \n \t é",
+  "private": true,
+  "count": 42,
+  "price": 19.99,
+  "negative": -273.15,
+  "exponent": 1.5e-10,
+  "enabled": true,
+  "deprecated": false,
+  "nothing": null,
+  "tags": ["theme", "dark", "classical"],
+  "matrix": [[1, 2], [3, 4]],
+  "empty": {
+    "array": [],
+    "object": {}
+  },
+  "author": {
+    "name": "Sample Author",
+    "url": "https://example.com",
+    "roles": [
+      { "id": 1, "title": "maintainer", "active": true },
+      { "id": 2, "title": "contributor", "active": false }
+    ]
+  },
+  "scripts": {
+    "build": "tsx src/build-theme.ts",
+    "test": "echo \"no tests\" && exit 0"
+  }
+}
